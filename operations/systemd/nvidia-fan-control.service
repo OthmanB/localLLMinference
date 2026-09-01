@@ -1,0 +1,16 @@
+[Unit]
+Description=Set fixed NVIDIA fan speed for the model GPU
+Wants=nvidia-power-limit.service
+After=nvidia-power-limit.service
+ConditionPathExists=@PYTHON@
+ConditionPathExists=/dev/nvidiactl
+
+[Service]
+Type=oneshot
+ExecStart=@PYTHON@ @REPO_ROOT@/tools/nvidia_fan_control.py --gpu 0 --speed 70
+TimeoutStartSec=15s
+RemainAfterExit=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

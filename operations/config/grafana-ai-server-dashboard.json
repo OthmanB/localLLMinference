@@ -1,0 +1,90 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "Model Up",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "ai_model_up", "legendFormat": "{{model}}"}],
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+    },
+    {
+      "title": "Decode tok/s",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "llamacpp:predicted_tokens_seconds", "legendFormat": "{{model}}"}],
+      "gridPos": {"h": 8, "w": 9, "x": 6, "y": 0}
+    },
+    {
+      "title": "Prefill tok/s",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "llamacpp:prompt_tokens_seconds", "legendFormat": "{{model}}"}],
+      "gridPos": {"h": 8, "w": 9, "x": 15, "y": 0}
+    },
+    {
+      "title": "GPU Power",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "ai_gpu_power_draw_watts", "legendFormat": "GPU {{gpu}} draw"},
+        {"expr": "ai_gpu_power_limit_watts", "legendFormat": "GPU {{gpu}} limit"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "title": "GPU Temperature",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "ai_gpu_temperature_celsius", "legendFormat": "GPU {{gpu}} {{model}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+    },
+    {
+      "title": "GPU Utilization",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "ai_gpu_utilization_percent", "legendFormat": "GPU {{gpu}} {{model}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "title": "VRAM Used",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "ai_gpu_memory_used_bytes / 1024 / 1024 / 1024", "legendFormat": "GPU {{gpu}} {{model}} GiB"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+    },
+    {
+      "title": "Host Memory",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "ai_host_memory_used_bytes / 1024 / 1024 / 1024", "legendFormat": "Used GiB"},
+        {"expr": "ai_host_memory_available_bytes / 1024 / 1024 / 1024", "legendFormat": "Available GiB"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+    },
+    {
+      "title": "Active Requests",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "llamacpp:requests_processing", "legendFormat": "{{model}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+    },
+    {
+      "title": "Generated Tokens",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "llamacpp:tokens_predicted_total", "legendFormat": "{{model}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ai-server", "llama.cpp"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "AI Server - Qwen Q4",
+  "uid": "ai-server-qwen-q4",
+  "version": 1
+}

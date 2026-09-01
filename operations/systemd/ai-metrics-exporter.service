@@ -1,0 +1,18 @@
+[Unit]
+Description=AI server Prometheus metrics exporter
+Wants=network-online.target
+After=network-online.target llama-qwen3.8-q4-192k.service
+
+[Service]
+Type=simple
+User=@SERVICE_USER@
+Group=@SERVICE_USER@
+EnvironmentFile=/etc/ai-server/ai-metrics-exporter.env
+ExecStart=@PYTHON@ @REPO_ROOT@/tools/ai_metrics_exporter.py --host 0.0.0.0 --port 9108
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

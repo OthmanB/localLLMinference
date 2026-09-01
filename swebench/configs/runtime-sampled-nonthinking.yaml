@@ -1,0 +1,29 @@
+agent:
+  mode: yolo
+  confirm_exit: false
+  step_limit: 250
+  cost_limit: 0
+  wall_time_limit_seconds: 7200
+
+environment:
+  timeout: 600
+  container_timeout: 2h
+  pull_timeout: 600
+  run_args: ["--rm", "--network", "none"]
+
+model:
+  cost_tracking: ignore_errors
+  model_kwargs:
+    api_key: EMPTY
+    max_tokens: 8192
+    temperature: 0.7
+    top_p: 0.8
+    presence_penalty: 1.5
+    drop_params: false
+    extra_body:
+      top_k: 20
+      chat_template_kwargs:
+        enable_thinking: false
+      reasoning_format: none
+      parse_tool_calls: true
+      parallel_tool_calls: false

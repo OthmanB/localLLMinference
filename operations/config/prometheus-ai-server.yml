@@ -1,0 +1,12 @@
+# Merge this scrape job into the Prometheus configuration on the monitoring host.
+# Replace the placeholders with the AI server's current LAN address and hostname.
+# The exporter is reachable from the monitoring host; llama.cpp itself remains
+# loopback-only.
+scrape_configs:
+  - job_name: ai-server
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["<AI_SERVER_LAN_IP>:9108"]
+        labels:
+          host: <AI_SERVER_HOST>

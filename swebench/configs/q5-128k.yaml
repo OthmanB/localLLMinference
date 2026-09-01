@@ -1,0 +1,4 @@
+model:
+  model_name: hosted_vllm/qwen3.8-27b-q5-gpukv128
+  model_kwargs:
+    api_base: http://127.0.0.1:8081/v1

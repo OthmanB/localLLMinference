@@ -1,0 +1,70 @@
+{
+  "power_limit_w": 300,
+  "policy": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "presence_penalty": 1.5,
+    "max_tokens": 128,
+    "enable_thinking": false,
+    "cache_type_k": "q8_0",
+    "cache_type_v": "q8_0",
+    "flash_attention": true
+  },
+  "results": [
+    {
+      "model": "q4",
+      "context_tokens": 196608,
+      "prompt_tokens": 196227,
+      "completion_tokens": 128,
+      "prefill_tok_s": 554.998,
+      "decode_tok_s": 15.428,
+      "request_seconds": 362.506,
+      "max_memory_used_mib": 22728,
+      "max_power_draw_w": 299.63,
+      "max_temperature_c": 75,
+      "status": "passed",
+      "server_log": "q4-196608.server.log"
+    },
+    {
+      "model": "q4",
+      "context_tokens": 262144,
+      "prompt_tokens": 261765,
+      "completion_tokens": 128,
+      "prefill_tok_s": 448.013,
+      "decode_tok_s": 10.162,
+      "request_seconds": 597.715,
+      "max_memory_used_mib": 24124,
+      "max_power_draw_w": 299.95,
+      "max_temperature_c": 76,
+      "status": "passed",
+      "server_log": "q4-262144.server.log"
+    },
+    {
+      "model": "q5",
+      "context_tokens": 196608,
+      "prompt_tokens": 196227,
+      "completion_tokens": 128,
+      "prefill_tok_s": 467.250,
+      "decode_tok_s": 0.360,
+      "request_seconds": 775.806,
+      "max_memory_used_mib": 24126,
+      "max_power_draw_w": 299.78,
+      "max_temperature_c": 78,
+      "status": "passed",
+      "server_log": "q5-196608.server.log"
+    },
+    {
+      "model": "q5",
+      "context_tokens": 262144,
+      "prompt_tokens": 261761,
+      "completion_tokens": 118,
+      "prefill_tok_s": 244.10,
+      "decode_tok_s": 0.17,
+      "startup_memory_used_mib": 24126,
+      "status": "partial_timeout",
+      "error": "Request did not return within the 1800-second ceiling; server log captured 118 generated tokens before cancellation.",
+      "server_log": "q5-262144.server.log"
+    }
+  ]
+}
