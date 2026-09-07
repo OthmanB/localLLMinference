@@ -58,7 +58,7 @@ checking GPU ownership first.
 ## Reboot Acceptance
 
 After a reboot verify that the inference GPUs report their power limits
-(GPU 0 = 300 W, GPU 1 = 275 W), GPU 0's fixed fan service is active, Flash
+(GPUs 0-2 = 300 W), GPU 0's fixed fan service is active, Flash
 Next reports model ID `qwen3.8-flash-next-nvfp4-262k`, Q4 reports model ID
 `qwen3.8-27b-q4-gpukv192` on GPU 1, the gateway requires a token, the exporter
 is reachable by Prometheus, and the old Q5 service did not start.

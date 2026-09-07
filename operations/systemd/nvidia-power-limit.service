@@ -7,8 +7,8 @@ ConditionPathExists=/usr/bin/nvidia-smi
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/nvidia-smi -i 0 -pl 300
-# GPU 1 is slot-direct (no riser) and runs hottest: 300 W -> ~86 C, 275 W -> ~82 C
-ExecStart=/usr/bin/nvidia-smi -i 1 -pl 275
+ExecStart=/usr/bin/nvidia-smi -i 1 -pl 300
+ExecStart=/usr/bin/nvidia-smi -i 2 -pl 300
 RemainAfterExit=yes
 
 [Install]

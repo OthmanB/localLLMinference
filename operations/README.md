@@ -9,7 +9,7 @@ Operational reference for a self-hosted AI server. Research results stay under
 - 196608-token context with Q8 GPU KV and Flash Attention.
 - Internal llama.cpp endpoint: `http://127.0.0.1:8080`.
 - Authenticated OpenAI gateway on port `8088` on the LAN and tailnet.
-- GPU power limit: 300 W on both RTX 3090 cards, applied at system boot.
+- GPU power limit: 300 W on all three RTX 3090 GPUs, applied at system boot.
 - GPU 0 fan speed: fixed at 70% at system boot while the model service runs.
 - Reasoning uses `--reasoning auto --reasoning-effort medium` by default.
   Clients may override it per request with `none`, `low`, `medium`, `high`, or
