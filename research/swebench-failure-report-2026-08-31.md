@@ -95,7 +95,7 @@ stored. It only means that the mini-SWE-agent completion marker was detected.
 
 The frozen run prompt is in:
 
-`swebench/configs/common.yaml`
+`/home/obenomar/localLLMinference/swebench/configs/common.yaml`
 
 Its submission instructions at lines 18-23 are effectively:
 
@@ -116,7 +116,7 @@ custom common file and Q4/Q5 overlay were loaded.
 
 The installed standard configuration is:
 
-`<SWEBENCH_VENV>/lib/python3.12/site-packages/minisweagent/config/benchmarks/swebench.yaml`
+`/home/obenomar/.local/share/swebench-venv/lib/python3.12/site-packages/minisweagent/config/benchmarks/swebench.yaml`
 
 Its submission workflow at lines 75-101 requires:
 
@@ -128,7 +128,7 @@ echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt
 
 The installed Docker environment implements completion at:
 
-`<SWEBENCH_VENV>/lib/python3.12/site-packages/minisweagent/environments/docker.py:140-150`
+`/home/obenomar/.local/share/swebench-venv/lib/python3.12/site-packages/minisweagent/environments/docker.py:140-150`
 
 The relevant logic is:
 
@@ -144,7 +144,7 @@ therefore raises `Submitted` with `submission=""`.
 
 The controller then deliberately rejects that result at:
 
-`tools/swebench_controller.py:493-503`
+`/home/obenomar/localLLMinference/tools/swebench_controller.py:493-503`
 
 because it requires both `exit_status == "Submitted"` and a non-empty
 submission. It correctly prevents an empty prediction from being considered a
@@ -159,7 +159,7 @@ Task:
 
 Evidence file:
 
-`swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/q5/astropy__astropy-13579/agent.log`
+`/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/q5/astropy__astropy-13579/agent.log`
 
 The log shows that the agent:
 
@@ -256,7 +256,7 @@ while not STOP_REQUESTED:
 
 in:
 
-`tools/swebench_controller.py`
+`/home/obenomar/localLLMinference/tools/swebench_controller.py`
 
 The two inflated ledger counters were restored from 1418 and 1911 to their
 real value of 1. The event history was retained. The controller was then killed
@@ -317,7 +317,7 @@ trajectories as diagnostic evidence only.
 
 The failed 40-task run was not resumed. A new smoke run was created at:
 
-`swebench/runs/qwen38-q4-q5-smoke-r2`
+`/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-smoke-r2`
 
 The smoke run used:
 
@@ -354,10 +354,10 @@ was not a context-window overflow.
 
 The smoke launcher and runtime files are:
 
-- `swebench/run_smoke.sh`
-- `swebench/configs/runtime-stock.yaml`
-- `swebench/runs/qwen38-q4-q5-smoke-r2/configs/swebench-stock.yaml`
-- `swebench/runs/qwen38-q4-q5-smoke-r2/configs/runtime.yaml`
+- `/home/obenomar/localLLMinference/swebench/run_smoke.sh`
+- `/home/obenomar/localLLMinference/swebench/configs/runtime-stock.yaml`
+- `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-smoke-r2/configs/swebench-stock.yaml`
+- `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-smoke-r2/configs/runtime.yaml`
 
 The new smoke run is stopped. Its ledger contains two completed Q4 rows, one
 completed Q5 row, and one intentionally interrupted Q5 row. No model server,
@@ -367,7 +367,7 @@ controller, resource collector, or SWE container is active.
 
 The Astropy task was then rerun alone on both quantizations in a fresh run:
 
-`swebench/runs/qwen38-q4-q5-astropy-sampled-r1`
+`/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-astropy-sampled-r1`
 
 Everything except sampling was kept unchanged:
 
@@ -398,8 +398,8 @@ trajectory for this agent workload.
 
 The sampling runtime snapshot and launcher are:
 
-- `swebench/configs/runtime-sampled-nonthinking.yaml`
-- `swebench/run_astropy_sampling.sh`
+- `/home/obenomar/localLLMinference/swebench/configs/runtime-sampled-nonthinking.yaml`
+- `/home/obenomar/localLLMinference/swebench/run_astropy_sampling.sh`
 
 The sampled run is stopped after evaluation; no benchmark process or container
 is active and both GPUs are idle.
@@ -409,7 +409,7 @@ is active and both GPUs are idle.
 After the sampled Astropy retry resolved on both Q4 and Q5, the full paired
 comparison was initialized in a new run directory:
 
-`swebench/runs/qwen38-q4-q5-verified40-r2-sampled-89b534d4`
+`/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r2-sampled-89b534d4`
 
 It uses the sampled runtime snapshot, stock mini-SWE configuration, 40 tasks per
 model, and the same 128k/Q8/Docker-isolated setup. The launch preflight passed
@@ -433,20 +433,20 @@ run is not being resumed.
 ## Important Artifacts
 
 - Run ledger:
-  `swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/ledger.sqlite3`
+  `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/ledger.sqlite3`
 - Controller log:
-  `swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/controller.log`
+  `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/controller.log`
 - Resource log:
-  `swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/resources.csv`
+  `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/resources.csv`
 - Custom run prompt:
-  `swebench/configs/common.yaml`
+  `/home/obenomar/localLLMinference/swebench/configs/common.yaml`
 - Q4 overlay:
-  `swebench/configs/q4-128k.yaml`
+  `/home/obenomar/localLLMinference/swebench/configs/q4-128k.yaml`
 - Q5 overlay:
-  `swebench/configs/q5-128k.yaml`
+  `/home/obenomar/localLLMinference/swebench/configs/q5-128k.yaml`
 - Paired controller:
-  `tools/swebench_controller.py`
+  `/home/obenomar/localLLMinference/tools/swebench_controller.py`
 - Headless launcher:
-  `swebench/run_headless.sh`
+  `/home/obenomar/localLLMinference/swebench/run_headless.sh`
 - Direct proof of a solved-but-discarded Q5 task:
-  `swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/q5/astropy__astropy-13579/agent.log`
+  `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r1-89b534d4/q5/astropy__astropy-13579/agent.log`

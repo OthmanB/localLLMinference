@@ -1,0 +1,181 @@
+{
+  "report": {
+    "title": "Mistral-Small-4-119B-2603 IQ3 two-RTX-3090 context and review evaluation",
+    "date": "2026-09-04",
+    "scope": "Mistral IQ3 capacity, throughput, long-context review reliability, and independently supervised review quality. This is not a direct Mistral-versus-Qwen SWE-bench coding comparison."
+  },
+  "environment": {
+    "mistral_gpus": [1, 2],
+    "gpu_model": "RTX 3090 24 GiB",
+    "runtime": "llama.cpp c841aee",
+    "parallel": 1,
+    "tensor_split": "1,1",
+    "cache": {
+      "k": "q8_0",
+      "v": "q8_0"
+    },
+    "full_residency_requirement": "37/37 layers on GPU, no CPU weight offload"
+  },
+  "phase2": {
+    "method": "Fresh server per point; cold cache-independent prompt near context limit; warmup; 128 forced completion tokens; server timing fields.",
+    "all_points_fully_resident": true,
+    "pcie_under_load": "Gen3 x8",
+    "swap_used": false,
+    "points": [
+      {
+        "quant": "IQ3_XXS",
+        "context_tokens": 8192,
+        "decode_tok_s": 92.93,
+        "prefill_tok_s": 2151.47,
+        "prompt_tokens": 7926,
+        "peak_vram_mib": {"gpu1": 21584, "gpu2": 20056},
+        "max_temperature_c": 69
+      },
+      {
+        "quant": "IQ3_XXS",
+        "context_tokens": 32768,
+        "decode_tok_s": 78.13,
+        "prefill_tok_s": 1555.36,
+        "prompt_tokens": 32502,
+        "peak_vram_mib": {"gpu1": 21840, "gpu2": 20312},
+        "max_temperature_c": 77
+      },
+      {
+        "quant": "IQ3_XXS",
+        "context_tokens": 131072,
+        "decode_tok_s": 48.87,
+        "prefill_tok_s": 643.1,
+        "prompt_tokens": 130800,
+        "peak_vram_mib": {"gpu1": 22866, "gpu2": 21338},
+        "max_temperature_c": 86
+      },
+      {
+        "quant": "IQ3_XXS",
+        "context_tokens": 196608,
+        "decode_tok_s": 38.75,
+        "prefill_tok_s": 457.31,
+        "prompt_tokens": 196349,
+        "peak_vram_mib": {"gpu1": 23634, "gpu2": 21978},
+        "max_temperature_c": 88
+      },
+      {
+        "quant": "IQ3_XXS",
+        "context_tokens": 262144,
+        "decode_tok_s": 30.05,
+        "prefill_tok_s": 357.84,
+        "prompt_tokens": 261887,
+        "peak_vram_mib": {"gpu1": 24126, "gpu2": 22618},
+        "max_temperature_c": 87
+      },
+      {
+        "quant": "IQ3_S",
+        "context_tokens": 131072,
+        "decode_tok_s": 48.71,
+        "prefill_tok_s": 635.8,
+        "prompt_tokens": 130809,
+        "peak_vram_mib": {"gpu1": 23762, "gpu2": 21978},
+        "max_temperature_c": 87
+      },
+      {
+        "quant": "IQ3_S",
+        "context_tokens": 196608,
+        "decode_tok_s": 31.58,
+        "prefill_tok_s": 449.02,
+        "prompt_tokens": 196336,
+        "peak_vram_mib": {"gpu1": 24126, "gpu2": 22618},
+        "max_temperature_c": 87
+      },
+      {
+        "quant": "IQ3_S",
+        "context_tokens": 262144,
+        "decode_tok_s": 24.2,
+        "prefill_tok_s": 347.76,
+        "prompt_tokens": 261885,
+        "peak_vram_mib": {"gpu1": 24126, "gpu2": 23258},
+        "max_temperature_c": 85
+      }
+    ],
+    "findings": {
+      "max_supported_tested_context_tokens": 262144,
+      "gpu1_headroom_at_256k_mib": 450,
+      "recommended_default_context_tokens": 131072,
+      "reason": "128k retains about 49 decode tok/s and has a roughly 206-208 second cold prefill; 192k and 256k require 7-13 minutes of cold prefill."
+    }
+  },
+  "phase3": {
+    "method": "128k allocation, approximately 120k-token prompt, reasoning_effort=high, natural EOS, full text capture.",
+    "reserve_tokens": 8192,
+    "mistral_xxs": {
+      "runs": 8,
+      "premature_eos": 3,
+      "complete_completion_token_range": [245, 847],
+      "wall_seconds_range": [185.04, 204.5],
+      "fully_resident": true,
+      "temperature_mitigation": "No usable mitigation observed: seed 42 prematurely stopped at 0.8 and 0.6, while a comparable raw 0.7 diagnostic stopped mid-[THINK] without an answer."
+    },
+    "mistral_s": {
+      "runs": 3,
+      "premature_eos": 0,
+      "complete_completion_token_range": [288, 427],
+      "wall_seconds_range": [194.3, 197.04],
+      "fully_resident": true
+    },
+    "finding": "IQ3_S is the dependable 128k natural-EOS response quant in this sample; IQ3_XXS has a persistent premature-EOS failure mode."
+  },
+  "phase4": {
+    "method": "Static baseline: four blind reviews of real unresolved Qwen SWE-bench patches. Mistral reviewers received a fixed adversarial prompt at 32k context, seed 1337, temperature 0.8, and reasoning_effort=high. Terra compared answers to a fixed gold-derived key hidden from the models.",
+    "supervisor": "Terra",
+    "qwen_reviewer_output": "Excluded from scoring because Qwen is a SWE comparison target and supplied the candidate patches.",
+    "all_mistral_reviews_natural_eos": true,
+    "total_valid_objections": 7,
+    "scores": {
+      "IQ3_XXS": {
+        "found": 1,
+        "partial": 1,
+        "missed": 5,
+        "weighted_score": 1.5
+      },
+      "IQ3_S": {
+        "found": 2,
+        "partial": 0,
+        "missed": 5,
+        "weighted_score": 2.0
+      }
+    },
+    "finding": "IQ3_S was modestly better in the constrained static baseline. The corrected direct agentic follow-up found no valid objection across all four preregistered repository-aware cases.",
+    "agentic_follow_up": {
+      "model": "IQ3_S",
+      "invalidated_attempts": "The earlier mini-SWE-agent trajectories used a marker-only command and could not capture a review file from stdout, so they are excluded from reviewer-quality scoring.",
+      "method": "Direct Docker loop over real SWE-bench base repositories with read-only candidate patch mount, bash(command), submit_review(text), normal OpenAI tool history, tool-call smoke test, 128k context, reasoning_effort=high, temperature=0.7, and a 30-step hard budget.",
+      "sphinx": "Submitted at step 23 but reviewed the base behavior rather than the candidate patch. Terra scored 0/2 hidden objections and no additional valid objection.",
+      "seaborn": "Submitted at step 30. Terra scored 0/2 hidden objections and no additional valid objection.",
+      "sympy": "Reached the 30-step limit without calling submit_review, yielding 0/2 hidden objections.",
+      "django": "Submitted at step 28. Terra scored 0/1 hidden objection and no additional valid objection.",
+      "scoring": "The direct agentic screen is 0/7 hidden objections with 3/4 submitted reviews. Review claims were also checked for additional repository-supported objections; none were valid."
+    }
+  },
+  "verdict": {
+    "residency_and_throughput": "GO: both quants fully resident through 256k with usable decode throughput.",
+    "long_context_planning": "Conditional pilot for IQ3_S only. It passed the 128k reliability check, but planning quality was not directly benchmarked.",
+    "autonomous_reviewer": "NO-GO for both quants. The constrained static scores were 1.5/7 for IQ3_XXS and 2.0/7 for IQ3_S; the corrected IQ3_S agentic screen scored 0/7 with 3/4 submissions.",
+    "autonomous_meta_reviewer": "NO-GO for both quants because of the static quality baseline and the corrected agentic result.",
+    "iq3_xxs_at_128k": "NO-GO because 3/8 runs produced no answer through premature EOS.",
+    "operational_default": "Use IQ3_S at 128k for non-authoritative long-context assistance with independent verification; use 192k or 256k only when their cold-prefill latency is acceptable."
+  },
+  "limitations": [
+    "Each Phase 2 point is one timed run, not a confidence interval.",
+    "Phase 3 has 8 IQ3_XXS and 3 IQ3_S samples.",
+    "The static and corrected agentic Phase 4 screens each have four cases and seven hidden objections.",
+    "Gold-derived objections are not exhaustive, although the agentic reviews were also checked for additional repository-supported objections and none were valid.",
+    "No direct Mistral-versus-Qwen SWE-bench resolution-rate comparison was run.",
+    "No 256k natural-EOS review reliability run was performed."
+  ],
+  "artifacts": {
+    "phase2": "research/mistral-small-4-119b-context-sweep/results.json",
+    "phase3": "research/mistral-small-4-119b-context-sweep/phase3/summary.json",
+    "phase4_scoring": "research/mistral-small-4-119b-context-sweep/phase4/terra_scoring.json",
+    "phase4_agentic": "research/mistral-small-4-119b-context-sweep/phase4/agentic-review-2026-09-04-r4/ and agentic-review-2026-09-04-r5/",
+    "phase4_agentic_scoring": "research/mistral-small-4-119b-context-sweep/phase4/agentic_terra_scoring.json",
+    "plan": "research/mistral-small-4-119b-context-sweep-plan-2026-09-02.md"
+  }
+}

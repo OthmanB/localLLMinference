@@ -36,15 +36,16 @@ printf '\n'
 export AI_SERVER_API_KEY
 ```
 
-The model identifier is:
+The available model identifiers are:
 
 ```text
 qwen3.8-27b-q4-gpukv192
+qwen3.8-flash-next-nvfp4-262k
 ```
 
-The configured context limit is 196608 tokens. The production server defaults
-to reasoning auto-detection with medium effort. Supported request-level
-reasoning values are `none`, `low`, `medium`, `high`, and `xhigh`.
+Q4 runs on GPU 1 with a 196608-token limit and defaults to medium reasoning.
+Flash Next runs on GPU 0 with a 262144-token limit and defaults to xhigh
+reasoning; clients can set `reasoning_effort` per request.
 
 ## OpenCode
 
@@ -62,7 +63,7 @@ environment reference:
   "provider": {
     "ai-server": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "AI Server (Qwen3.8 Q4)",
+      "name": "AI Server (Qwen3.8 Models)",
       "options": {
         "baseURL": "http://<AI_SERVER_LAN_IP>:8088/v1",
         "apiKey": "{env:AI_SERVER_API_KEY}"
@@ -77,6 +78,16 @@ environment reference:
           "options": {
             "reasoningEffort": "medium"
           }
+        },
+        "qwen3.8-flash-next-nvfp4-262k": {
+          "name": "Qwen3.8 Flash Next NVFP4, 262k",
+          "limit": {
+            "context": 262144,
+            "output": 128
+          },
+          "options": {
+            "reasoningEffort": "xhigh"
+          }
         }
       }
     }
@@ -87,9 +98,9 @@ environment reference:
 Use `http://<AI_SERVER_TAILSCALE_IP>:8088/v1` instead of the LAN URL for a client that
 reaches the server through Tailscale. Start OpenCode from a shell where
 `AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select
-`ai-server/qwen3.8-27b-q4-gpukv192`.
+either model.
 
-The model-level `reasoningEffort` setting gives OpenCode a medium default.
+The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
 the gateway accepts the selected value and forwards it to llama.cpp.
 
@@ -111,6 +122,14 @@ providers:
         input: [text]
         contextWindow: 196608
         maxTokens: 8192
+        compat:
+          supportsReasoningEffort: true
+      - id: qwen3.8-flash-next-nvfp4-262k
+        name: Qwen3.8 Flash Next NVFP4, 262k
+        reasoning: true
+        input: [text]
+        contextWindow: 262144
+        maxTokens: 128
         compat:
           supportsReasoningEffort: true
 ```
@@ -182,5 +201,5 @@ curl -sS -H "Authorization: Bearer $AI_SERVER_API_KEY" \
   "$AI_SERVER_BASE_URL/models"
 ```
 
-The response should list `qwen3.8-27b-q4-gpukv192`. A missing or incorrect token
+The response should list both model identifiers. A missing or incorrect token
 should return HTTP 401.

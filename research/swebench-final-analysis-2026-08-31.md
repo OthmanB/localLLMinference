@@ -2,7 +2,7 @@
 
 ## Run
 
-- Run directory: `swebench/runs/qwen38-q4-q5-verified40-r2-sampled-89b534d4`
+- Run directory: `/home/obenomar/localLLMinference/swebench/runs/qwen38-q4-q5-verified40-r2-sampled-89b534d4`
 - Dataset: frozen 40-task SWE-bench Verified manifest
 - Manifest SHA-256: `89b534d44bfcfb63f0d5810261ed7ced70611f4968a493f9f499911a17ccb6a1`
 - Runtime: stock mini-SWE configuration with sampled non-thinking policy

@@ -1,14 +1,15 @@
 [Unit]
 Description=AI server Prometheus metrics exporter
 Wants=network-online.target
-After=network-online.target llama-qwen3.8-q4-192k.service
+After=network-online.target freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service llama-muse-glimmer-30b-131k.service
 
 [Service]
 Type=simple
-User=@SERVICE_USER@
-Group=@SERVICE_USER@
+User=obenomar
+Group=obenomar
 EnvironmentFile=/etc/ai-server/ai-metrics-exporter.env
-ExecStart=@PYTHON@ @REPO_ROOT@/tools/ai_metrics_exporter.py --host 0.0.0.0 --port 9108
+StateDirectory=ai-metrics-exporter
+ExecStart=/usr/bin/python3 /home/obenomar/localLLMinference/tools/ai_metrics_exporter.py --host 0.0.0.0 --port 9108 --cost-config /etc/ai-server/ai-cost-accounting.json --pricing-config /etc/ai-server/ai-api-pricing.json --state-path /var/lib/ai-metrics-exporter/cost-accounting-state.json
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65536

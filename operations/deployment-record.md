@@ -18,12 +18,12 @@ Record these values only in the local deployment record:
 
 ## Supported Runtime
 
-- Qwen3.8-27B Q4_K_M on GPU 0
-- 196,608-token context
-- Q8_0 GPU KV cache for K and V
-- Flash Attention enabled
-- All model layers offloaded
-- llama.cpp bound to loopback on port 8080
+- Qwen3.8 Flash Next NVFP4 on GPU 0
+- 262,144-token context
+- QSA sparse attention with a 262,144-token GPU KV pool
+- 1,664-slot GPU MoE cache with hybrid CPU/GPU expert decode
+- Disk-backed PLE and 512-token prefill chunks
+- FreeToken bound to loopback on port 1901
 - Authenticated OpenAI-compatible gateway on port 8088
 - Prometheus exporter on port 9108
 - Fixed 70% fan speed on the model GPU at boot, when supported by NVML
@@ -49,10 +49,10 @@ overwrite enabled and verify the dashboard UID documented in `monitoring.md`.
 After installation, verify:
 
 ```bash
-systemctl is-active nvidia-power-limit.service llama-qwen3.8-q4-192k.service
+systemctl is-active nvidia-power-limit.service freetoken-qwen3.8-flash-next-262k.service
 systemctl is-active lan-inference-gateway.service ai-metrics-exporter.service
 nvidia-smi --query-gpu=index,power.limit --format=csv
-curl -sS http://127.0.0.1:8080/health
+curl -sS http://127.0.0.1:1901/health
 curl -sS http://127.0.0.1:8088/readyz
 ```
 

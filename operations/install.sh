@@ -1,8 +1,21 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+readonly ROOT=/home/obenomar/localLLMinference
+readonly OPS=${ROOT}/operations
+readonly ETC=/etc/ai-server
+readonly USER_ID=$(id -u obenomar)
+readonly LAN_SUBNET=${AI_SERVER_LAN_SUBNET:-}
+readonly PROMETHEUS_IP=${AI_SERVER_PROMETHEUS_IP:-}
+readonly GATEWAY_BACKENDS='LAN_INFERENCE_BACKENDS=[{"name":"qwen3.8-27b-q4","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-gpukv192"],"health_path":"/health"},{"name":"flash-next-262k","base_url":"http://127.0.0.1:1901","models":["qwen3.8-flash-next-nvfp4-262k"],"health_path":"/health"},{"name":"muse-glimmer-30b-131k","base_url":"http://127.0.0.1:8082","models":["muse-glimmer-30b-kquant17"],"health_path":"/health"}]'
+
 if [[ ${EUID} -ne 0 ]]; then
-    printf '%s\n' 'Run this installer as root: sudo /path/to/localLLMinference/operations/install.sh' >&2
+    printf '%s\n' 'Run this installer as root: sudo /home/obenomar/localLLMinference/operations/install.sh' >&2
+    exit 1
+fi
+
+if [[ -z ${LAN_SUBNET} || -z ${PROMETHEUS_IP} ]]; then
+    printf '%s\n' 'Set AI_SERVER_LAN_SUBNET and AI_SERVER_PROMETHEUS_IP before installation.' >&2
     exit 1
 fi
 
@@ -12,47 +25,14 @@ if ! flock -n 9; then
     exit 1
 fi
 
-readonly ROOT=${AI_SERVER_ROOT:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
-readonly OPS=${ROOT}/operations
-readonly ETC=/etc/ai-server
-readonly SERVICE_USER=${AI_SERVER_USER:-${SUDO_USER:-}}
-readonly LAN_SUBNET=${AI_SERVER_LAN_SUBNET:-}
-readonly PROMETHEUS_IP=${AI_SERVER_PROMETHEUS_IP:-}
-readonly LLAMA_CPP_ROOT=${AI_SERVER_LLAMA_CPP_ROOT:-}
-readonly LLAMA_SERVER_BIN=${AI_SERVER_LLAMA_SERVER_BIN:-${LLAMA_CPP_ROOT}/build/bin/llama-server}
-readonly MODEL_PATH=${AI_SERVER_MODEL_PATH:-${ROOT}/models/qwen3.8-27b-q4-k-m-gguf/Qwen3.8-27B-UD-Q4_K_M.gguf}
-readonly PYTHON=${AI_SERVER_PYTHON:-/usr/bin/python3}
-
-if [[ -z ${SERVICE_USER} || -z ${LAN_SUBNET} || -z ${PROMETHEUS_IP} || -z ${LLAMA_CPP_ROOT} ]]; then
-    printf '%s\n' 'Set AI_SERVER_USER, AI_SERVER_LAN_SUBNET, AI_SERVER_PROMETHEUS_IP, and AI_SERVER_LLAMA_CPP_ROOT before installation.' >&2
-    exit 1
-fi
-
-readonly USER_ID=$(id -u "${SERVICE_USER}")
-
-render_unit() {
-    local source=$1
-    local target=$2
-    local rendered
-    rendered=$(mktemp)
-    sed \
-        -e "s#@SERVICE_USER@#${SERVICE_USER}#g" \
-        -e "s#@REPO_ROOT@#${ROOT}#g" \
-        -e "s#@LLAMA_CPP_ROOT@#${LLAMA_CPP_ROOT}#g" \
-        -e "s#@LLAMA_SERVER_BIN@#${LLAMA_SERVER_BIN}#g" \
-        -e "s#@MODEL_PATH@#${MODEL_PATH}#g" \
-        -e "s#@PYTHON@#${PYTHON}#g" \
-        "${source}" > "${rendered}"
-    install -m 0644 "${rendered}" "${target}"
-    rm -f "${rendered}"
-}
-
-install -d -m 0750 -o root -g "${SERVICE_USER}" "${ETC}"
+install -d -m 0750 -o root -g obenomar "${ETC}"
 install -m 0644 "${OPS}/systemd/nvidia-power-limit.service" /etc/systemd/system/nvidia-power-limit.service
-render_unit "${OPS}/systemd/nvidia-fan-control.service" /etc/systemd/system/nvidia-fan-control.service
-render_unit "${OPS}/systemd/llama-qwen3.8-q4-192k.service" /etc/systemd/system/llama-qwen3.8-q4-192k.service
-render_unit "${OPS}/systemd/lan-inference-gateway.service" /etc/systemd/system/lan-inference-gateway.service
-render_unit "${OPS}/systemd/ai-metrics-exporter.service" /etc/systemd/system/ai-metrics-exporter.service
+install -m 0644 "${OPS}/systemd/nvidia-fan-control.service" /etc/systemd/system/nvidia-fan-control.service
+install -m 0644 "${OPS}/systemd/freetoken-qwen3.8-flash-next-262k.service" /etc/systemd/system/freetoken-qwen3.8-flash-next-262k.service
+install -m 0644 "${OPS}/systemd/llama-qwen3.8-q4-192k.service" /etc/systemd/system/llama-qwen3.8-q4-192k.service
+install -m 0644 "${OPS}/systemd/llama-muse-glimmer-30b-131k.service" /etc/systemd/system/llama-muse-glimmer-30b-131k.service
+install -m 0644 "${OPS}/systemd/lan-inference-gateway.service" /etc/systemd/system/lan-inference-gateway.service
+install -m 0644 "${OPS}/systemd/ai-metrics-exporter.service" /etc/systemd/system/ai-metrics-exporter.service
 
 gateway_env=${ETC}/lan-inference-gateway.env
 if [[ ! -e ${gateway_env} ]]; then
@@ -62,20 +42,30 @@ if [[ ! -e ${gateway_env} ]]; then
         "LAN_GATEWAY_CLIENT_TOKEN=${token}" \
         'LAN_INFERENCE_CLIENT_API_KEY_ENV=LAN_GATEWAY_CLIENT_TOKEN' \
         'LAN_INFERENCE_REQUEST_TIMEOUT_SECONDS=3600' \
-        'LAN_INFERENCE_BACKENDS=[{"name":"q4-192k","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-gpukv192"],"health_path":"/health"}]' \
+        'LAN_INFERENCE_BACKENDS=[{"name":"qwen3.8-27b-q4","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-gpukv192"],"health_path":"/health"},{"name":"flash-next-262k","base_url":"http://127.0.0.1:1901","models":["qwen3.8-flash-next-nvfp4-262k"],"health_path":"/health"},{"name":"muse-glimmer-30b-131k","base_url":"http://127.0.0.1:8082","models":["muse-glimmer-30b-kquant17"],"health_path":"/health"}]' \
         > "${gateway_env}"
     chown root:root "${gateway_env}"
     chmod 0600 "${gateway_env}"
 fi
 
+gateway_tmp=$(mktemp)
+trap 'rm -f "${gateway_tmp}"' EXIT
+awk -v replacement="${GATEWAY_BACKENDS}" '
+    /^LAN_INFERENCE_BACKENDS=/ { print replacement; found = 1; next }
+    { print }
+    END { if (!found) print replacement }
+' "${gateway_env}" > "${gateway_tmp}"
+install -m 0600 -o root -g root "${gateway_tmp}" "${gateway_env}"
+
 metrics_env=${ETC}/ai-metrics-exporter.env
-if [[ ! -e ${metrics_env} ]]; then
-    umask 077
-    printf '%s\n' \
-        'AI_METRICS_BACKENDS={"q4":{"url":"http://127.0.0.1:8080/metrics","model":"qwen3.8-27b-q4-gpukv192","gpu":"0"}}' \
-        > "${metrics_env}"
-    chown root:root "${metrics_env}"
-    chmod 0600 "${metrics_env}"
+install -m 0600 -o root -g root "${OPS}/config/ai-metrics-exporter.env.example" "${metrics_env}"
+cost_config=${ETC}/ai-cost-accounting.json
+pricing_config=${ETC}/ai-api-pricing.json
+if [[ ! -e ${cost_config} ]]; then
+    install -m 0640 -o root -g obenomar "${OPS}/config/ai-cost-accounting.json.example" "${cost_config}"
+fi
+if [[ ! -e ${pricing_config} ]]; then
+    install -m 0640 -o root -g obenomar "${OPS}/config/ai-api-pricing.json" "${pricing_config}"
 fi
 
 systemctl daemon-reload
@@ -87,7 +77,7 @@ if ! systemctl restart nvidia-fan-control.service; then
 fi
 
 if [[ -S /run/user/${USER_ID}/bus ]]; then
-        runuser -u "${SERVICE_USER}" -- env XDG_RUNTIME_DIR=/run/user/${USER_ID} \
+    runuser -u obenomar -- env XDG_RUNTIME_DIR=/run/user/${USER_ID} \
         systemctl --user disable --now llama-qwen3.8-gpukv64.service llama-qwen3.8-longctx.service || true
 fi
 
@@ -102,10 +92,15 @@ restart_gateway() {
     fi
 }
 
+systemctl disable --now freetoken-flash-next-candidate.service || true
+systemctl enable freetoken-qwen3.8-flash-next-262k.service
 systemctl enable llama-qwen3.8-q4-192k.service
+systemctl enable llama-muse-glimmer-30b-131k.service
 systemctl enable ai-metrics-exporter.service
 systemctl enable lan-inference-gateway.service
+systemctl restart freetoken-qwen3.8-flash-next-262k.service
 systemctl restart llama-qwen3.8-q4-192k.service
+systemctl restart llama-muse-glimmer-30b-131k.service
 systemctl restart ai-metrics-exporter.service
 restart_gateway
 
@@ -117,4 +112,4 @@ if ip link show tailscale0 >/dev/null 2>&1; then
 fi
 
 nvidia-smi --query-gpu=index,power.limit --format=csv
-systemctl --no-pager --full status llama-qwen3.8-q4-192k.service lan-inference-gateway.service ai-metrics-exporter.service
+systemctl --no-pager --full status nvidia-fan-control.service freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service llama-muse-glimmer-30b-131k.service lan-inference-gateway.service ai-metrics-exporter.service

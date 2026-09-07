@@ -1,0 +1,37 @@
+{
+  "host_id": "ai-server",
+  "max_sample_gap_seconds": 20,
+  "baseline": {
+    "mode": "wall_idle_total_w",
+    "wall_idle_total_w": 300,
+    "default_gpu_idle_reference_w": 20,
+    "gpu_idle_reference_w_by_uuid": {},
+    "measured_at": "2026-09-07T20:05:00+09:00",
+    "method": "UPS draw minus NAS power; includes three idle GPUs at 20 W each"
+  },
+  "tariffs": [
+    {
+      "id": "tepco-standard-gt300-2026-09-pre-subsidy",
+      "scenario": "actual_pre_subsidy",
+      "effective_from": "2026-09-01",
+      "effective_to": "2026-09-30",
+      "components_jpy_per_kwh": {
+        "tepco_standard_gt300_energy_charge": 40.49,
+        "fy2026_renewable_energy_surcharge": 4.18,
+        "september_2026_low_voltage_fuel_adjustment": -10.96
+      },
+      "source_description": "TEPCO Kanto reference components supplied by the operator.",
+      "notes": "Temporary government subsidy is intentionally excluded until its bill-month value is entered. Fixed monthly basic charge is excluded."
+    },
+    {
+      "id": "planning-40-jpy-per-kwh",
+      "scenario": "planning",
+      "effective_from": "2026-01-01",
+      "components_jpy_per_kwh": {
+        "planning_assumption": 40.0
+      },
+      "source_description": "Operator planning scenario.",
+      "notes": "Sensitivity scenario, not a billed tariff."
+    }
+  ]
+}

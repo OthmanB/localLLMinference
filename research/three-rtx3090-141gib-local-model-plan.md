@@ -7,7 +7,7 @@ Snapshot: 2026-08-29
 
 The immediate design is valid: install the third RTX 3090, its riser, and the second PSU with a synchronizer. The host now reports 141 GiB total and 137 GiB available RAM. Further RAM is deliberately out of scope for this phase. AirLLM is excluded because it solves capacity at non-interactive latency.
 
-The 200 W GPU cap is also a hard design input, not a recommendation to relax. The local three-RTX-3090 power study measured 0.250 aggregate GEMM TFLOPS/W at 200 W versus 0.253 at 220 W. The split-PSU projection for three 200 W cards plus 25% CPU is 1,059-1,089 W against the selected 1,100 W room-server budget; with 50% CPU it is 1,157-1,167 W and over budget. The 200 W target therefore needs final validation with the real three-card LLM/CPU mix, but it must not be raised to chase a small synthetic efficiency difference. GEMM is not LLM inference, so final choice requires tokens/s and tokens/J measurements at this selected electrical cap.
+The 200 W GPU cap is also a hard design input, not a recommendation to relax. The local [three-RTX-3090 power study](../../loadTests/three-rtx-3090-power-load-test.md) measured 0.250 aggregate GEMM TFLOPS/W at 200 W versus 0.253 at 220 W. The split-PSU projection for three 200 W cards plus 25% CPU is 1,059-1,089 W against the selected 1,100 W room-server budget; with 50% CPU it is 1,157-1,167 W and over budget. The 200 W target therefore needs final validation with the real three-card LLM/CPU mix, but it must not be raised to chase a small synthetic efficiency difference. GEMM is not LLM inference, so final choice requires tokens/s and tokens/J measurements at this selected electrical cap.
 
 The upgraded host capacity broadens the objective to:
 
@@ -26,9 +26,9 @@ The third 3090 is therefore useful immediately for **capacity** and parallel ser
 | System RAM | 141 GiB total; 137 GiB available; 8 GiB unused swap | Qwen3.6-35B-A3B BF16 and a gpt-oss-120b TP=2 experiment now have physical host capacity. DeepSeek-V4-Flash, MiniMax-M2.5, GLM-5.2, Kimi K3, and Qwen3-235B remain outside the safe envelope. A hybrid fit must retain zero swap. |
 | GPU VRAM now | 2 x 24 GiB = 48 GiB theoretical | A conventional fully resident model should be no more than about 42-44 GiB to leave runtime and KV-cache headroom. `llama.cpp --fit` is a conditional exception: it can calculate a CPU/GPU placement, but must be evaluated against the actual installed host RAM without disk paging and with RSS monitoring. |
 | GPU VRAM after build | 3 x 24 GiB = 72 GiB theoretical | About 58-62 GiB remains the conservative ordinary-model weight budget. Qwen3-Coder-Next has unusually low measured hybrid-state growth, making Q5_K_M a better primary target and Q6_K a model-specific experiment, not an automatic fit. |
-| Interconnect | No active NVLink; GPUs report max Gen3 / max x16 and current idle Gen1 / x8 | On this board, the bottom PCIE4 x8 link is expected electrically. Investigate the top PCIE1 x8 link under load. The final target is stable Gen3 x16 + x16 + x8, with reliable width preferred over an unreliable Gen4 attempt. |
+| Interconnect | No active NVLink; GPUs report max Gen3 / max x16 and current idle Gen1 / x8 | On the ASRock TRX40 Creator, the bottom PCIE4 x8 link is expected electrically. Investigate the top PCIE1 x8 link under load. The final target is stable Gen3 x16 + x16 + x8, with reliable width preferred over an unreliable Gen4 attempt. |
 | GPU power | Deliberate 200 W per-card cap | Retain this target for planning. It is within 1.2% of the best measured GEMM TFLOPS/W point. Three cards at that cap narrowly meet the 1,100 W room-server budget only at 25% CPU and exceed it at 50% CPU, so final LLM/CPU validation is required. Published 350 W 3090 results overstate performance, not the desired operating point. |
-| Storage | SATA SSD | Model load time is acceptable for 16-59 GiB GGUF but model switching is slower than NVMe. Do not use disk paging during decode. |
+| Storage | SATA Samsung 860 SSD | Model load time is acceptable for 16-59 GiB GGUF but model switching is slower than NVMe. Do not use disk paging during decode. |
 | FreeToken | Qwen3.6 loaders: TP=1 only; gpt-oss: TP=2 only; hard `memlock` is 17.66 GiB | FreeToken is ideal for the one-GPU Qwen MoE path and can now validate its BF16 host-bank path, but the current lock limit blocks the 64.4 GB Qwen BF16 bank and larger candidates. |
 
 ### Required distinction: one model versus three services
@@ -104,12 +104,13 @@ Publisher scores are generally for native or BF16 evaluation configurations. Q4,
 
 ### Required local intelligence and hallucination gate
 
-Before a model enters a coding path, measure its exact quantized deployment on a frozen local suite:
+Before a model enters a coding or trading path, measure its exact quantized deployment on a frozen local suite:
 
 1. Coding: test pass rate, patch acceptance rate, tool-call validity, and regression rate using one fixed agent scaffold.
 2. Grounded factuality: measure supported-claim precision, unsupported-claim rate, citation faithfulness, and abstention recall on time-frozen internal and public source packets.
 3. Adversarial factuality: include false-premise, missing-context, contradictory-source, and stale-data cases. Reward a correct "insufficient evidence" answer.
-4. Efficiency: measure TTFT, decode tok/s, p95 inter-token latency, watts, and joules per completed task at the intentional 200 W cap.
+4. Trading: measure schema validity, calibrated confidence, decision stability under prompt/quantization changes, and time-ordered out-of-sample utility after fees and slippage.
+5. Efficiency: measure TTFT, decode tok/s, p95 inter-token latency, watts, and joules per completed task at the intentional 200 W cap.
 
 ## Performance expectation
 
@@ -165,7 +166,7 @@ The third GPU does not turn the Qwen3.6 FreeToken path into a three-GPU model. I
 
 ## Immediate priority order
 
-1. Run `<FREETOKEN_ROOT>/install-system.sh` with `sudo`. FreeToken 0.1.2 and its CUDA-enabled Python environment are already installed, but the CUDA 13.2 `nvcc` toolkit and system service with unlimited `memlock` still require privileged installation. Do not run a large host-bank launch while the interactive limit remains 17.66 GiB.
+1. Run `/home/obenomar/.local/share/freetoken/install-system.sh` with `sudo`. FreeToken 0.1.2 and its CUDA-enabled Python environment are already installed, but the CUDA 13.2 `nvcc` toolkit and system service with unlimited `memlock` still require privileged installation. Do not run a large host-bank launch while the interactive limit remains 17.66 GiB.
 2. Run `ft bench bw --dtype nvfp4,bf16` on both existing GPUs and retain its per-GPU profiles. Launch Qwen3.6-35B-A3B NVFP4 as the first FreeToken smoke test, recording `VmLck`, RSS, swap, VRAM, and power.
 3. After the smoke test, run Qwen3.6-35B-A3B BF16 as the primary 141 GiB FreeToken validation. Do not start gpt-oss or Flash-Next until this run has stable zero-swap results.
 4. On the existing cards, build current llama.cpp and run `llama-cli --fit` with explicit `--fit-target` and `--fit-ctx` for Qwen3-Coder-Next Q3 and Q4 at 4k, 16k, and 32k. Record the computed CPU/GPU split, host RSS, swap, VRAM, and sustained 200 W behavior. This establishes whether the community dual-3090 result is reproducible on this Gen3 x8 system.
@@ -200,7 +201,7 @@ Use identical prompts, context limits, sampling parameters, and quantization for
 | Engine comparison | Qwen3.6-35B-A3B: FreeToken versus `llama.cpp`/Ollama | Same weights if possible; report decode tok/s, TTFT p50/p95, inter-token p95, and cache-hit behavior |
 | KV/MTP comparison | Qwen3.8 and Qwen3-Coder-Next in llama.cpp; Qwen3.8 in vLLM where applicable | Test base versus MTP and each `--cache-type-k` / `--cache-type-v` candidate separately; accept only a measured task/latency/memory improvement. |
 
-Choose the default model with a combined score of task utility, deadline-miss rate, and joules per completed decision. Use the large three-GPU model only as a second-pass verifier if it improves that score in time-ordered offline evaluation.
+For the trading pipeline, choose the default model with a combined score of task utility, deadline-miss rate, and joules per completed decision. Use the large three-GPU model only as a second-pass verifier if it improves that score in time-ordered offline evaluation.
 
 ## Refined bottom line
 
@@ -233,7 +234,7 @@ Choose the default model with a combined score of task utility, deadline-miss ra
 18. [llama.cpp fit-params README](https://github.com/ggml-org/llama.cpp/blob/master/tools/fit-params/README.md)
 19. [vLLM MTP speculative decoding](https://docs.vllm.ai/en/stable/features/speculative_decoding/mtp/)
 20. [Hardware Corner Coder-Next report, community measurement](https://www.hardware-corner.net/qwen3-coder-next-hardware-requirements/)
-21. Local three-RTX-3090 power study (kept outside the public repository)
+21. [Local three-RTX-3090 power study](../../loadTests/three-rtx-3090-power-load-test.md)
 22. [DeepSeek-V4-Flash model card](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731)
 23. [DeepSeek-V4-Pro model card](https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813)
 24. [DeepSeek-V4-Flash Hub metadata](https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Flash-0731)

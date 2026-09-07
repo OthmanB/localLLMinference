@@ -16,13 +16,13 @@ Code: [FlashML-org/FreeToken](https://github.com/FlashML-org/FreeToken)
 
 5. **The best compact quality candidates remain Qwen3.8-27B Q5_K_M and Ornith-1.5-35B-A3B Q4_K_M.** FreeToken now directly supports Qwen3.8-27B dense FP8/NVFP4 checkpoints as well as Qwen3.6/3.5 MoE. The 141 GiB RAM upgrade makes Qwen3.6-35B-A3B BF16 a physical FreeToken candidate and makes a gpt-oss-120b TP=2 experiment plausible, but neither is launch-ready until the current 17.66 GiB hard locked-memory limit is raised and CUDA 13 is installed. Ampere has no native NVFP4 tensor cores, so FreeToken uses its portable Triton or Marlin W4A16 path.
 
-6. **The current bottleneck is not the number of GPUs.** Both GPUs report Gen3/x16 capability and currently idle at Gen1/x8, with no active NVLink. On this board, the bottom PCIE4 card's x8 link is expected electrically; the top PCIE1 card's x8 link under load is the configuration-dependent condition to investigate. The intended three-card topology is stable Gen3 x16 + Gen3 x16 + Gen3 x8, with reliable lane width preferred over an unreliable Gen4 attempt. The 200 W power limit is an intentional electrical-efficiency design choice, not an accidental throttle: the local load study measured 0.250 aggregate TFLOPS/W at 200 W versus 0.253 at 220 W. With the split-PSU arrangement, three 200 W cards plus 25% CPU load project to 1,059-1,089 W against the selected 1,100 W room-server budget; at 50% CPU they project to 1,157-1,167 W and are over budget. The paper's 3090 had 25.3 GB/s measured host-to-device bandwidth; Gen3 x8 has only 7.88 GB/s theoretical bandwidth. This can erase much of FreeToken's published advantage. Prioritize stable PCIe lane topology and the CUDA 13 toolkit; do not assume that a third GPU will multiply one-model token throughput.
+6. **The current bottleneck is not the number of GPUs.** Both GPUs report Gen3/x16 capability and currently idle at Gen1/x8, with no active NVLink. On the ASRock TRX40 Creator, the bottom PCIE4 card's x8 link is expected electrically; the top PCIE1 card's x8 link under load is the configuration-dependent condition to investigate. The intended three-card topology is stable Gen3 x16 + Gen3 x16 + Gen3 x8, with reliable lane width preferred over an unreliable Gen4 attempt. The 200 W power limit is an intentional electrical-efficiency design choice, not an accidental throttle: the local load study measured 0.250 aggregate TFLOPS/W at 200 W versus 0.253 at 220 W. With the split-PSU arrangement, three 200 W cards plus 25% CPU load project to 1,059-1,089 W against the selected 1,100 W room-server budget; at 50% CPU they project to 1,157-1,167 W and are over budget. The paper's 3090 had 25.3 GB/s measured host-to-device bandwidth; Gen3 x8 has only 7.88 GB/s theoretical bandwidth. This can erase much of FreeToken's published advantage. Prioritize stable PCIe lane topology and the CUDA 13 toolkit; do not assume that a third GPU will multiply one-model token throughput.
 
 7. **For near-frontier coding models such as MiniMax-M2.5 or DeepSeek-V4-Flash, target 256 GiB of fast, correctly populated quad-channel RAM.** Hugging Face reports Flash at 155.427 GiB used storage for 304.180B tensors. Its official configuration uses FP4 experts, FP8 weights, and BF16 ancillary tensors, so it is already a mixed-precision release rather than an uncompressed BF16 checkpoint. Flash is plausible only in the larger-RAM design with the stable intended PCIe lane topology; no published RTX 3090 result exists. A conservative expectation is single-digit to low-teens decode tok/s, not the 22-25 tok/s DeepSeek result obtained on an RTX 5090.
 
 8. **A third 3090 is useful, but it is not the first point at which Qwen3-Coder-Next can be tested.** `llama.cpp --fit` can calculate a CPU/GPU hybrid placement for Q3/Q4 on the two installed cards; the observed 141 GiB total / 137 GiB available RAM increases its host-placement margin, but it remains a measured, nonresident path. Three cards make Q5_K_M the clean initial Coder-Next deployment and leave more runtime/context margin. FreeToken has tensor-parallel infrastructure, but support is model-specific: Qwen3.5/3.6 MoE remains TP=1, while gpt-oss source-level sharding supports TP=2 but not TP=3 with its 64 query heads.
 
-9. **GLM-5.2 and Kimi K3 are not sensible targets for this platform.** GLM-5.2's NVFP4 checkpoint is about 433 GiB and the paper used 512 GiB host RAM plus a 96 GiB RTX PRO 6000. Kimi K3 is about 594 GiB and AirLLM's demonstrated rate is minutes per token. They may be technically launchable with extreme streaming, but they are not useful for an interactive coding pipeline.
+9. **GLM-5.2 and Kimi K3 are not sensible targets for this platform.** GLM-5.2's NVFP4 checkpoint is about 433 GiB and the paper used 512 GiB host RAM plus a 96 GiB RTX PRO 6000. Kimi K3 is about 594 GiB and AirLLM's demonstrated rate is minutes per token. They may be technically launchable with extreme streaming, but they are not useful for an interactive coding or trading pipeline.
 
 ## Confidence notation
 
@@ -45,19 +45,19 @@ The following was queried directly on 2026-08-29, except where an earlier observ
 | GPU 1 | Zotac RTX 3090, 24 GiB | Same capacity, but aggregate 48 GiB is usable only by engines/model paths that implement multi-GPU partitioning |
 | PCIe | Both GPUs report max Gen3 / max x16; current idle state is Gen1 / x8 | Under load the generation should rise to Gen3. The bottom PCIE4 card is expected to operate at x8; investigate only the top PCIE1 card's x8 state. The intended final layout is stable Gen3 x16 + x16 + x8, not a required Gen4 configuration. |
 | GPU topology | `PHB` between GPUs; NVLink links inactive | Peer traffic traverses the PCIe host bridge. Tensor parallel collectives will be much slower than NVLink. |
-| GPU power | Both capped at 200 W by deliberate design; board maximum 350 W | The cap is near the local GEMM efficiency knee and respects UPS/room constraints. It can reduce compute-bound prefill performance versus unrestricted 3090 benchmarks, so all local token-rate estimates retain it rather than recommending a higher cap. See the local power study (kept outside the public repository). |
-| CPU | 32 cores/64 threads, AVX2, one NUMA node | Many cores and four memory channels are useful for hybrid MoE, but it lacks the AVX-512/AMX paths used by some recent Intel KTransformers results. |
+| GPU power | Both capped at 200 W by deliberate design; board maximum 350 W | The cap is near the local GEMM efficiency knee and respects UPS/room constraints. It can reduce compute-bound prefill performance versus unrestricted 3090 benchmarks, so all local token-rate estimates retain it rather than recommending a higher cap. See the [power study](../../loadTests/three-rtx-3090-power-load-test.md). |
+| CPU | Threadripper 3970X, 32 cores/64 threads, AVX2, one NUMA node | Many cores and four memory channels are useful for hybrid MoE, but it lacks the AVX-512/AMX paths used by some recent Intel KTransformers results. |
 | RAM | 141 GiB total, 137 GiB available; 8 GiB swap enabled but unused | Physical capacity now covers the 128 GiB planning tier: Qwen3.6-35B-A3B BF16 and a cautious gpt-oss-120b TP=2 experiment. It remains below the safe DeepSeek-V4-Flash and MiniMax-M2.5 tier. Never permit swap during decode. |
 | Locked memory | `ulimit -l` soft/hard: 18,521,516 KiB = 17.66 GiB | FreeToken pins host expert banks. This blocks Qwen3.6 BF16's 64.4 GB expert pool and Qwen3.8-Flash-Next's 47.7 GiB PLE table despite sufficient physical RAM. |
-| Storage | SATA SSD | Fine for smaller models, but about 0.55 GB/s sequential class performance makes large-model startup slow. Source plus FTW conversion may require roughly twice checkpoint size. |
+| Storage | Samsung 860 SATA SSD, 915 GiB filesystem, 819 GiB available | Fine for smaller models, but about 0.55 GB/s sequential class performance makes large-model startup slow. Source plus FTW conversion may require roughly twice checkpoint size. |
 | NVIDIA driver | 595.84 | New enough for FreeToken's r580+ requirement |
-| FreeToken / CUDA toolkit | FreeToken 0.1.2 is installed in `<FREETOKEN_VENV>`; Torch 2.11.0+cu130 detects both GPUs. `nvcc` is still absent. | The staged root installer adds CUDA toolkit 13.2 and a dedicated systemd service with unlimited `memlock`. FreeToken cannot JIT its kernels until that installer is run. |
+| FreeToken / CUDA toolkit | FreeToken 0.1.2 is installed in `/home/obenomar/.local/share/freetoken/.venv`; Torch 2.11.0+cu130 detects both GPUs. `nvcc` is still absent. | The staged root installer adds CUDA toolkit 13.2 and a dedicated systemd service with unlimited `memlock`. FreeToken cannot JIT its kernels until that installer is run. |
 
 ### The PCIe finding is critical
 
-The paper measured **25.3 GB/s** of pinned host-to-device expert transfer on its RTX 3090 PCIe 4.0 x16 system. A realistic Gen3 x8 transfer range is approximately **6-7.5 GB/s**, only 24-30% of that measurement. Current Gen1 at idle is normal power management. For this board layout, PCIE4 at Gen3 x8 is expected; the actionable issue is the top PCIE1 card remaining at x8 when the intended stable layout is Gen3 x16 + x16 + x8.
+The paper measured **25.3 GB/s** of pinned host-to-device expert transfer on its RTX 3090 PCIe 4.0 x16 system. A realistic Gen3 x8 transfer range is approximately **6-7.5 GB/s**, only 24-30% of that measurement. Current Gen1 at idle is normal power management. For this ASRock layout, PCIE4 at Gen3 x8 is expected; the actionable issue is the top PCIE1 card remaining at x8 when the intended stable layout is Gen3 x16 + x16 + x8.
 
-The CPU exposes enough lanes for the intended three-card layout, but the motherboard manual, slot wiring, BIOS bifurcation, and riser specification determine what is actually delivered. Validate every card under load after the third card and riser arrive. A stable Gen3 x16 link is preferred to an unreliable Gen4 link, and a Gen3 x8 PCIE4 link is expected rather than a fault to correct.
+Threadripper 3970X exposes enough lanes for the intended three-card layout, but the motherboard manual, slot wiring, BIOS bifurcation, and riser specification determine what is actually delivered. Validate every card under load after the third card and riser arrive. A stable Gen3 x16 link is preferred to an unreliable Gen4 link, and a Gen3 x8 PCIE4 link is expected rather than a fault to correct.
 
 ## What the 141 GiB RAM upgrade changes for FreeToken
 
@@ -187,7 +187,7 @@ The strongest new idea is the combination of **compute where an absent expert al
 - Agent trajectories diverge, so per-request means summarize different paths and token counts. The paper deliberately avoids total wall-clock comparison.
 - Unsupported configurations are marked as failures, which is operationally fair but not an algorithm-only comparison.
 - The 4060 result uses Qwen NVFP4 while the desktop/server Qwen tests use BF16.
-- The 3090 host is not representative of this exact CPU/PCIe topology, especially its PCIe bandwidth.
+- The 3090 host is not representative of this exact Threadripper topology, especially its PCIe bandwidth.
 
 ### Reported results
 
@@ -239,7 +239,7 @@ AirLLM's older compression timing chart lacks enough information to reproduce a 
 - Very low-frequency offline generation where one result is worth hours.
 - Researching per-expert disk streaming.
 
-It is not suitable as the main coding-agent inference server.
+It is not suitable as the main coding-agent or latency-sensitive trading inference server.
 
 ## RAM compression and virtual memory for LLM inference
 
@@ -436,7 +436,7 @@ A 2-4 TB PCIe 4.0 NVMe drive would improve model switching and FTW conversion su
 
 ### Tier 0: use the current hardware before buying around assumptions
 
-1. Run the staged privileged installer at `<FREETOKEN_ROOT>/install-system.sh` to install CUDA toolkit 13.2 and activate the dedicated FreeToken system service; keep Ollama/llama.cpp/vLLM environments separate.
+1. Run the staged privileged installer at `/home/obenomar/.local/share/freetoken/install-system.sh` to install CUDA toolkit 13.2 and activate the dedicated FreeToken system service; keep Ollama/llama.cpp/vLLM environments separate.
 2. Raise the hard locked-memory limit before attempting a large pinned expert bank. The current soft and hard value is 18,521,516 KiB (17.66 GiB); this is below Qwen3.6 BF16's 64.4 GB expert pool and Qwen3.8-Flash-Next's 47.7 GiB PLE table. Confirm `VmLck` and zero swap during the run.
 3. Verify the top PCIE1 card can reach stable Gen3 x16; the bottom PCIE4 card operating at Gen3 x8 is expected. Inspect motherboard slot wiring, BIOS, and riser quality. Target stable Gen3 x16 + x16 + x8; prefer that over an unreliable Gen4 experiment.
    ```bash
@@ -488,7 +488,7 @@ Do not buy or install it on the assumption that current FreeToken Qwen inference
 
 Two RTX 3090s can use a two-card NVLink bridge if board spacing and card design match. There is no three-way 3090 NVLink topology. NVLink can materially help two-way tensor parallelism, but it does not solve FreeToken host offload and does not connect the third card.
 
-Three stock 3090s can request roughly 1,050 W before CPU, drives, pumps/fans, and transients, but that is not this design's target. The local power study establishes 200 W as the selected efficiency and electrical-budget cap: two cards measured 695 W stable / 705 W peak on the UPS; three split-PSU cards at 200 W plus 25% CPU project to 1,059-1,089 W against the selected 1,100 W room-server budget. The same estimate fails at 50% CPU. A PSU synchronizer starts two PSUs together; it does not by itself validate connector loading, grounding, branch-circuit capacity, transient response, or safe separation of each GPU's power leads. Keep the selected cap, do not seek a higher sustained cap, and repeat the documented final three-GPU GPU-plus-representative-CPU validation after installation.
+Three stock 3090s can request roughly 1,050 W before CPU, drives, pumps/fans, and transients, but that is not this design's target. The local [power study](../../loadTests/three-rtx-3090-power-load-test.md) establishes 200 W as the selected efficiency and electrical-budget cap: two cards measured 695 W stable / 705 W peak on the 980 W Smart-UPS; three split-PSU cards at 200 W plus 25% CPU project to 1,059-1,089 W against the selected 1,100 W room-server budget. The same estimate fails at 50% CPU. A PSU synchronizer starts two PSUs together; it does not by itself validate connector loading, grounding, branch-circuit capacity, transient response, or safe separation of each GPU's power leads. Keep the selected cap, do not seek a higher sustained cap, and repeat the documented final three-GPU GPU-plus-representative-CPU validation after installation.
 
 ## Benchmark plan for factual decisions
 
@@ -534,6 +534,21 @@ Token rate is not capability. Evaluate every quantized model on:
 - deterministic regression prompts for code review, patch generation, and data analysis;
 - output disagreement between BF16 and the intended quantization.
 
+### Trading-pipeline metrics
+
+For a model feeding a trading pipeline, use an offline, time-ordered evaluation before any deployment decision:
+
+- end-to-end decision latency and deadline miss rate;
+- schema/tool-call validity;
+- directional accuracy and balanced accuracy;
+- probability calibration/Brier score if the model emits confidence;
+- rank information coefficient for scored opportunities;
+- precision and recall at the actual trade threshold;
+- turnover, fees, slippage, and market-impact-adjusted returns;
+- drawdown and tail loss;
+- data leakage checks and walk-forward stability;
+- sensitivity of decisions to quantization, prompt changes, seeds, and delayed inputs.
+
 The key custom metric should combine **task utility, latency, and cost**, rather than optimizing tok/s in isolation. A slower near-frontier model may be useful as a second-pass verifier while a resident 27B/35B model handles the latency-critical first pass.
 
 ## Practical architecture recommendation
@@ -547,6 +562,10 @@ Use a two-stage local stack:
 3. **Slow verifier after 256 GiB upgrade:** MiniMax-M2.5 or DeepSeek-V4-Flash through FreeToken for difficult repository tasks, reviews, and final patch verification.
 
 This is more useful than forcing every request through the largest model.
+
+### Trading and analytical pipelines
+
+Keep deterministic data processing, risk rules, and order construction outside the LLM. Use the LLM for unstructured extraction, hypothesis generation, code, explanations, or exception handling. A resident 27B/35B model provides predictable latency; a larger offloaded MoE can be invoked only when its measured incremental utility exceeds its additional latency and energy cost.
 
 ### Engine selection
 
@@ -604,7 +623,7 @@ This is more useful than forcing every request through the largest model.
 34. [Linux zswap documentation](https://docs.kernel.org/admin-guide/mm/zswap.html)
 35. [Hugging Face Accelerate big-model inference](https://huggingface.co/docs/accelerate/concept_guides/big_model_inference)
 36. [DeepSpeed ZeRO-Inference](https://www.deepspeed.ai/2022/09/09/zero-inference.html)
-37. Local three-RTX-3090 power study (kept outside the public repository)
+37. [Local three-RTX-3090 power study](../../loadTests/three-rtx-3090-power-load-test.md)
 38. [DeepSeek-V4-Pro model card](https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813)
 39. [DeepSeek-V4-Flash Hub metadata](https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Flash-0731)
 40. [DeepSeek-V4-Pro Hub metadata](https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4-Pro-0813)

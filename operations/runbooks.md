@@ -5,6 +5,7 @@
 ```bash
 systemctl status nvidia-power-limit.service
 systemctl status nvidia-fan-control.service
+systemctl status freetoken-qwen3.8-flash-next-262k.service
 systemctl status llama-qwen3.8-q4-192k.service
 systemctl status lan-inference-gateway.service
 systemctl status ai-metrics-exporter.service
@@ -15,8 +16,8 @@ nvidia-smi
 
 The installer is idempotent for the generated secrets. It installs the
 canonical units, preserves an existing gateway token, applies the GPU power and
-fan settings, disables the old user llama services, starts the Q4 model, and
-starts the gateway and exporter:
+fan settings, disables the old user llama services, starts the Flash Next model,
+and starts the gateway and exporter:
 
 ```bash
 sudo /path/to/localLLMinference/operations/install.sh
@@ -32,7 +33,7 @@ an installation or deliberate restart.
 ## API Check
 
 ```bash
-curl -sS http://127.0.0.1:8080/health
+curl -sS http://127.0.0.1:1901/health
 curl -sS http://127.0.0.1:8088/healthz
 curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
   http://127.0.0.1:8088/v1/models
@@ -43,23 +44,24 @@ curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
 Restart the model before the gateway so the dependency remains clear:
 
 ```bash
-sudo systemctl restart llama-qwen3.8-q4-192k.service
+sudo systemctl restart freetoken-qwen3.8-flash-next-262k.service
 sudo systemctl restart lan-inference-gateway.service
 sudo systemctl restart ai-metrics-exporter.service
 ```
 
 ## Rollback
 
-Stop the operational Q4 service and restore only a deliberately selected
-profile. Do not re-enable the old Q5 64k user service without checking GPU 0
-ownership first.
+Stop only the service being changed. Flash Next owns GPU 0 and Q4 owns GPU 1,
+so they are intended to run together. Do not enable the old Q5 service without
+checking GPU ownership first.
 
 ## Reboot Acceptance
 
-After a reboot verify that both GPUs report 300 W, GPU 0's fixed fan service is
-active, Q4 reports model ID
-`qwen3.8-27b-q4-gpukv192`, the gateway requires a token, the exporter is
-reachable by Prometheus, and the old Q5 64k service did not start.
+After a reboot verify that the inference GPUs report their power limits
+(GPU 0 = 300 W, GPU 1 = 275 W), GPU 0's fixed fan service is active, Flash
+Next reports model ID `qwen3.8-flash-next-nvfp4-262k`, Q4 reports model ID
+`qwen3.8-27b-q4-gpukv192` on GPU 1, the gateway requires a token, the exporter
+is reachable by Prometheus, and the old Q5 service did not start.
 
 The full deployment history and NAS configuration are in
 `deployment-record.md`.

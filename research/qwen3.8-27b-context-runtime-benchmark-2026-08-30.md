@@ -37,7 +37,7 @@ the observed limit is a decode-saturation cliff, not a startup or prefill OOM.
 
 ## Test system
 
-- CPU: 32 physical cores, AVX2.
+- CPU: Threadripper 3970X, 32 physical cores, AVX2.
 - RAM: 141 GiB total.
 - GPUs: 2 x RTX 3090, 24 GiB each; the original sweep used GPU 0, while the Q4/Q5 follow-up used
   GPU 0 for Q4 and GPU 1 for Q5.

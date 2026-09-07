@@ -1,0 +1,25 @@
+[Unit]
+Description=Muse Glimmer 30B K-Quant DFlash 131k llama.cpp server
+Wants=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+After=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+Requires=nvidia-power-limit.service
+RequiresMountsFor=/mnt/model-store/models/muse-glimmer-30b-gguf
+
+[Service]
+Type=simple
+User=obenomar
+Group=obenomar
+Environment=CUDA_VISIBLE_DEVICES=2
+Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
+Environment=GGML_CUDA_ENABLE_UNIFIED_MEMORY=0
+WorkingDirectory=/home/obenomar/.local/share/llama.cpp
+ExecStart=/home/obenomar/.local/share/llama.cpp/build/bin/llama-server --model /mnt/model-store/models/muse-glimmer-30b-gguf/Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf --mmproj /mnt/model-store/models/muse-glimmer-30b-gguf/mmproj-Muse-Glimmer-30B-Q4_K_M.gguf --model-draft /mnt/model-store/models/muse-glimmer-30b-gguf/dflash-Muse-Glimmer-30B-Q4_K_M.gguf --n-gpu-layers-draft all --alias muse-glimmer-30b-kquant17 --host 127.0.0.1 --port 8082 --ctx-size 131072 --parallel 1 --n-gpu-layers all --kv-offload --cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on --threads 16 --threads-batch 16 --batch-size 2048 --ubatch-size 512 --fit on --fit-target 1024 --metrics --perf --no-ui --jinja
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitNOFILE=1048576
+MemorySwapMax=0
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

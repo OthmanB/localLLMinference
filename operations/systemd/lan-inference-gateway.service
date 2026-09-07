@@ -1,16 +1,16 @@
 [Unit]
 Description=Authenticated LAN OpenAI inference gateway
 Wants=network-online.target
-After=network-online.target llama-qwen3.8-q4-192k.service
-Requires=llama-qwen3.8-q4-192k.service
+After=network-online.target freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service
+Requires=freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service
 
 [Service]
 Type=simple
-User=@SERVICE_USER@
-Group=@SERVICE_USER@
+User=obenomar
+Group=obenomar
 EnvironmentFile=/etc/ai-server/lan-inference-gateway.env
-WorkingDirectory=@REPO_ROOT@/lan-inference-gateway
-ExecStart=@REPO_ROOT@/lan-inference-gateway/.venv/bin/lan-inference-gateway
+WorkingDirectory=/home/obenomar/localLLMinference/lan-inference-gateway
+ExecStart=/home/obenomar/localLLMinference/lan-inference-gateway/.venv/bin/lan-inference-gateway
 Restart=on-failure
 RestartSec=3
 KillMode=mixed

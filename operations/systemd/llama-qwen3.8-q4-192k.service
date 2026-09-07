@@ -6,13 +6,13 @@ Requires=nvidia-power-limit.service
 
 [Service]
 Type=simple
-User=@SERVICE_USER@
-Group=@SERVICE_USER@
-Environment=CUDA_VISIBLE_DEVICES=0
+User=obenomar
+Group=obenomar
+Environment=CUDA_VISIBLE_DEVICES=1
 Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
 Environment=GGML_CUDA_ENABLE_UNIFIED_MEMORY=0
-WorkingDirectory=@LLAMA_CPP_ROOT@
-ExecStart=@LLAMA_SERVER_BIN@ --model @MODEL_PATH@ --alias qwen3.8-27b-q4-gpukv192 --host 127.0.0.1 --port 8080 --ctx-size 196608 --parallel 1 --n-gpu-layers all --kv-offload --cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on --threads 32 --threads-batch 32 --batch-size 2048 --ubatch-size 512 --fit off --metrics --perf --no-ui --reasoning auto --reasoning-effort medium
+WorkingDirectory=/home/obenomar/.local/share/llama.cpp
+ExecStart=/home/obenomar/.local/share/llama.cpp/build/bin/llama-server --model /home/obenomar/localLLMinference/models/qwen3.8-27b-q4-k-m-gguf/Qwen3.8-27B-UD-Q4_K_M.gguf --alias qwen3.8-27b-q4-gpukv192 --host 127.0.0.1 --port 8080 --ctx-size 196608 --parallel 1 --n-gpu-layers all --kv-offload --cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on --threads 32 --threads-batch 32 --batch-size 2048 --ubatch-size 512 --fit off --metrics --perf --no-ui --reasoning auto --reasoning-effort medium
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30

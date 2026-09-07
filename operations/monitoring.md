@@ -1,16 +1,25 @@
 # Monitoring
 
 Prometheus and Grafana run on the monitoring host. The AI server exporter listens
-on port 9108 and combines llama.cpp metrics with `nvidia-smi` metrics.
+on port 9108 and combines FreeToken, llama.cpp, `nvidia-smi`, host-memory, energy,
+electricity-cost, and API-equivalent-cost metrics.
 
 Expected model labels:
 
-- `model="qwen3.8-27b-q4-gpukv192"`
+- `model="qwen3.8-flash-next-nvfp4-262k"`
 - `gpu="0"`
+- `model="qwen3.8-27b-q4-gpukv192"`
+- `gpu="1"`
+- `model="muse-glimmer-30b-kquant17"`
+- `gpu="2"`
 
-The dashboard should show request processing, prompt tokens/s, generated
-tokens/s, cumulative prompt/generated tokens, GPU utilization, power draw and
-limit, temperature, VRAM, host memory, and exporter/service health.
+All exporter-owned GPU and accounting series also include immutable `host_id` and
+`gpu_uuid` labels. Do not identify a GPU solely by the global GPU index.
+
+The dashboard should show request processing, prefill tokens/s, decode tokens/s,
+cumulative prompt/generated tokens, GPU utilization, measured power draw and limit,
+temperature, VRAM, host memory, energy, electricity cost, API-equivalent costs,
+and exporter/service health.
 
 Host memory metrics are exposed as:
 
@@ -30,4 +39,99 @@ re-import the dashboard with overwrite enabled:
 
 ```bash
 sudo systemctl restart ai-metrics-exporter.service
+```
+
+Run `sudo operations/promote-freetoken-flash-next-262k.sh` on the AI server to
+install the permanent service and local gateway/exporter configuration. Then
+import the dashboard source on the monitoring host with overwrite enabled.
+
+## Energy and Cost Accounting
+
+The exporter samples actual `nvidia-smi` `power.draw` every five seconds and uses
+timestamped trapezoidal integration. `power.limit` is exposed for operations but
+is never treated as consumption. State is atomically retained at
+`/var/lib/ai-metrics-exporter/cost-accounting-state.json`; runtime counter resets
+are interpreted as a new counter value rather than a negative token delta.
+
+`/etc/ai-server/ai-cost-accounting.json` is installed from
+`config/ai-cost-accounting.json.example`. Its current `wall_idle_total_w` baseline
+is 300 W, measured at `2026-09-07T20:05:00+09:00` as UPS draw minus NAS power and
+including three idle GPUs at 20 W each. Whole-host power is therefore calculated
+as `300 + sum(max(actual GPU draw - 20, 0))` W. This is a host-level allocation
+and must not be presented as a per-model inference cost.
+
+The electricity tariff and API prices are explicit, dated configuration inputs.
+The installed files are readable by the exporter service account but writable only
+by root. The current TEPCO scenario excludes the temporary subsidy and the fixed
+monthly basic charge. The JPY API figures use the configurable planning FX rate,
+not a billed exchange rate. Update the source JSON files, review the price source
+and effective date, then explicitly install the reviewed file into `/etc/ai-server`.
+The installer and promotion scripts create missing config files but preserve
+existing local calibration and pricing inputs.
+
+Key counters:
+
+- `ai_gpu_energy_joules_total`: actual energy for each UUID with consecutive valid samples.
+- `ai_model_active_gpu_energy_joules_total`: direct GPU energy only when the named model was active in both endpoint samples.
+- `ai_host_estimated_energy_joules_total`: full host estimate, integrated only when the entire GPU set is available.
+- `ai_energy_integration_gap_seconds_total`: elapsed time intentionally excluded from the whole-host estimate because samples were missing, late, or incomplete.
+- `ai_host_reboot_downtime_seconds_total`: elapsed time between samples across a confirmed changed Linux boot ID; it is not charged to the host-energy estimate.
+- `ai_host_boot_time_seconds`: Unix time of the current Linux host boot.
+- `ai_model_energy_covered_completion_tokens_total`: completion-token denominator paired with observed active-energy intervals. This includes terminal token deltas reported when a request finishes after validated active samples.
+- `ai_host_electricity_cost_jpy_total` and `ai_model_active_gpu_electricity_cost_jpy_total`: host and direct-GPU electricity views respectively.
+- `ai_model_api_workload_cost_{usd,jpy}_total`: token-priced remote API comparison including input, cached input, and output.
+- `ai_model_api_output_only_cost_{usd,jpy}_total`: output-only remote API comparison.
+
+The FreeToken endpoint does not expose a cached-input token counter. Its
+API-comparison metrics carry `cached_input_mode="unobserved_assumed_uncached"` and
+must not be interpreted as a measured cache discount. For runtimes that report
+both counters, cached prompt tokens are treated as a subset of total prompt tokens
+and replace the corresponding regular-input rate. Prices not represented in
+`ai-api-pricing.json`, including unverified Qwen Model Studio and RunInfra Flash
+Next rates, are intentionally absent rather than estimated.
+
+After each exporter restart, successfully scraped configured models emit zero-valued
+active-energy and API-comparison counters before their first request. This keeps
+cost panels visible without claiming that direct inference energy was measured.
+The direct-GPU JPY-per-1K panel intentionally remains unavailable until a
+completion has matching active-energy coverage.
+
+When the AI server is off, its exporter cannot emit a local zero sample. The
+monitoring host therefore provides `up{job="ai-server"}`: `0` means the target
+could not be scraped, whether from power-off, network loss, or exporter failure.
+On its next successful sample, a changed Linux boot ID records the interval in
+`ai_host_reboot_downtime_seconds_total` instead of
+`ai_energy_integration_gap_seconds_total`; neither counter adds the 300 W host
+baseline. A changed boot ID confirms a reboot, not whether it was deliberate or
+caused by power loss.
+
+The dashboard's selected-period counters use `last_over_time(...) -
+first_over_time(...)` rather than `increase(...)`. This reports the exact observed
+counter delta in the selected window and avoids Prometheus boundary extrapolation
+when a new exporter series starts partway through that window.
+
+Useful PromQL range queries:
+
+```promql
+# Measured active direct-GPU electricity cost for one model and tariff.
+last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+- first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+
+# Full host electricity cost. Do not attribute this number to one model.
+last_over_time(ai_host_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
+- first_over_time(ai_host_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
+
+# Equivalent remote API workload cost under each configured comparison and FX scenario.
+last_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+- first_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+
+# Direct-GPU JPY per 1,000 completions with matching energy coverage.
+1000 * sum by (model, tariff_id) (
+  last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
+  - first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
+)
+/ on (model) group_left sum by (model) (
+  last_over_time(ai_model_energy_covered_completion_tokens_total{host_id="ai-server"}[$__range])
+  - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id="ai-server"}[$__range])
+)
 ```
