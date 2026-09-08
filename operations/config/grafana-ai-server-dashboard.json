@@ -121,11 +121,11 @@
     },
     {
       "title": "Configured Host Baseline",
-      "description": "The accounting convention and baseline used for the whole-host estimate.",
+      "description": "Currently-configured whole-host baseline. Aggregated by host so a superseded baseline mode (after a mode change) does not keep showing its stale value.",
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_host_baseline_power_watts{host_id=~\"$host_id\"}[15m])", "legendFormat": "{{baseline_mode}}"}],
+      "targets": [{"expr": "max by (host_id) (last_over_time(ai_host_baseline_power_watts{host_id=~\"$host_id\"}[60s]))", "legendFormat": "baseline"}],
       "gridPos": {"h": 5, "w": 6, "x": 18, "y": 40}
     },
     {
