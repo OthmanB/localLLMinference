@@ -1,5 +1,5 @@
 [Unit]
-Description=Set fixed NVIDIA fan speed for the model GPU
+Description=Set fixed NVIDIA fan speeds for all GPUs
 Wants=nvidia-power-limit.service
 After=nvidia-power-limit.service
 ConditionPathExists=/usr/bin/python3
@@ -8,6 +8,8 @@ ConditionPathExists=/dev/nvidiactl
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/python3 /home/obenomar/localLLMinference/tools/nvidia_fan_control.py --gpu 0 --speed 70
+ExecStart=/usr/bin/python3 /home/obenomar/localLLMinference/tools/nvidia_fan_control.py --gpu 1 --speed 80
+ExecStart=/usr/bin/python3 /home/obenomar/localLLMinference/tools/nvidia_fan_control.py --gpu 2 --speed 70
 TimeoutStartSec=15s
 RemainAfterExit=yes
 UMask=0077

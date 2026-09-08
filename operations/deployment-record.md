@@ -26,7 +26,7 @@ Record these values only in the local deployment record:
 - FreeToken bound to loopback on port 1901
 - Authenticated OpenAI-compatible gateway on port 8088
 - Prometheus exporter on port 9108
-- Fixed 70% fan speed on the model GPU at boot, when supported by NVML
+- Fixed fan speeds at boot when supported by NVML: GPU 0 and GPU 2 at 70%, GPU 1 at 80%
 - Reasoning default: `auto` with medium effort
 - Sampling parameters supplied by clients
 

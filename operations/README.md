@@ -12,7 +12,7 @@ Operational reference for a self-hosted AI server. Research results stay under
 - Internal llama.cpp endpoint: `http://127.0.0.1:8080`.
 - Authenticated OpenAI gateway on port `8088` on the LAN and tailnet.
 - GPU power limit: 300 W on all three RTX 3090 GPUs, applied at system boot.
-- GPU 0 fan speed: fixed at 70% at system boot while the model service runs.
+- Fixed fan speeds at system boot: GPU 0 and GPU 2 at 70%, GPU 1 at 80%.
 - OpenCode reasoning defaults are Q4 `medium`, Flash Next `xhigh`, and Muse
   Glimmer `high`. Q4 supports `none`, `low`, `medium`, `high`, and `xhigh`;
   Flash Next supports `none`, `low`, `medium`, and `xhigh`; Muse Glimmer
