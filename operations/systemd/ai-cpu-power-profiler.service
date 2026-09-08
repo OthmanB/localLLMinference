@@ -1,0 +1,23 @@
+[Unit]
+Description=AI server CPU power and utilization profiler
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=obenomar
+Group=obenomar
+StateDirectory=ai-metrics-exporter
+# udev cannot change sysfs attribute permissions, so fix them as root at start.
+# Enable the powercap domain first (writing it can recreate attributes at 0440),
+# then make the energy counters world-readable. The + prefix runs as root even
+# though the service itself runs unprivileged.
+ExecStartPre=+/bin/sh -c 'for f in /sys/devices/virtual/powercap/intel-rapl/intel-rapl:0*/enabled; do [ -e "$f" ] && echo 1 > "$f" || true; done'
+ExecStartPre=+/bin/sh -c 'chmod -f o+r /sys/devices/virtual/powercap/intel-rapl/intel-rapl:0*/energy_uj || true'
+ExecStart=/usr/bin/python3 /home/obenomar/localLLMinference/tools/ai_cpu_power_profiler.py --config /etc/ai-server/cpu-power-profiler.json
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

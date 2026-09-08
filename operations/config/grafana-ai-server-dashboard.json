@@ -12,15 +12,19 @@
     },
     {
       "title": "Decode tok/s",
+      "description": "Last nonzero decode throughput reported by the runtime. The exporter holds the last measured sample while the runtime reports zero, so idle periods render as a plateau until the next measurement replaces it.",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"custom": {"lineInterpolation": "stepAfter"}}, "overrides": []},
       "targets": [{"expr": "ai_model_decode_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
       "gridPos": {"h": 8, "w": 9, "x": 6, "y": 0}
     },
     {
       "title": "Prefill tok/s",
+      "description": "Last nonzero prefill throughput reported by the runtime. The exporter holds the last measured sample while the runtime reports zero, so idle periods render as a plateau until the next measurement replaces it.",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"custom": {"lineInterpolation": "stepAfter"}}, "overrides": []},
       "targets": [{"expr": "ai_model_prefill_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
       "gridPos": {"h": 8, "w": 9, "x": 15, "y": 0}
     },
@@ -99,7 +103,7 @@
     },
     {
       "title": "Whole-Host Electricity Cost",
-      "description": "Configured tariff scenario applied to estimated whole-host energy. It includes idle baseline and is not a per-model cost.",
+      "description": "Configured tariff scenario applied to estimated whole-host energy over the selected dashboard time range only; it is not a daily or billing total. The ~200 W idle whole-host draw (base + idle CPU) costs roughly 7 JPY per hour at the September TEPCO rate (33.71 JPY/kWh). For daily, weekly, and monthly totals use the Cost To Date panels below.",
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
@@ -121,7 +125,7 @@
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
-      "targets": [{"expr": "ai_host_baseline_power_watts{host_id=~\"$host_id\"}", "legendFormat": "{{baseline_mode}}"}],
+      "targets": [{"expr": "last_over_time(ai_host_baseline_power_watts{host_id=~\"$host_id\"}[15m])", "legendFormat": "{{baseline_mode}}"}],
       "gridPos": {"h": 5, "w": 6, "x": 18, "y": 40}
     },
     {
@@ -169,7 +173,7 @@
     },
     {
       "title": "Confirmed Reboot Downtime",
-      "description": "Elapsed time between the last sample before and first sample after a changed host boot ID. No 300 W baseline is charged for this interval. It proves a reboot occurred, not why it occurred.",
+      "description": "Elapsed time between the last sample before and first sample after a changed host boot ID. No host baseline is charged for this interval. It proves a reboot occurred, not why it occurred.",
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
@@ -178,18 +182,89 @@
     },
     {
       "title": "Current Host Boot",
-      "description": "Kernel boot time reported by the exporter. A changed value confirms the host rebooted since the preceding series.",
+      "description": "Kernel boot time reported by the exporter. Multiplied by 1000 because Grafana renders dateTimeAsIso in epoch milliseconds. A changed value confirms the host rebooted since the preceding series.",
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "dateTimeAsIso"}, "overrides": []},
-      "targets": [{"expr": "ai_host_boot_time_seconds{host_id=~\"$host_id\"}", "legendFormat": "Boot time", "instant": true, "range": false}],
+      "targets": [{"expr": "ai_host_boot_time_seconds{host_id=~\"$host_id\"} * 1000", "legendFormat": "Boot time", "instant": true, "range": false}],
       "gridPos": {"h": 5, "w": 8, "x": 16, "y": 61}
-    }
-  ],
+    },
+    {
+      "title": "Host Electricity Cost To Date",
+      "description": "Cumulative whole-host electricity cost since the current JST calendar-day, Monday, and month start. The whole-host series already contains the idle baseline, so the curve rises linearly while idle and steepens while GPUs are active. Each curve resets at its own JST period boundary.",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyJPY", "min": 0, "custom": {"lineInterpolation": "linear"}}, "overrides": []},
+      "targets": [
+        {"expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} day"},
+        {"expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} week"},
+        {"expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} month"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 66}
+    },
+    {
+      "title": "Host Cost Today",
+      "description": "Host electricity cost accumulated since midnight JST for each configured tariff scenario.",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
+      "targets": [{"expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 66}
+    },
+    {
+      "title": "Host Cost This Week",
+      "description": "Host electricity cost accumulated since Monday 00:00 JST for each configured tariff scenario.",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
+      "targets": [{"expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 66}
+    },
+    {
+      "title": "Host Cost This Month",
+      "description": "Host electricity cost accumulated since the first day of the month 00:00 JST for each configured tariff scenario. Excludes the fixed monthly basic charge.",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
+      "targets": [{"expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
+       "gridPos": {"h": 4, "w": 4, "x": 20, "y": 66}
+     },
+     {
+       "title": "CPU Power & Utilization",
+       "description": "CPU package power used by host accounting (source label: rapl -> interpolated bucket curve -> linear) alongside /proc/stat utilization.",
+       "type": "timeseries",
+       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+       "targets": [
+         {"expr": "ai_host_cpu_power_watts{host_id=~\"$host_id\"}", "legendFormat": "{{source}} watts"},
+         {"expr": "ai_host_cpu_utilization_percent{host_id=~\"$host_id\"}", "legendFormat": "CPU utilization %"}
+       ],
+       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 74}
+     },
+     {
+       "title": "Learned CPU Power Curve",
+       "description": "Median and stddev of RAPL-measured CPU package power per 5-point utilization bucket; each bucket keeps a moving window of the last 20 samples.",
+       "type": "timeseries",
+       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+       "targets": [
+         {"expr": "ai_cpu_power_bucket_median_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% median"},
+         {"expr": "ai_cpu_power_bucket_stddev_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% stddev"}
+       ],
+       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 74}
+     }
+   ],
   "schemaVersion": 39,
   "tags": ["ai-server", "freetoken", "llama.cpp", "muse-glimmer"],
   "templating": {
     "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "options": [],
+        "hide": 0
+      },
       {
         "name": "host_id",
         "label": "Host",
@@ -221,5 +296,5 @@
   "time": {"from": "now-6h", "to": "now"},
   "title": "AI Server - Inference Models",
   "uid": "ai-server-qwen-q4",
-  "version": 5
+  "version": 7
 }

@@ -10,3 +10,12 @@ scrape_configs:
       - targets: ["<AI_SERVER_LAN_IP>:9108"]
         labels:
           host: <AI_SERVER_HOST>
+
+  # CPU power/utilization profiler (RAPL package power + learned bucket curve).
+  - job_name: ai-server-cpu-power
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["<AI_SERVER_LAN_IP>:9109"]
+        labels:
+          host: <AI_SERVER_HOST>

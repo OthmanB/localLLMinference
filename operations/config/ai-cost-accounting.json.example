@@ -1,5 +1,6 @@
 {
   "host_id": "ai-server",
+  "timezone": "Asia/Tokyo",
   "max_sample_gap_seconds": 20,
   "baseline": {
     "mode": "wall_idle_total_w",
@@ -9,6 +10,14 @@
     "measured_at": "2026-09-07T20:05:00+09:00",
     "method": "UPS draw minus NAS power; includes three idle GPUs at 20 W each"
   },
+  "cpu_power": {
+    "profiler_url": "http://127.0.0.1:9109/metrics",
+    "linear": {
+      "max_watts": 150,
+      "saturate_utilization_percent": 25
+    }
+  },
+  "cpu_power_notes": "Preferred baseline with measured CPU power uses mode wall_idle_plus_cpu_w with base_idle_total_w instead of wall_idle_total_w; flat modes record ai_host_cpu_energy_joules_total but keep the flat host estimate. Resolution: rapl -> bucket-curve interpolation -> linear.",
   "tariffs": [
     {
       "id": "tepco-standard-gt300-2026-09-pre-subsidy",

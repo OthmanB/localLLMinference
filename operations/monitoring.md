@@ -21,6 +21,14 @@ cumulative prompt/generated tokens, GPU utilization, measured power draw and lim
 temperature, VRAM, host memory, energy, electricity cost, API-equivalent costs,
 and exporter/service health.
 
+Throughput plateau semantics: runtimes report zero decode/prefill throughput
+whenever their scheduler is idle. The exporter therefore retains the last nonzero
+decode and prefill sample per model and keeps exporting it until the next nonzero
+measurement replaces it. Panels render both series with `stepAfter` so the graph
+shows a plateau between measurements rather than a zero baseline with one-second
+spikes. After an exporter restart, the retained value starts at zero again until
+the model completes its first new batch.
+
 Host memory metrics are exposed as:
 
 - `ai_host_memory_total_bytes`
@@ -45,6 +53,64 @@ Run `sudo operations/promote-freetoken-flash-next-262k.sh` on the AI server to
 install the permanent service and local gateway/exporter configuration. Then
 import the dashboard source on the monitoring host with overwrite enabled.
 
+## CPU Power Attribution
+
+`tools/ai_cpu_power_profiler.py` runs as the always-on
+`ai-cpu-power-profiler.service` and listens on port 9109. Every
+`sampling_interval_seconds` (default 10 s) it reads the AMD/Intel RAPL
+`package-0` energy counter delta and the `/proc/stat` utilization delta. Each
+`(utilization, watts)` pair is stored in one of twenty 5-point utilization
+buckets, and each bucket keeps a moving window of the last
+`bucket_window_samples` (default 20) samples, dropping the oldest. Median,
+standard deviation, maximum, and count per bucket are exposed as
+`ai_cpu_power_bucket_*` metrics, which lets the power-versus-utilization curve
+be learned passively during normal operation.
+
+RAPL energy counters are root-only (sysfs mode `0440`) and the powercap domain
+can boot disabled. udev cannot change sysfs attribute permissions, so the
+profiler unit fixes both at start with root-privileged `ExecStartPre=+` lines:
+it writes `1` to the domain `enabled` files and then `chmod o+r` the
+`energy_uj` counters, while the service itself stays unprivileged. Run
+`sudo operations/install-cpu-power-profiler.sh` once to install the unit and
+the config from `config/cpu-power-profiler.json.example`.
+`ai_cpu_profiler_rapl_available` is 1 when the RAPL `package-0` energy counter
+is readable and exposes a nonzero `max_energy_range_uj`; it deliberately does
+not require the powercap `enabled` flag to be nonzero. Some kernels report
+`enabled=0` while the counter still accumulates (observed on this host), so
+gating counter reads on the flag would silently disable working RAPL. The flag
+is still exported for diagnostics as `ai_cpu_profiler_rapl_enabled` (1 when it
+reads nonzero). If the counter is unreadable the metric is 0 and it re-arms on
+the next sample once the counter becomes readable.
+
+The main exporter resolves CPU package power per scrape in this order
+(`ai_host_cpu_power_source_info` reports the selection):
+
+1. `rapl`: live package power from the profiler endpoint.
+2. `interpolated`: piecewise-linear interpolation across the learned bucket
+   medians at the current utilization.
+3. `linear`: `min(max_watts, max_watts x utilization / saturate_utilization_percent)`
+   from the `cpu_power.linear` block of the cost config, a rough bootstrap model.
+4. `unavailable`: nothing is integrated for that interval.
+
+With the baseline mode `wall_idle_plus_cpu_w` (`base_idle_total_w` instead of
+`wall_idle_total_w`), whole-host power becomes `base_idle_total_w +
+cpu_power_w + sum(max(gpu_draw - idle_reference, 0))`, so idle periods are no
+longer charged the old flat 300 W and GPU-resident models add no CPU term. The
+selected split is exposed as `ai_host_power_attribution_watts{source=...}` and
+CPU energy accumulates in `ai_host_cpu_energy_joules_total`. Older flat modes
+keep their original semantics and ignore CPU power for host estimates while
+still recording `ai_host_cpu_energy_joules_total`.
+
+After switching modes, re-measure the base: with the host otherwise idle
+(inference clients routed away from this machine), set `base_idle_total_w` to
+`UPS_watts - cpu_package_watts - sum(max(gpu_draw - idle_reference, 0))` and record
+`measured_at`. Because GPU power enters the estimate as *excess* above the idle
+reference, the idle GPUs stay inside the base; at rest they sit at their
+references, so the last term is ~0 and the base is just `UPS_watts -
+cpu_package_watts` (e.g. 200 - 73 = 127 W). The validation load sequence runs
+the load probes only, because the assistant's own model would otherwise pollute
+the CPU measurement.
+
 ## Energy and Cost Accounting
 
 The exporter samples actual `nvidia-smi` `power.draw` every five seconds and uses
@@ -54,11 +120,14 @@ is never treated as consumption. State is atomically retained at
 are interpreted as a new counter value rather than a negative token delta.
 
 `/etc/ai-server/ai-cost-accounting.json` is installed from
-`config/ai-cost-accounting.json.example`. Its current `wall_idle_total_w` baseline
-is 300 W, measured at `2026-09-07T20:05:00+09:00` as UPS draw minus NAS power and
-including three idle GPUs at 20 W each. Whole-host power is therefore calculated
-as `300 + sum(max(actual GPU draw - 20, 0))` W. This is a host-level allocation
-and must not be presented as a per-model inference cost.
+`config/ai-cost-accounting.json.example`. Its optional `timezone` key selects the
+calendar used by the day/week/month cost views; the current value is
+`Asia/Tokyo`. Its baseline mode is `wall_idle_plus_cpu_w` with `base_idle_total_w`
+of 127 W (measured 2026-09-08): the 200 W rest wall draw minus the ~73 W CPU
+package floor, so the base covers the platform (chassis fans, motherboard, RAM,
+disks) plus the three idle GPUs. Whole-host power is therefore `127 +
+cpu_power_w + sum(max(actual GPU draw - 20, 0))` W. This is a host-level
+allocation and must not be presented as a per-model inference cost.
 
 The electricity tariff and API prices are explicit, dated configuration inputs.
 The installed files are readable by the exporter service account but writable only
@@ -76,7 +145,8 @@ Key counters:
 - `ai_host_estimated_energy_joules_total`: full host estimate, integrated only when the entire GPU set is available.
 - `ai_energy_integration_gap_seconds_total`: elapsed time intentionally excluded from the whole-host estimate because samples were missing, late, or incomplete.
 - `ai_host_reboot_downtime_seconds_total`: elapsed time between samples across a confirmed changed Linux boot ID; it is not charged to the host-energy estimate.
-- `ai_host_boot_time_seconds`: Unix time of the current Linux host boot.
+- `ai_host_boot_time_seconds`: Unix time of the current Linux host boot. Grafana's `dateTimeAsIso` unit expects milliseconds, so the dashboard multiplies this metric by 1000.
+- `ai_host_electricity_cost_jpy_today`, `_week_to_date`, and `_month_to_date`: host electricity cost accumulated since the current calendar day, Monday, and month start in the configured timezone, each with a `period` label and a reset at the next boundary. Because the whole-host series contains the idle baseline, these curves ramp linearly while idle and steepen while GPUs are active. They exclude the fixed monthly basic charge.
 - `ai_model_energy_covered_completion_tokens_total`: completion-token denominator paired with observed active-energy intervals. This includes terminal token deltas reported when a request finishes after validated active samples.
 - `ai_host_electricity_cost_jpy_total` and `ai_model_active_gpu_electricity_cost_jpy_total`: host and direct-GPU electricity views respectively.
 - `ai_model_api_workload_cost_{usd,jpy}_total`: token-priced remote API comparison including input, cached input, and output.
@@ -109,6 +179,13 @@ The dashboard's selected-period counters use `last_over_time(...) -
 first_over_time(...)` rather than `increase(...)`. This reports the exact observed
 counter delta in the selected window and avoids Prometheus boundary extrapolation
 when a new exporter series starts partway through that window.
+
+Because that view depends on the selected dashboard time range, the
+`Whole-Host Electricity Cost` stat is not a daily or billing total. At the idle
+300 W baseline and the current TEPCO scenario (33.71 JPY/kWh), the host costs
+roughly 10 JPY per hour. For calendar totals use the `Host Cost Today`,
+`Host Cost This Week`, and `Host Cost This Month` panels and the `Host
+Electricity Cost To Date` time series, which reset at their own JST boundaries.
 
 Useful PromQL range queries:
 

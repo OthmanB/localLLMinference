@@ -1,0 +1,12 @@
+{
+  "host_id": "ai-server",
+  "sampling_interval_seconds": 10,
+  "bucket_width_percent": 5,
+  "bucket_window_samples": 20,
+  "rapl_domain": "package-0",
+  "state_path": "/var/lib/ai-metrics-exporter/cpu-power-profiler-state.json",
+  "listen": {
+    "host": "0.0.0.0",
+    "port": 9109
+  }
+}

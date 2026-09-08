@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -16,7 +17,20 @@ from ai_cost_accounting import (
     rate_from_components,
     trapezoid_energy_joules,
 )
-from ai_metrics_exporter import parse_llama_metrics
+from ai_metrics_exporter import (
+    bucket_points,
+    parse_freetoken_stats,
+    parse_llama_metrics,
+    retain_nonzero_rate,
+)
+from ai_cpu_power_profiler import (
+    CpuPowerProfiler,
+    bucket_index,
+    bucket_label,
+    cpu_utilization_percent,
+    interpolate_power,
+    rapl_power_watts,
+)
 
 
 class CostAccountingTest(unittest.TestCase):
@@ -296,6 +310,221 @@ class CostAccountingTest(unittest.TestCase):
             self.assertEqual(
                 accounting.state["energy_covered_completion_tokens"]["local\x1fgpu-a"], 10
             )
+
+
+class ThroughputRetentionTest(unittest.TestCase):
+    def labels(self) -> dict[str, str]:
+        return {"host_id": "ai-server", "model": "flash", "gpu": "0", "gpu_uuid": "gpu-a"}
+
+    def values_for(self, lines: list[str], metric: str) -> list[str]:
+        return [line for line in lines if line.startswith(metric + "{")]
+
+    def test_freetoken_zero_decode_holds_plateau(self) -> None:
+        state: dict[str, float] = {}
+        labels = self.labels()
+        first, _ = parse_freetoken_stats(
+            {"throughput": {"decode_tps": 30.5, "prefill_tps": 400.0}, "requests": {}},
+            labels,
+            set(),
+            state,
+        )
+        self.assertTrue(all(line.endswith(" 30.5") for line in self.values_for(first, "ai_model_decode_tokens_per_second")))
+        second, _ = parse_freetoken_stats(
+            {"throughput": {"decode_tps": 0.0, "prefill_tps": 0.0}, "requests": {}},
+            labels,
+            set(),
+            state,
+        )
+        self.assertTrue(all(line.endswith(" 30.5") for line in self.values_for(second, "ai_model_decode_tokens_per_second")))
+        self.assertTrue(all(line.endswith(" 400.0") for line in self.values_for(second, "ai_model_prefill_tokens_per_second")))
+        third, _ = parse_freetoken_stats(
+            {"throughput": {"decode_tps": 12.0, "prefill_tps": 0.0}, "requests": {}},
+            labels,
+            set(),
+            state,
+        )
+        self.assertTrue(all(line.endswith(" 12.0") for line in self.values_for(third, "ai_model_decode_tokens_per_second")))
+        self.assertTrue(all(line.endswith(" 400.0") for line in self.values_for(third, "ai_model_prefill_tokens_per_second")))
+
+    def test_llama_zero_decode_holds_plateau(self) -> None:
+        state: dict[str, float] = {}
+        labels = self.labels()
+        _, _ = parse_llama_metrics("llamacpp:predicted_tokens_seconds 25", labels, set(), state)
+        output, _ = parse_llama_metrics("llamacpp:predicted_tokens_seconds 0", labels, set(), state)
+        decode_lines = self.values_for(output, "ai_model_decode_tokens_per_second")
+        self.assertTrue(all(line.endswith(" 25.0") for line in decode_lines))
+        raw_lines = [line for line in output if line.startswith("llamacpp:predicted_tokens_seconds")]
+        self.assertTrue(all(line.endswith(" 0") for line in raw_lines))
+
+    def test_retention_is_scoped_per_model(self) -> None:
+        state: dict[str, float] = {}
+        retain_nonzero_rate(state, "a", "ai_model_decode_tokens_per_second", 20)
+        value = retain_nonzero_rate(state, "b", "ai_model_decode_tokens_per_second", 0)
+        self.assertEqual(value, 0)
+
+
+class HostCostPeriodTest(unittest.TestCase):
+    config = {
+        "host_id": "test-host",
+        "timezone": "Asia/Tokyo",
+        "max_sample_gap_seconds": 20_000,
+        "baseline": {"mode": "baseline_non_gpu_w", "baseline_non_gpu_w": 120},
+        "tariffs": [
+            {"id": "tariff", "effective_from": "2026-01-01", "components_jpy_per_kwh": {"rate": 36.0}}
+        ],
+    }
+
+    def samples_with_labels(self) -> list[tuple[str, dict[str, str], float]]:
+        return self.accounting.metrics()
+
+    def test_day_period_resets_at_jst_midnight(self) -> None:
+        tz = ZoneInfo("Asia/Tokyo")
+        first_jst_day = datetime(2026, 9, 7, 23, 0, tzinfo=tz)
+        second_jst_day = first_jst_day + timedelta(hours=3)
+        gpu = {"gpu-a": {"power_watts": 20, "model": None, "active": False}}
+        with tempfile.TemporaryDirectory() as temporary:
+            self.accounting = CostAccounting(self.config, {}, Path(temporary) / "state.json")
+            self.accounting.observe(first_jst_day.timestamp(), gpu, {})
+            self.accounting.observe(second_jst_day.timestamp(), gpu, {})
+            self.accounting.observe(second_jst_day.timestamp() + 3600, gpu, {})
+
+            periods = {
+                name: (labels, value)
+                for name, labels, value in self.samples_with_labels()
+                if name.startswith("ai_host_electricity_cost_jpy_") and name != "ai_host_electricity_cost_jpy_total"
+            }
+            today_labels, today_value = periods["ai_host_electricity_cost_jpy_today"]
+            # 140 W wall power for one hour: 504000 J = 0.14 kWh at 36 JPY/kWh.
+            self.assertAlmostEqual(today_value, 0.14 * 36, places=6)
+            self.assertEqual(today_labels["period"], second_jst_day.date().isoformat())
+
+            week_labels, week_value = periods["ai_host_electricity_cost_jpy_week_to_date"]
+            self.assertEqual(
+                week_labels["period"],
+                (
+                    second_jst_day.date()
+                    - timedelta(days=second_jst_day.weekday())
+                ).isoformat(),
+            )
+            self.assertGreater(week_value, today_value)
+
+            month_labels, _month_value = periods["ai_host_electricity_cost_jpy_month_to_date"]
+            self.assertEqual(month_labels["period"], first_jst_day.strftime("%Y-%m"))
+
+    def test_period_rebases_after_counter_decrease(self) -> None:
+        timestamp = datetime(2026, 9, 7, 12, 0, tzinfo=UTC).timestamp()
+        gpu = {"gpu-a": {"power_watts": 20, "model": None, "active": False}}
+        with tempfile.TemporaryDirectory() as temporary:
+            self.accounting = CostAccounting(self.config, {}, Path(temporary) / "state.json")
+            self.accounting.observe(timestamp, gpu, {})
+            self.accounting.observe(timestamp + 600, gpu, {})
+            self.accounting.state["host_cost_periods"]["tariff\x1fday"]["baseline"] = 5.0
+            self.accounting.observe(timestamp + 1200, gpu, {})
+            today = [
+                value
+                for name, _labels, value in self.samples_with_labels()
+                if name == "ai_host_electricity_cost_jpy_today"
+            ]
+            self.assertEqual(today, [0.0])
+
+
+class CpuProfilerTest(unittest.TestCase):
+    def test_rapl_power_delta_and_wrap(self) -> None:
+        watts = rapl_power_watts(1_000_000.0, 6_000_000.0, 10_000_000.0, 5.0)
+        self.assertIsNotNone(watts)
+        self.assertAlmostEqual(watts if watts is not None else -1.0, 1.0, places=9)
+        wrapped = rapl_power_watts(9_000_000.0, 2_000_000.0, 10_000_000.0, 2.0)
+        self.assertIsNotNone(wrapped)
+        self.assertAlmostEqual(wrapped if wrapped is not None else -1.0, 1.5, places=9)
+        self.assertIsNone(rapl_power_watts(None, 2_000_000.0, 10_000_000.0, 2.0))
+
+    def test_bucket_index_and_label(self) -> None:
+        self.assertEqual(bucket_index(24.99, 5.0), 4)
+        self.assertEqual(bucket_label(4, 5.0), "20-25")
+        self.assertEqual(bucket_label(bucket_index(100.0, 5.0), 5.0), "95-100")
+        self.assertEqual(bucket_index(-1.0, 5.0), 0)
+
+    def test_bucket_window_drops_oldest(self) -> None:
+        profiler = CpuPowerProfiler(
+            {"host_id": "test", "bucket_width_percent": 5.0, "bucket_window_samples": 3},
+            None,
+        )
+        for watts in (10.0, 20.0, 30.0, 40.0, 50.0):
+            profiler.update_bucket(2.5, watts)
+        self.assertEqual(profiler.state["buckets"]["00-05"], [30.0, 40.0, 50.0])
+
+    def test_cpu_utilization_percent(self) -> None:
+        util = cpu_utilization_percent((100.0, 10.0), (200.0, 60.0))
+        self.assertAlmostEqual(util if util is not None else -1.0, 50.0)
+        self.assertIsNone(cpu_utilization_percent(None, (200.0, 60.0)))
+
+    def test_interpolate_power(self) -> None:
+        points = [(2.5, 10.0), (7.5, 50.0), (12.5, 90.0)]
+        at_mid = interpolate_power(points, 5.0)
+        self.assertAlmostEqual(at_mid if at_mid is not None else -1.0, 30.0)
+        self.assertEqual(interpolate_power(points, 0.0), 10.0)
+        self.assertEqual(interpolate_power(points, 20.0), 90.0)
+        self.assertEqual(interpolate_power([(7.5, 50.0)], 1.0), 50.0)
+        self.assertIsNone(interpolate_power([], 1.0))
+
+    def test_bucket_points_from_labels(self) -> None:
+        self.assertEqual(bucket_points({'bucket="20-25"': 40.0}), [(22.5, 40.0)])
+
+
+class WallIdlePlusCpuTest(unittest.TestCase):
+    baseline = {
+        "mode": "wall_idle_plus_cpu_w",
+        "base_idle_total_w": 120.0,
+        "default_gpu_idle_reference_w": 20.0,
+    }
+    pricing = {"prices": [], "comparisons": [], "fx_rates": []}
+    tariff = [
+        {"id": "t", "effective_from": "2026-01-01", "components_jpy_per_kwh": {"rate": 36.0}}
+    ]
+
+    def make(self, baseline: dict) -> CostAccounting:
+        return CostAccounting(
+            {"host_id": "test", "tariffs": self.tariff, "baseline": baseline},
+            self.pricing,
+            None,
+        )
+
+    def values(self, accounting: CostAccounting) -> dict[str, float]:
+        output: dict[str, float] = {}
+        for name, _labels, value in accounting.metrics():
+            output.setdefault(name, value)
+        return output
+
+    def test_host_power_includes_cpu_only_when_measured(self) -> None:
+        gpus = {"gpu-a": 40.0, "gpu-b": 20.0}
+        self.assertAlmostEqual(host_power_watts(self.baseline, gpus), 140.0)
+        self.assertAlmostEqual(host_power_watts(self.baseline, gpus, 80.0), 220.0)
+
+    def test_observe_integrates_cpu_and_host_energy(self) -> None:
+        accounting = self.make(self.baseline)
+        gpus = {"gpu-a": {"power_watts": 20.0, "model": None, "active": False}}
+        accounting.observe(100.0, gpus, {}, cpu_power_watts=100.0)
+        accounting.observe(110.0, gpus, {}, cpu_power_watts=200.0)
+        values = self.values(accounting)
+        self.assertAlmostEqual(values["ai_host_cpu_energy_joules_total"], 1500.0, places=6)
+        # Host: trapezoid of (120+100) and (120+200) over 10 s = 2700 J.
+        self.assertAlmostEqual(values["ai_host_estimated_energy_joules_total"], 2700.0, places=6)
+
+    def test_flat_baseline_mode_still_records_cpu_energy(self) -> None:
+        accounting = self.make(
+            {
+                "mode": "wall_idle_total_w",
+                "wall_idle_total_w": 300.0,
+                "default_gpu_idle_reference_w": 20.0,
+            }
+        )
+        gpus = {"gpu-a": {"power_watts": 20.0, "model": None, "active": False}}
+        accounting.observe(100.0, gpus, {}, cpu_power_watts=100.0)
+        accounting.observe(110.0, gpus, {}, cpu_power_watts=200.0)
+        values = self.values(accounting)
+        self.assertAlmostEqual(values["ai_host_cpu_energy_joules_total"], 1500.0, places=6)
+        # Flat 300 W baseline must ignore CPU power.
+        self.assertAlmostEqual(values["ai_host_estimated_energy_joules_total"], 3000.0, places=6)
 
 
 if __name__ == "__main__":

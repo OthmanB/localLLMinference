@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, date
+from datetime import UTC, datetime, date, timedelta
 import json
 import os
 from pathlib import Path
 import tempfile
 from typing import Any, Mapping
+from zoneinfo import ZoneInfo
 
 
 JOULES_PER_KWH = 3_600_000.0
@@ -52,19 +53,34 @@ def rate_from_components(components: Mapping[str, Any]) -> float:
     return sum(float(value) for value in components.values() if value is not None)
 
 
-def host_power_watts(baseline: Mapping[str, Any], gpu_powers: Mapping[str, float]) -> float:
+def gpu_excess_power_watts(baseline: Mapping[str, Any], gpu_powers: Mapping[str, float]) -> float:
+    """Sum GPU draw above the configured per-GPU idle references."""
+    references = baseline.get("gpu_idle_reference_w_by_uuid", {})
+    default_reference = float(baseline.get("default_gpu_idle_reference_w", 0.0))
+    return sum(
+        max(power - float(references.get(uuid, default_reference)), 0.0)
+        for uuid, power in gpu_powers.items()
+    )
+
+
+def host_power_watts(
+    baseline: Mapping[str, Any],
+    gpu_powers: Mapping[str, float],
+    cpu_power_w: float | None = None,
+) -> float:
     """Calculate wall power with exactly one GPU-idle accounting convention."""
     mode = baseline.get("mode")
     if mode == "baseline_non_gpu_w":
         return float(baseline["baseline_non_gpu_w"]) + sum(gpu_powers.values())
     if mode == "wall_idle_total_w":
-        references = baseline.get("gpu_idle_reference_w_by_uuid", {})
-        default_reference = float(baseline.get("default_gpu_idle_reference_w", 0.0))
-        additional_gpu_power = sum(
-            max(power - float(references.get(uuid, default_reference)), 0.0)
-            for uuid, power in gpu_powers.items()
+        return float(baseline["wall_idle_total_w"]) + gpu_excess_power_watts(baseline, gpu_powers)
+    if mode == "wall_idle_plus_cpu_w":
+        cpu_power = float(cpu_power_w) if cpu_power_w is not None else 0.0
+        return (
+            float(baseline["base_idle_total_w"])
+            + cpu_power
+            + gpu_excess_power_watts(baseline, gpu_powers)
         )
-        return float(baseline["wall_idle_total_w"]) + additional_gpu_power
     raise ValueError(f"unsupported baseline mode: {mode!r}")
 
 
@@ -124,6 +140,7 @@ class CostAccounting:
         self.host_id = str(self.config["host_id"])
         self.max_gap_seconds = float(self.config.get("max_sample_gap_seconds", 20.0))
         self.baseline = self.config["baseline"]
+        self.timezone = ZoneInfo(str(self.config.get("timezone", "Asia/Tokyo")))
         self.boot_id = read_host_boot_id() if boot_id is None else boot_id
         self.boot_time_seconds = (
             read_host_boot_time_seconds() if boot_time_seconds is None else boot_time_seconds
@@ -152,7 +169,9 @@ class CostAccounting:
             "energy_covered_completion_tokens": {},
             "models_with_unmatched_active_energy": {},
             "host_energy_joules": 0.0,
+            "cpu_energy_joules": 0.0,
             "host_energy_cost_jpy": {},
+            "host_cost_periods": {},
             "active_model_energy_cost_jpy": {},
             "api_workload_cost_usd": {},
             "api_output_cost_usd": {},
@@ -247,6 +266,7 @@ class CostAccounting:
         timestamp_seconds: float,
         gpus: Mapping[str, Mapping[str, Any]],
         models: Mapping[str, Mapping[str, Any]],
+        cpu_power_watts: float | None = None,
     ) -> None:
         """Observe one exporter sample keyed by GPU UUID."""
         today = datetime.fromtimestamp(timestamp_seconds, UTC).date()
@@ -261,7 +281,14 @@ class CostAccounting:
                 ) + max(elapsed, 0.0)
                 covered_models = set()
             elif 0 < elapsed <= self.max_gap_seconds and isinstance(previous_gpus, Mapping):
-                covered_models = self._integrate_energy(elapsed, previous_gpus, gpus, today)
+                covered_models = self._integrate_energy(
+                    elapsed,
+                    previous_gpus,
+                    gpus,
+                    today,
+                    previous.get("cpu_power_watts"),
+                    cpu_power_watts,
+                )
             elif elapsed > self.max_gap_seconds:
                 self.state["integration_gap_seconds_total"] = float(
                     self.state.get("integration_gap_seconds_total", 0.0)
@@ -274,9 +301,11 @@ class CostAccounting:
 
         self._initialize_model_counters(models, today)
         self._account_tokens(models, today, covered_models)
+        self._update_cost_periods(datetime.fromtimestamp(timestamp_seconds, self.timezone).date())
         self.state["boot_id"] = self.boot_id
         self.state["last_sample"] = {
             "timestamp_seconds": timestamp_seconds,
+            "cpu_power_watts": cpu_power_watts,
             "gpus": {
                 uuid: {
                     "power_watts": float(sample["power_watts"]),
@@ -325,6 +354,8 @@ class CostAccounting:
         previous_gpus: Mapping[str, Any],
         current_gpus: Mapping[str, Mapping[str, Any]],
         today: date,
+        previous_cpu_watts: float | None = None,
+        current_cpu_watts: float | None = None,
     ) -> set[str]:
         previous_power: dict[str, float] = {}
         current_power: dict[str, float] = {}
@@ -355,13 +386,20 @@ class CostAccounting:
                         energy / JOULES_PER_KWH * rate_from_components(tariff["components_jpy_per_kwh"]),
                     )
 
+        cpu_energy = 0.0
+        if previous_cpu_watts is not None and current_cpu_watts is not None:
+            cpu_energy = trapezoid_energy_joules(
+                float(previous_cpu_watts), float(current_cpu_watts), elapsed
+            )
+        self._increment(self.state, "cpu_energy_joules", cpu_energy)
+
         # A wall-power estimate needs a complete, stable GPU set. Individual GPU
         # energy can still be integrated when one device's samples are available.
         complete_gpu_set = bool(previous_gpus) and set(previous_gpus) == set(current_gpus)
         if complete_gpu_set:
             host_energy = trapezoid_energy_joules(
-                host_power_watts(self.baseline, previous_power),
-                host_power_watts(self.baseline, current_power),
+                host_power_watts(self.baseline, previous_power, previous_cpu_watts),
+                host_power_watts(self.baseline, current_power, current_cpu_watts),
                 elapsed,
             )
             self.state["host_energy_joules"] = float(self.state["host_energy_joules"]) + host_energy
@@ -430,6 +468,28 @@ class CostAccounting:
                     self._increment(self.state["api_workload_cost_jpy"], fx_key, workload_usd * jpy_per_usd)
                     self._increment(self.state["api_output_cost_jpy"], fx_key, output_usd * jpy_per_usd)
 
+    def _update_cost_periods(self, local_day: date) -> None:
+        """Reset host cost period baselines at calendar day/week/month boundaries."""
+        monday = local_day - timedelta(days=local_day.weekday())
+        period_keys = {
+            "day": local_day.isoformat(),
+            "week": monday.isoformat(),
+            "month": local_day.strftime("%Y-%m"),
+        }
+        for tariff in self._tariffs(local_day):
+            self.state["host_energy_cost_jpy"].setdefault(str(tariff["id"]), 0.0)
+        periods = self.state["host_cost_periods"]
+        for tariff_id, cumulative in self.state["host_energy_cost_jpy"].items():
+            for kind, period_key in period_keys.items():
+                key = metric_key(tariff_id, kind)
+                entry = periods.get(key)
+                if (
+                    not isinstance(entry, Mapping)
+                    or entry.get("period") != period_key
+                    or float(entry.get("baseline", 0.0)) > cumulative
+                ):
+                    periods[key] = {"period": period_key, "baseline": float(cumulative)}
+
     def metrics(self) -> list[tuple[str, dict[str, str], float]]:
         """Return accounting counter samples for Prometheus exposition."""
         output: list[tuple[str, dict[str, str], float]] = []
@@ -442,11 +502,28 @@ class CostAccounting:
             model, uuid = split_metric_key(key)
             output.append(("ai_model_energy_covered_completion_tokens_total", {"host_id": self.host_id, "model": model, "gpu_uuid": uuid}, float(tokens)))
         output.append(("ai_host_estimated_energy_joules_total", {"host_id": self.host_id}, float(self.state["host_energy_joules"])))
+        output.append(("ai_host_cpu_energy_joules_total", {"host_id": self.host_id}, float(self.state.get("cpu_energy_joules", 0.0))))
         output.append(("ai_energy_integration_gap_seconds_total", {"host_id": self.host_id}, float(self.state["integration_gap_seconds_total"])))
         output.append(("ai_host_reboot_downtime_seconds_total", {"host_id": self.host_id}, float(self.state["reboot_downtime_seconds_total"])))
         output.append(("ai_host_boot_time_seconds", {"host_id": self.host_id}, self.boot_time_seconds))
         for tariff_id, value in self.state["host_energy_cost_jpy"].items():
             output.append(("ai_host_electricity_cost_jpy_total", {"host_id": self.host_id, "tariff_id": tariff_id}, float(value)))
+        period_metrics = {
+            "day": "ai_host_electricity_cost_jpy_today",
+            "week": "ai_host_electricity_cost_jpy_week_to_date",
+            "month": "ai_host_electricity_cost_jpy_month_to_date",
+        }
+        for key, entry in self.state["host_cost_periods"].items():
+            tariff_id, kind = split_metric_key(key)
+            cumulative = float(self.state["host_energy_cost_jpy"].get(tariff_id, 0.0))
+            to_date = max(cumulative - float(entry.get("baseline", 0.0)), 0.0)
+            output.append(
+                (
+                    period_metrics[kind],
+                    {"host_id": self.host_id, "tariff_id": tariff_id, "period": str(entry["period"])},
+                    to_date,
+                )
+            )
         for key, value in self.state["active_model_energy_cost_jpy"].items():
             model, uuid, tariff_id = split_metric_key(key)
             output.append(("ai_model_active_gpu_electricity_cost_jpy_total", {"host_id": self.host_id, "model": model, "gpu_uuid": uuid, "tariff_id": tariff_id}, float(value)))
@@ -485,7 +562,10 @@ class CostAccounting:
         today = datetime.fromtimestamp(timestamp_seconds, UTC).date()
         baseline_mode = str(self.baseline["mode"])
         baseline_value = float(
-            self.baseline.get("baseline_non_gpu_w", self.baseline.get("wall_idle_total_w", 0.0))
+            self.baseline.get(
+                "baseline_non_gpu_w",
+                self.baseline.get("wall_idle_total_w", self.baseline.get("base_idle_total_w", 0.0)),
+            )
         )
         output = [
             ("ai_host_power_accounting_configured", {"host_id": self.host_id, "baseline_mode": baseline_mode}, 1.0),
