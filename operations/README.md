@@ -7,6 +7,7 @@ Operational reference for a self-hosted AI server. Research results stay under
 
 - Qwen3.8-27B Q4_K_M on GPU 1.
 - Qwen3.8 Flash Next NVFP4 on GPU 0 with a 262144-token context.
+- Flash Next uses 2,048-token prefill chunks and a 2,048-slot GPU MoE cache.
 - Muse Glimmer 30B K-Quant on GPU 2 with a 131072-token context.
 - 196608-token context with Q8 GPU KV and Flash Attention.
 - Internal llama.cpp endpoint: `http://127.0.0.1:8080`.

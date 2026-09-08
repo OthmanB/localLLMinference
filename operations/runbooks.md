@@ -80,11 +80,15 @@ change the general-purpose service for that test.
 Sampling parameters are caller-controlled. Use the Qwen-recommended values for
 the selected thinking or non-thinking mode when reproducibility is required.
 
-Flash Next is single-request and uses 512-token prefill chunks to preserve GPU
-headroom. An OpenCode request also contains its system and tool context, so a
-short user message can still take minutes before the first output token. GPU
-activity during this interval is prefill, not decode; use a fresh session and
-the `none` or `low` variant for a quick responsiveness check.
+Flash Next is single-request and the validated profile uses a 2,048-slot GPU
+MoE cache with 2,048-token prefill chunks. The native-context validation measured
+approximately 401 tok/s prefill and 36.7 tok/s settled scheduler decode. The
+preceding 2,344-slot/512-token profile measured 39.61 tok/s settled decode, so
+the current profile trades approximately 7.4% decode throughput for much faster
+prefill. An OpenCode request also contains its system and tool context, so a
+fresh session can still be slow before the first output token. GPU activity
+during this interval is prefill, not decode; subsequent calls benefit from the
+runtime's populated context and expert state.
 
 Thinking example:
 

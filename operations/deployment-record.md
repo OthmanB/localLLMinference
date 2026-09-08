@@ -21,14 +21,31 @@ Record these values only in the local deployment record:
 - Qwen3.8 Flash Next NVFP4 on GPU 0
 - 262,144-token context
 - QSA sparse attention with a 262,144-token GPU KV pool
-- 1,664-slot GPU MoE cache with hybrid CPU/GPU expert decode
-- Disk-backed PLE and 512-token prefill chunks
+- 2,048-slot GPU MoE cache with hybrid CPU/GPU expert decode
+- Disk-backed PLE and 2,048-token prefill chunks
 - FreeToken bound to loopback on port 1901
 - Authenticated OpenAI-compatible gateway on port 8088
 - Prometheus exporter on port 9108
 - Fixed fan speeds at boot when supported by NVML: GPU 0 and GPU 2 at 70%, GPU 1 at 80%
 - Reasoning default: `auto` with medium effort
 - Sampling parameters supplied by clients
+
+## Current Flash Validation
+
+The validated 2026-09-08 Flash profile uses the existing PCIe Gen3 x16 link and
+DDR4-3066 memory configuration, with 2,048 MoE cache slots and 2,048-token
+prefill chunks. A fresh OpenCode window completed successfully; its first call
+was slow before the first response because it paid the cold prompt prefill cost.
+
+The native-context probe accepted 261,949 prompt tokens and 127 output tokens
+in 656.85 seconds. It measured approximately 401 tok/s prefill and 36.7 tok/s
+settled scheduler decode, with the marker returned exactly first. GPU0 peaked at
+23,450 MiB allocated, with approximately 677 MiB free; no OOM or swap occurred.
+Host-level monitoring showed approximately 85 GB RAM used in `htop`.
+
+For comparison, the preceding 2,344-slot/512-token profile measured 39.61 tok/s
+settled decode at native context. The current 2,048/2,048 profile is therefore
+approximately 7.4% slower on decode while providing much faster prefill.
 
 ## Required Secrets
 
