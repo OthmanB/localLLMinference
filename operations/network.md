@@ -14,11 +14,12 @@ The gateway requires `Authorization: Bearer <token>` on every `/v1/*` route.
 Health checks remain unauthenticated. The token lives in
 `/etc/ai-server/lan-inference-gateway.env`, owned by root and mode 0600.
 
-The model service uses `--reasoning auto --reasoning-effort medium` as its
-general-purpose default. Clients may set `reasoning_effort` to `none`, `low`,
-`medium`, `high`, or `xhigh` in the OpenAI chat-completions request. The gateway
-forwards this field to llama.cpp. Sampling parameters remain request-specific
-and are not fixed by the service.
+Q4 uses `--reasoning auto --reasoning-effort medium` as its general-purpose
+default. Flash Next advertises `xhigh` as its default and supports `none`,
+`low`, `medium`, and `xhigh`; Muse Glimmer is configured with `high` as the
+OpenCode default and supports `low`, `medium`, `high`, and `xhigh`. The gateway
+forwards `reasoning_effort` to the appropriate backend. Sampling parameters
+remain request-specific and are not fixed by the service.
 
 Authenticate the Tailscale device interactively through the browser. Do not
 reuse a GitHub CLI token as an application credential. Use `tailscale ip -4` and

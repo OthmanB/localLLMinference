@@ -68,14 +68,22 @@ The full deployment history and NAS configuration are in
 
 ## Reasoning Effort
 
-Send one of `none`, `low`, `medium`, `high`, or `xhigh` as the OpenAI
-`reasoning_effort` request field. The production default is medium via
-`--reasoning auto --reasoning-effort medium`. For an exact non-thinking
-benchmark profile, use a separate one-off server invocation with
-`--reasoning off`; do not change the general-purpose service for that test.
+Use the model-specific OpenCode variants: Q4 defaults to `medium` and supports
+`none`, `low`, `medium`, `high`, and `xhigh`; Flash Next defaults to `xhigh` and
+supports `none`, `low`, `medium`, and `xhigh`; Muse Glimmer defaults to `high`
+and supports `low`, `medium`, `high`, and `xhigh`. Muse does not expose a
+reliable non-thinking mode. For an exact Q4 non-thinking benchmark profile,
+use a separate one-off llama.cpp invocation with `--reasoning off`; do not
+change the general-purpose service for that test.
 
 Sampling parameters are caller-controlled. Use the Qwen-recommended values for
 the selected thinking or non-thinking mode when reproducibility is required.
+
+Flash Next is single-request and uses 512-token prefill chunks to preserve GPU
+headroom. An OpenCode request also contains its system and tool context, so a
+short user message can still take minutes before the first output token. GPU
+activity during this interval is prefill, not decode; use a fresh session and
+the `none` or `low` variant for a quick responsiveness check.
 
 Thinking example:
 

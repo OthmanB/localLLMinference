@@ -46,9 +46,10 @@ muse-glimmer-30b-kquant17
 
 Q4 runs on GPU 1 with a 196608-token limit and defaults to medium reasoning.
 Flash Next runs on GPU 0 with a 262144-token limit and defaults to xhigh
-reasoning; clients can set `reasoning_effort` per request. Muse Glimmer runs on
-GPU 2 with a 131072-token limit, accepts text and inline-image input, and uses
-its own template and tool-call format rather than a `reasoning_effort` toggle.
+reasoning; clients can select `none`, `low`, `medium`, or `xhigh` per request.
+Muse Glimmer runs on GPU 2 with a 131072-token limit, accepts text and
+inline-image input, and supports `low`, `medium`, `high`, or `xhigh` reasoning;
+`high` is the recommended local agent default.
 
 ## OpenCode
 
@@ -80,16 +81,29 @@ environment reference:
           },
           "options": {
             "reasoningEffort": "medium"
+          },
+          "variants": {
+            "none": {"reasoningEffort": "none"},
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"},
+            "xhigh": {"reasoningEffort": "xhigh"}
           }
         },
         "qwen3.8-flash-next-nvfp4-262k": {
           "name": "Qwen3.8 Flash Next NVFP4, 262k",
           "limit": {
             "context": 262144,
-            "output": 128
+            "output": 8192
           },
           "options": {
             "reasoningEffort": "xhigh"
+          },
+          "variants": {
+            "none": {"reasoningEffort": "none"},
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "xhigh": {"reasoningEffort": "xhigh"}
           }
         },
         "muse-glimmer-30b-kquant17": {
@@ -97,6 +111,15 @@ environment reference:
           "limit": {
             "context": 131072,
             "output": 8192
+          },
+          "options": {
+            "reasoningEffort": "high"
+          },
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"},
+            "xhigh": {"reasoningEffort": "xhigh"}
           }
         }
       }
@@ -139,7 +162,7 @@ providers:
         reasoning: true
         input: [text]
         contextWindow: 262144
-        maxTokens: 128
+        maxTokens: 8192
         compat:
           supportsReasoningEffort: true
       - id: muse-glimmer-30b-kquant17
@@ -148,6 +171,8 @@ providers:
         input: [text, image]
         contextWindow: 131072
         maxTokens: 8192
+        compat:
+          supportsReasoningEffort: true
 ```
 
 Use the Tailscale URL in `baseUrl` when appropriate:

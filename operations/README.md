@@ -5,15 +5,18 @@ Operational reference for a self-hosted AI server. Research results stay under
 
 ## Supported Profile
 
-- Qwen3.8-27B Q4_K_M on GPU 0.
+- Qwen3.8-27B Q4_K_M on GPU 1.
+- Qwen3.8 Flash Next NVFP4 on GPU 0 with a 262144-token context.
+- Muse Glimmer 30B K-Quant on GPU 2 with a 131072-token context.
 - 196608-token context with Q8 GPU KV and Flash Attention.
 - Internal llama.cpp endpoint: `http://127.0.0.1:8080`.
 - Authenticated OpenAI gateway on port `8088` on the LAN and tailnet.
 - GPU power limit: 300 W on all three RTX 3090 GPUs, applied at system boot.
 - GPU 0 fan speed: fixed at 70% at system boot while the model service runs.
-- Reasoning uses `--reasoning auto --reasoning-effort medium` by default.
-  Clients may override it per request with `none`, `low`, `medium`, `high`, or
-  `xhigh`; the service does not force reasoning off.
+- OpenCode reasoning defaults are Q4 `medium`, Flash Next `xhigh`, and Muse
+  Glimmer `high`. Q4 supports `none`, `low`, `medium`, `high`, and `xhigh`;
+  Flash Next supports `none`, `low`, `medium`, and `xhigh`; Muse Glimmer
+  supports `low`, `medium`, `high`, and `xhigh`.
 - Sampling parameters are not baked into the service. Clients should provide
   mode-specific sampling parameters when reproducibility matters.
 
