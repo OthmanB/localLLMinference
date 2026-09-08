@@ -41,11 +41,14 @@ The available model identifiers are:
 ```text
 qwen3.8-27b-q4-gpukv192
 qwen3.8-flash-next-nvfp4-262k
+muse-glimmer-30b-kquant17
 ```
 
 Q4 runs on GPU 1 with a 196608-token limit and defaults to medium reasoning.
 Flash Next runs on GPU 0 with a 262144-token limit and defaults to xhigh
-reasoning; clients can set `reasoning_effort` per request.
+reasoning; clients can set `reasoning_effort` per request. Muse Glimmer runs on
+GPU 2 with a 131072-token limit, accepts text and inline-image input, and uses
+its own template and tool-call format rather than a `reasoning_effort` toggle.
 
 ## OpenCode
 
@@ -88,6 +91,13 @@ environment reference:
           "options": {
             "reasoningEffort": "xhigh"
           }
+        },
+        "muse-glimmer-30b-kquant17": {
+          "name": "Muse Glimmer 30B K-Quant, 131k",
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
         }
       }
     }
@@ -98,7 +108,7 @@ environment reference:
 Use `http://<AI_SERVER_TAILSCALE_IP>:8088/v1` instead of the LAN URL for a client that
 reaches the server through Tailscale. Start OpenCode from a shell where
 `AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select
-either model.
+any of the three models.
 
 The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
@@ -132,6 +142,12 @@ providers:
         maxTokens: 128
         compat:
           supportsReasoningEffort: true
+      - id: muse-glimmer-30b-kquant17
+        name: Muse Glimmer 30B K-Quant, 131k
+        reasoning: true
+        input: [text, image]
+        contextWindow: 131072
+        maxTokens: 8192
 ```
 
 Use the Tailscale URL in `baseUrl` when appropriate:
@@ -201,5 +217,5 @@ curl -sS -H "Authorization: Bearer $AI_SERVER_API_KEY" \
   "$AI_SERVER_BASE_URL/models"
 ```
 
-The response should list both model identifiers. A missing or incorrect token
+The response should list all three model identifiers. A missing or incorrect token
 should return HTTP 401.
