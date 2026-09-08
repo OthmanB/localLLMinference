@@ -90,7 +90,9 @@ The main exporter resolves CPU package power per scrape in this order
    medians at the current utilization.
 3. `linear`: `min(max_watts, max_watts x utilization / saturate_utilization_percent)`
    from the `cpu_power.linear` block of the cost config, a rough bootstrap model.
-4. `unavailable`: nothing is integrated for that interval.
+4. `unavailable`: the CPU term is treated as 0 W for that interval, so the
+   whole-host estimate is a lower bound (only when RAPL is down, no learned
+   bucket data exists, and no `cpu_power.linear` fallback is configured).
 
 With the baseline mode `wall_idle_plus_cpu_w` (`base_idle_total_w` instead of
 `wall_idle_total_w`), whole-host power becomes `base_idle_total_w +

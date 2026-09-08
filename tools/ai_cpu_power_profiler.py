@@ -279,8 +279,10 @@ class CpuPowerProfiler:
         labels = f'{{host_id="{self.host_id}"}}'
         last_power = self.state["last_power_watts"]
         last_util = self.state["last_utilization_percent"]
-        lines.append(f"ai_cpu_power_watts{labels} {last_power if last_power is not None else 0.0}")
-        lines.append(f"ai_cpu_utilization_percent{labels} {last_util if last_util is not None else 0.0}")
+        if last_power is not None:
+            lines.append(f"ai_cpu_power_watts{labels} {last_power}")
+        if last_util is not None:
+            lines.append(f"ai_cpu_utilization_percent{labels} {last_util}")
         lines.append(f"ai_cpu_profiler_rapl_available{labels} {1.0 if self.rapl_ready else 0.0}")
         lines.append(f"ai_cpu_profiler_rapl_enabled{labels} {1.0 if self._domain_enabled() else 0.0}")
         config_labels = f'{{host_id="{self.host_id}",interval_seconds="{self.sampling_interval_seconds:g}",bucket_width_percent="{self.bucket_width_percent:g}",bucket_window_samples="{self.bucket_window_samples}"}}'

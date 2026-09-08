@@ -94,7 +94,7 @@
     },
     {
       "title": "Estimated Whole-Host Energy",
-      "description": "Wall-idle baseline plus measured GPU power above the configured idle reference. This cannot be attributed to an individual model.",
+      "description": "Base idle draw, plus live CPU package power in wall_idle_plus_cpu_w mode, plus measured GPU power above the configured idle reference. This is a host-level estimate and cannot be attributed to an individual model.",
       "type": "stat",
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "kwatth"}, "overrides": []},
@@ -249,9 +249,20 @@
          {"expr": "ai_cpu_power_bucket_median_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% median"},
          {"expr": "ai_cpu_power_bucket_stddev_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% stddev"}
        ],
-       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 74}
-     }
-   ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 74}
+      },
+      {
+        "title": "Host Power Attribution (base / cpu / gpu)",
+        "description": "Whole-host power split in wall_idle_plus_cpu_w mode: base (platform + idle GPUs) + live CPU package power + GPU draw above the idle reference, stacked to the estimated whole-host draw. Present only while the baseline mode is wall_idle_plus_cpu_w.",
+        "type": "timeseries",
+        "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+        "fieldConfig": {"defaults": {"unit": "watt", "custom": {"fillOpacity": 12, "stacking": {"mode": "normal", "group": "a"}}}, "overrides": []},
+        "targets": [
+          {"expr": "sum by (source) (ai_host_power_attribution_watts{host_id=~\"$host_id\"})", "legendFormat": "{{source}}"}
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 82}
+      }
+    ],
   "schemaVersion": 39,
   "tags": ["ai-server", "freetoken", "llama.cpp", "muse-glimmer"],
   "templating": {
