@@ -264,7 +264,7 @@
       }
     ],
   "schemaVersion": 39,
-  "tags": ["ai-server", "freetoken", "llama.cpp", "muse-glimmer"],
+  "tags": ["ai-server", "llama.cpp", "muse-glimmer"],
   "templating": {
     "list": [
       {
@@ -294,8 +294,9 @@
         "label": "Model",
         "type": "query",
         "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-        "definition": "label_values(ai_model_up{host_id=~\"$host_id\"}, model)",
-        "query": "label_values(ai_model_up{host_id=~\"$host_id\"}, model)",
+        "definition": "query_result(max by (model) (ai_model_up{host_id=~\"$host_id\"} == 1))",
+        "query": "query_result(max by (model) (ai_model_up{host_id=~\"$host_id\"} == 1))",
+        "regex": "/model=\"([^\"]+)\"/",
         "includeAll": true,
         "allValue": ".*",
         "multi": true,

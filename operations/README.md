@@ -5,19 +5,16 @@ Operational reference for a self-hosted AI server. Research results stay under
 
 ## Supported Profile
 
-- Qwen3.8-27B Q4_K_M on GPU 1.
-- Qwen3.8 Flash Next NVFP4 on GPU 0 with a 262144-token context.
-- Flash Next uses 2,048-token prefill chunks and a 2,048-slot GPU MoE cache.
-- Muse Glimmer 30B K-Quant on GPU 2 with a 131072-token context.
-- 196608-token context with Q8 GPU KV and Flash Attention.
+- Qwen3.8-27B Q4_K_M tensor-split across GPUs 1 and 2 with a 262144-token context.
+- Qwen uses F16 GPU KV, Flash Attention, and 2048/1024 batch/ubatch sizes.
+- Muse Glimmer 30B K-Quant on GPU 0 with a 131072-token context.
 - Internal llama.cpp endpoint: `http://127.0.0.1:8080`.
 - Authenticated OpenAI gateway on port `8088` on the LAN and tailnet.
 - GPU power limit: 300 W on all three RTX 3090 GPUs, applied at system boot.
-- Fixed fan speeds at system boot: GPU 0 and GPU 2 at 70%, GPU 1 at 80%.
-- OpenCode reasoning defaults are Q4 `medium`, Flash Next `xhigh`, and Muse
-  Glimmer `high`. Q4 supports `none`, `low`, `medium`, `high`, and `xhigh`;
-  Flash Next supports `none`, `low`, `medium`, and `xhigh`; Muse Glimmer
-  supports `low`, `medium`, `high`, and `xhigh`.
+- Fixed fan speeds at system boot: GPU 0 at 70%, GPU 1 at 80%, and GPU 2 at
+  85% for sustained dense-model thermal headroom.
+- OpenCode reasoning defaults are Qwen `medium` and Muse Glimmer `high`.
+  Clients can select the supported reasoning effort per request.
 - Sampling parameters are not baked into the service. Clients should provide
   mode-specific sampling parameters when reproducibility matters.
 

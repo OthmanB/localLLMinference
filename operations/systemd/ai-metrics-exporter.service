@@ -1,7 +1,7 @@
 [Unit]
 Description=AI server Prometheus metrics exporter
 Wants=network-online.target
-After=network-online.target freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service llama-muse-glimmer-30b-131k.service
+After=network-online.target llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service
 
 [Service]
 Type=simple

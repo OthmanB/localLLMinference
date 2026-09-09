@@ -1,0 +1,22 @@
+[Unit]
+Description=Qwen3.8-27B Q4 tensor split 262k llama.cpp server
+Wants=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+After=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+Requires=nvidia-power-limit.service
+
+[Service]
+Type=simple
+User=obenomar
+Group=obenomar
+Environment=CUDA_VISIBLE_DEVICES=1,2
+Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
+WorkingDirectory=/home/obenomar/.local/share/llama.cpp-recent-20260905
+ExecStart=/home/obenomar/.local/share/llama.cpp-recent-20260905/build/bin/llama-server --model /home/obenomar/localLLMinference/models/qwen3.8-27b-q4-k-m-gguf/Qwen3.8-27B-UD-Q4_K_M.gguf --alias qwen3.8-27b-q4-tensor262k --host 127.0.0.1 --port 8080 --device CUDA0,CUDA1 --split-mode tensor --tensor-split 1,1 --n-gpu-layers all --ctx-size 262144 --parallel 1 --kv-offload --cache-type-k f16 --cache-type-v f16 --flash-attn on --threads 32 --threads-batch 32 --batch-size 2048 --ubatch-size 1024 --fit off --metrics --perf --no-ui --reasoning auto --reasoning-effort medium
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitNOFILE=1048576
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from collections.abc import Collection
 from typing import Any, Mapping
 from zoneinfo import ZoneInfo
 
@@ -329,6 +330,8 @@ class CostAccounting:
             for tariff in self._tariffs(today):
                 cost_key = metric_key(model, uuid, str(tariff["id"]))
                 self.state["active_model_energy_cost_jpy"].setdefault(cost_key, 0.0)
+            if not bool(sample.get("account_tokens", True)):
+                continue
             cached_mode = str(sample.get("cached_input_mode", "unobserved_assumed_uncached"))
             for price, comparison in self._prices_for_model(model, today):
                 price_id = str(price["id"])
@@ -422,6 +425,8 @@ class CostAccounting:
         covered_models: set[str],
     ) -> None:
         for uuid, sample in models.items():
+            if not bool(sample.get("account_tokens", True)):
+                continue
             model = str(sample["model"])
             model_key = metric_key(model, uuid)
             current = {
@@ -490,16 +495,29 @@ class CostAccounting:
                 ):
                     periods[key] = {"period": period_key, "baseline": float(cumulative)}
 
-    def metrics(self) -> list[tuple[str, dict[str, str], float]]:
-        """Return accounting counter samples for Prometheus exposition."""
+    def metrics(
+        self,
+        allowed_models: Collection[str] | None = None,
+        allowed_model_gpus: Mapping[str, Collection[str]] | None = None,
+    ) -> list[tuple[str, dict[str, str], float]]:
+        """Return accounting samples for currently configured model/GPU pairs."""
+        def include_model_gpu(model: str, uuid: str) -> bool:
+            if allowed_models is not None and model not in allowed_models:
+                return False
+            return allowed_model_gpus is None or uuid in allowed_model_gpus.get(model, ())
+
         output: list[tuple[str, dict[str, str], float]] = []
         for uuid, joules in self.state["gpu_energy_joules"].items():
             output.append(("ai_gpu_energy_joules_total", {"host_id": self.host_id, "gpu_uuid": uuid}, float(joules)))
         for key, joules in self.state["active_model_energy_joules"].items():
             model, uuid = split_metric_key(key)
+            if not include_model_gpu(model, uuid):
+                continue
             output.append(("ai_model_active_gpu_energy_joules_total", {"host_id": self.host_id, "model": model, "gpu_uuid": uuid}, float(joules)))
         for key, tokens in self.state["energy_covered_completion_tokens"].items():
             model, uuid = split_metric_key(key)
+            if not include_model_gpu(model, uuid):
+                continue
             output.append(("ai_model_energy_covered_completion_tokens_total", {"host_id": self.host_id, "model": model, "gpu_uuid": uuid}, float(tokens)))
         output.append(("ai_host_estimated_energy_joules_total", {"host_id": self.host_id}, float(self.state["host_energy_joules"])))
         output.append(("ai_host_cpu_energy_joules_total", {"host_id": self.host_id}, float(self.state.get("cpu_energy_joules", 0.0))))
@@ -526,6 +544,8 @@ class CostAccounting:
             )
         for key, value in self.state["active_model_energy_cost_jpy"].items():
             model, uuid, tariff_id = split_metric_key(key)
+            if not include_model_gpu(model, uuid):
+                continue
             output.append(("ai_model_active_gpu_electricity_cost_jpy_total", {"host_id": self.host_id, "model": model, "gpu_uuid": uuid, "tariff_id": tariff_id}, float(value)))
         for metric, values in (
             ("ai_model_api_workload_cost_usd_total", self.state["api_workload_cost_usd"]),
@@ -533,6 +553,8 @@ class CostAccounting:
         ):
             for key, value in values.items():
                 model, uuid, price_id, comparison_id, cached_mode = split_metric_key(key)
+                if not include_model_gpu(model, uuid):
+                    continue
                 labels = {
                     "host_id": self.host_id,
                     "model": model,
@@ -547,6 +569,8 @@ class CostAccounting:
         ):
             for key, value in values.items():
                 model, uuid, price_id, comparison_id, cached_mode, fx_id = split_metric_key(key)
+                if not include_model_gpu(model, uuid):
+                    continue
                 labels = {
                     "host_id": self.host_id,
                     "model": model,

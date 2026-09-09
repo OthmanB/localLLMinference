@@ -1,17 +1,15 @@
 # Monitoring
 
 Prometheus and Grafana run on the monitoring host. The AI server exporter listens
-on port 9108 and combines FreeToken, llama.cpp, `nvidia-smi`, host-memory, energy,
+on port 9108 and combines llama.cpp, `nvidia-smi`, host-memory, energy,
 electricity-cost, and API-equivalent-cost metrics.
 
 Expected model labels:
 
-- `model="qwen3.8-flash-next-nvfp4-262k"`
-- `gpu="0"`
-- `model="qwen3.8-27b-q4-gpukv192"`
-- `gpu="1"`
 - `model="muse-glimmer-30b-kquant17"`
-- `gpu="2"`
+- `gpu="0"`
+- `model="qwen3.8-27b-q4-tensor262k"`
+- `gpu="1"` and `gpu="2"`
 
 All exporter-owned GPU and accounting series also include immutable `host_id` and
 `gpu_uuid` labels. Do not identify a GPU solely by the global GPU index.
@@ -49,9 +47,9 @@ re-import the dashboard with overwrite enabled:
 sudo systemctl restart ai-metrics-exporter.service
 ```
 
-Run `sudo operations/promote-freetoken-flash-next-262k.sh` on the AI server to
-install the permanent service and local gateway/exporter configuration. Then
-import the dashboard source on the monitoring host with overwrite enabled.
+Run `sudo operations/install.sh` on the AI server to install the permanent
+services and local gateway/exporter configuration. Then import the dashboard
+source on the monitoring host with overwrite enabled.
 
 ## CPU Power Attribution
 
@@ -154,13 +152,10 @@ Key counters:
 - `ai_model_api_workload_cost_{usd,jpy}_total`: token-priced remote API comparison including input, cached input, and output.
 - `ai_model_api_output_only_cost_{usd,jpy}_total`: output-only remote API comparison.
 
-The FreeToken endpoint does not expose a cached-input token counter. Its
-API-comparison metrics carry `cached_input_mode="unobserved_assumed_uncached"` and
-must not be interpreted as a measured cache discount. For runtimes that report
-both counters, cached prompt tokens are treated as a subset of total prompt tokens
-and replace the corresponding regular-input rate. Prices not represented in
-`ai-api-pricing.json`, including unverified Qwen Model Studio and RunInfra Flash
-Next rates, are intentionally absent rather than estimated.
+The configured llama.cpp runtimes report prompt and cached-prompt counters. Cached
+prompt tokens are treated as a subset of total prompt tokens and replace the
+corresponding regular-input rate. Prices not represented in `ai-api-pricing.json`
+are intentionally absent rather than estimated.
 
 After each exporter restart, successfully scraped configured models emit zero-valued
 active-energy and API-comparison counters before their first request. This keeps

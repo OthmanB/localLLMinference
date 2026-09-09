@@ -39,15 +39,13 @@ export AI_SERVER_API_KEY
 The available model identifiers are:
 
 ```text
-qwen3.8-27b-q4-gpukv192
-qwen3.8-flash-next-nvfp4-262k
+qwen3.8-27b-q4-tensor262k
 muse-glimmer-30b-kquant17
 ```
 
-Q4 runs on GPU 1 with a 196608-token limit and defaults to medium reasoning.
-Flash Next runs on GPU 0 with a 262144-token limit and defaults to xhigh
-reasoning; clients can select `none`, `low`, `medium`, or `xhigh` per request.
-Muse Glimmer runs on GPU 2 with a 131072-token limit, accepts text and
+Qwen tensor runs across GPUs 1 and 2 with a 262144-token limit and defaults to
+medium reasoning; clients can select the supported reasoning effort per request.
+Muse Glimmer runs on GPU 0 with a 131072-token limit, accepts text and
 inline-image input, and supports `low`, `medium`, `high`, or `xhigh` reasoning;
 `high` is the recommended local agent default.
 
@@ -73,10 +71,10 @@ environment reference:
         "apiKey": "{env:AI_SERVER_API_KEY}"
       },
       "models": {
-        "qwen3.8-27b-q4-gpukv192": {
-          "name": "Qwen3.8-27B Q4, 192k",
+        "qwen3.8-27b-q4-tensor262k": {
+          "name": "Qwen3.8-27B Q4 Tensor, 262k",
           "limit": {
-            "context": 196608,
+            "context": 262144,
             "output": 8192
           },
           "options": {
@@ -87,22 +85,6 @@ environment reference:
             "low": {"reasoningEffort": "low"},
             "medium": {"reasoningEffort": "medium"},
             "high": {"reasoningEffort": "high"},
-            "xhigh": {"reasoningEffort": "xhigh"}
-          }
-        },
-        "qwen3.8-flash-next-nvfp4-262k": {
-          "name": "Qwen3.8 Flash Next NVFP4, 262k",
-          "limit": {
-            "context": 262144,
-            "output": 8192
-          },
-          "options": {
-            "reasoningEffort": "xhigh"
-          },
-          "variants": {
-            "none": {"reasoningEffort": "none"},
-            "low": {"reasoningEffort": "low"},
-            "medium": {"reasoningEffort": "medium"},
             "xhigh": {"reasoningEffort": "xhigh"}
           }
         },
@@ -130,8 +112,7 @@ environment reference:
 
 Use `http://<AI_SERVER_TAILSCALE_IP>:8088/v1` instead of the LAN URL for a client that
 reaches the server through Tailscale. Start OpenCode from a shell where
-`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select
-any of the three models.
+`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select either model.
 
 The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
@@ -149,16 +130,8 @@ providers:
     api: openai-completions
     apiKey: AI_SERVER_API_KEY
     models:
-      - id: qwen3.8-27b-q4-gpukv192
-        name: Qwen3.8-27B Q4, 192k
-        reasoning: true
-        input: [text]
-        contextWindow: 196608
-        maxTokens: 8192
-        compat:
-          supportsReasoningEffort: true
-      - id: qwen3.8-flash-next-nvfp4-262k
-        name: Qwen3.8 Flash Next NVFP4, 262k
+      - id: qwen3.8-27b-q4-tensor262k
+        name: Qwen3.8-27B Q4 Tensor, 262k
         reasoning: true
         input: [text]
         contextWindow: 262144
@@ -185,7 +158,7 @@ Export `AI_SERVER_API_KEY` before launching `omp`. In Oh My Pi, inspect the
 provider and model with:
 
 ```bash
-omp models find qwen3.8-27b-q4-gpukv192
+omp models find qwen3.8-27b-q4-tensor262k
 ```
 
 Use `/model` to select the provider-prefixed model interactively. To make it
@@ -193,7 +166,7 @@ the default model, add this to `~/.omp/agent/config.yml`:
 
 ```yaml
 modelRoles:
-  default: ai-server/qwen3.8-27b-q4-gpukv192
+  default: ai-server/qwen3.8-27b-q4-tensor262k
 ```
 
 ## Reasoning And Sampling
@@ -242,5 +215,5 @@ curl -sS -H "Authorization: Bearer $AI_SERVER_API_KEY" \
   "$AI_SERVER_BASE_URL/models"
 ```
 
-The response should list all three model identifiers. A missing or incorrect token
+The response should list both model identifiers. A missing or incorrect token
 should return HTTP 401.

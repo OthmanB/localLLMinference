@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -19,6 +20,8 @@ from ai_cost_accounting import (
 )
 from ai_metrics_exporter import (
     bucket_points,
+    MetricsState,
+    nvidia_metrics,
     parse_freetoken_stats,
     parse_llama_metrics,
     retain_nonzero_rate,
@@ -310,6 +313,170 @@ class CostAccountingTest(unittest.TestCase):
             self.assertEqual(
                 accounting.state["energy_covered_completion_tokens"]["local\x1fgpu-a"], 10
             )
+
+
+    def test_dual_gpu_model_energy_does_not_duplicate_token_costs(self) -> None:
+        timestamp = datetime(2026, 9, 7, tzinfo=UTC).timestamp()
+        config = {
+            "host_id": "test-host",
+            "max_sample_gap_seconds": 20,
+            "baseline": {"mode": "baseline_non_gpu_w", "baseline_non_gpu_w": 100},
+            "tariffs": [],
+        }
+        pricing = {
+            "prices": [
+                {
+                    "id": "price",
+                    "provider": "example",
+                    "model": "remote",
+                    "effective_from": "2026-09-01",
+                    "input_usd_per_million_tokens": 1,
+                    "output_usd_per_million_tokens": 2,
+                }
+            ],
+            "comparisons": [{"id": "comparison", "local_model": "qwen", "price_id": "price"}],
+            "fx_rates": [],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            accounting = CostAccounting(config, pricing, Path(temporary) / "state.json")
+            inactive = {
+                "gpu-1": {"power_watts": 20, "model": "qwen", "active": False},
+                "gpu-2": {"power_watts": 20, "model": "qwen", "active": False},
+            }
+            active = {
+                "gpu-1": {"power_watts": 120, "model": "qwen", "active": True},
+                "gpu-2": {"power_watts": 120, "model": "qwen", "active": True},
+            }
+            initial = {
+                "gpu-1": {"model": "qwen", "completion_tokens": 0, "account_tokens": True},
+                "gpu-2": {"model": "qwen", "completion_tokens": 0, "account_tokens": False},
+            }
+            completed = {
+                "gpu-1": {
+                    "model": "qwen",
+                    "prompt_tokens": 100,
+                    "completion_tokens": 50,
+                    "account_tokens": True,
+                },
+                "gpu-2": {
+                    "model": "qwen",
+                    "prompt_tokens": 100,
+                    "completion_tokens": 50,
+                    "account_tokens": False,
+                },
+            }
+            later = {
+                "gpu-1": completed["gpu-1"] | {"prompt_tokens": 120, "completion_tokens": 60},
+                "gpu-2": completed["gpu-2"] | {"prompt_tokens": 120, "completion_tokens": 60},
+            }
+            accounting.observe(timestamp, inactive, initial)
+            accounting.observe(timestamp + 10, active, completed)
+            accounting.observe(timestamp + 20, active, later)
+
+            self.assertEqual(accounting.state["active_model_energy_joules"]["qwen\x1fgpu-1"], 1200)
+            self.assertEqual(accounting.state["active_model_energy_joules"]["qwen\x1fgpu-2"], 1200)
+            api_keys = set(accounting.state["api_workload_cost_usd"])
+            self.assertEqual(api_keys, {"qwen\x1fgpu-1\x1fprice\x1fcomparison\x1funobserved_assumed_uncached"})
+
+    def test_metrics_filter_retired_models_from_persisted_state(self) -> None:
+        timestamp = datetime(2026, 9, 7, tzinfo=UTC).timestamp()
+        config = {
+            "host_id": "test-host",
+            "baseline": {"mode": "baseline_non_gpu_w", "baseline_non_gpu_w": 100},
+            "tariffs": [],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            accounting = CostAccounting(config, {}, Path(temporary) / "state.json")
+            accounting.observe(
+                timestamp,
+                {"gpu-a": {"power_watts": 20, "model": "retired", "active": False}},
+                {"gpu-a": {"model": "retired", "completion_tokens": 0}},
+            )
+            accounting.observe(
+                timestamp + 10,
+                {"gpu-a": {"power_watts": 20, "model": "current", "active": False}},
+                {"gpu-a": {"model": "current", "completion_tokens": 0}},
+            )
+
+            metrics = accounting.metrics({"current"})
+            model_labels = [labels["model"] for _name, labels, _value in metrics if "model" in labels]
+            self.assertIn("current", model_labels)
+            self.assertNotIn("retired", model_labels)
+
+            accounting.state["active_model_energy_joules"]["current\x1fgpu-old"] = 1.0
+            metrics = accounting.metrics({"current"}, {"current": {"gpu-a"}})
+            current_uuids = {
+                labels["gpu_uuid"]
+                for _name, labels, _value in metrics
+                if labels.get("model") == "current"
+            }
+            self.assertEqual(current_uuids, {"gpu-a"})
+
+
+class MultiGpuExporterTest(unittest.TestCase):
+    def test_nvidia_metrics_labels_all_physical_gpus(self) -> None:
+        comments: set[str] = set()
+        lines = nvidia_metrics(
+            comments,
+            [
+                {"gpu": "0", "gpu_uuid": "gpu-0", "name": "3090", "power_limit_watts": 300, "power_watts": 20, "utilization_percent": 0, "temperature_celsius": 40, "memory_used_bytes": 1, "memory_total_bytes": 2},
+                {"gpu": "1", "gpu_uuid": "gpu-1", "name": "3090", "power_limit_watts": 300, "power_watts": 20, "utilization_percent": 0, "temperature_celsius": 40, "memory_used_bytes": 1, "memory_total_bytes": 2},
+                {"gpu": "2", "gpu_uuid": "gpu-2", "name": "3090", "power_limit_watts": 300, "power_watts": 20, "utilization_percent": 0, "temperature_celsius": 40, "memory_used_bytes": 1, "memory_total_bytes": 2},
+            ],
+            {"0": "muse", "1": "qwen", "2": "qwen"},
+            "test-host",
+        )
+        model_lines = [line for line in lines if line.startswith("ai_gpu_power_draw_watts{")]
+        self.assertEqual(len(model_lines), 3)
+        self.assertTrue(any('gpu="0"' in line and 'model="muse"' in line for line in model_lines))
+        self.assertEqual(sum('model="qwen"' in line for line in model_lines), 2)
+
+    def test_metrics_state_scrapes_dual_gpu_backend_once(self) -> None:
+        backends = {
+            "qwen": {
+                "url": "http://127.0.0.1:8080/metrics",
+                "model": "qwen",
+                "gpus": ["1", "2"],
+            },
+            "muse": {
+                "url": "http://127.0.0.1:8082/metrics",
+                "model": "muse",
+                "gpus": ["0"],
+            },
+        }
+        gpu_fields = {
+            "gpu": "0",
+            "gpu_uuid": "gpu-0",
+            "name": "3090",
+            "power_limit_watts": 300,
+            "power_watts": 20,
+            "utilization_percent": 0,
+            "temperature_celsius": 40,
+            "memory_used_bytes": 1,
+            "memory_total_bytes": 2,
+        }
+        gpus = [{**gpu_fields, "gpu": str(index), "gpu_uuid": f"gpu-{index}"} for index in range(3)]
+        llama_metrics = "\n".join(
+            [
+                "llamacpp:requests_processing 0",
+                "llamacpp:prompt_tokens_total 10",
+                "llamacpp:prompt_tokens_cached_total 0",
+                "llamacpp:tokens_predicted_total 20",
+            ]
+        )
+        with patch("ai_metrics_exporter.read_nvidia_gpus", return_value=gpus), patch(
+            "ai_metrics_exporter.fetch_metrics", side_effect=[llama_metrics, llama_metrics]
+        ), patch("ai_metrics_exporter.read_cpu_profiler", return_value=None), patch(
+            "ai_metrics_exporter.read_proc_stat_cpu", return_value=None
+        ):
+            state = MetricsState(backends, CostAccounting.disabled())
+
+        body = state.get()
+        self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="qwen",gpu="1"'), 1)
+        self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="qwen",gpu="2"'), 1)
+        self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="muse",gpu="0"'), 1)
+        self.assertNotIn("flash_next_262k", body)
+        self.assertNotIn("qwen3.8-27b-q4-gpukv192", body)
 
 
 class ThroughputRetentionTest(unittest.TestCase):

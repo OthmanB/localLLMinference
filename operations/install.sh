@@ -7,7 +7,8 @@ readonly ETC=/etc/ai-server
 readonly USER_ID=$(id -u obenomar)
 readonly LAN_SUBNET=${AI_SERVER_LAN_SUBNET:-}
 readonly PROMETHEUS_IP=${AI_SERVER_PROMETHEUS_IP:-}
-readonly GATEWAY_BACKENDS='LAN_INFERENCE_BACKENDS=[{"name":"qwen3.8-27b-q4","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-gpukv192"],"health_path":"/health"},{"name":"flash-next-262k","base_url":"http://127.0.0.1:1901","models":["qwen3.8-flash-next-nvfp4-262k"],"health_path":"/health"},{"name":"muse-glimmer-30b-131k","base_url":"http://127.0.0.1:8082","models":["muse-glimmer-30b-kquant17"],"health_path":"/health"}]'
+readonly GATEWAY_BACKENDS='LAN_INFERENCE_BACKENDS=[{"name":"qwen3.8-27b-q4-tensor-262k","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-tensor262k"],"health_path":"/health"},{"name":"muse-glimmer-30b-131k","base_url":"http://127.0.0.1:8082","models":["muse-glimmer-30b-kquant17"],"health_path":"/health"}]'
+readonly BACKUP_DIR=/var/backups/ai-server/$(date -u +%Y%m%dT%H%M%SZ)
 
 if [[ ${EUID} -ne 0 ]]; then
     printf '%s\n' 'Run this installer as root: sudo /home/obenomar/localLLMinference/operations/install.sh' >&2
@@ -25,11 +26,27 @@ if ! flock -n 9; then
     exit 1
 fi
 
+install -d -m 0700 -o root -g root "${BACKUP_DIR}"
+for path in \
+    /etc/ai-server/lan-inference-gateway.env \
+    /etc/ai-server/ai-metrics-exporter.env \
+    /etc/systemd/system/llama-qwen3.8-q4-192k.service \
+    /etc/systemd/system/freetoken-qwen3.8-flash-next-262k.service \
+    /etc/systemd/system/freetoken-flash-next-candidate.service \
+    /etc/systemd/system/llama-qwen3.8-q4-tensor-262k.service \
+    /etc/systemd/system/llama-muse-glimmer-30b-131k.service \
+    /etc/systemd/system/lan-inference-gateway.service \
+    /etc/systemd/system/ai-metrics-exporter.service; do
+    if [[ -e ${path} ]]; then
+        install -m 0600 "${path}" "${BACKUP_DIR}/$(basename "${path}")"
+    fi
+done
+printf 'Backed up existing deployment files to %s\n' "${BACKUP_DIR}"
+
 install -d -m 0750 -o root -g obenomar "${ETC}"
 install -m 0644 "${OPS}/systemd/nvidia-power-limit.service" /etc/systemd/system/nvidia-power-limit.service
 install -m 0644 "${OPS}/systemd/nvidia-fan-control.service" /etc/systemd/system/nvidia-fan-control.service
-install -m 0644 "${OPS}/systemd/freetoken-qwen3.8-flash-next-262k.service" /etc/systemd/system/freetoken-qwen3.8-flash-next-262k.service
-install -m 0644 "${OPS}/systemd/llama-qwen3.8-q4-192k.service" /etc/systemd/system/llama-qwen3.8-q4-192k.service
+install -m 0644 "${OPS}/systemd/llama-qwen3.8-q4-tensor-262k.service" /etc/systemd/system/llama-qwen3.8-q4-tensor-262k.service
 install -m 0644 "${OPS}/systemd/llama-muse-glimmer-30b-131k.service" /etc/systemd/system/llama-muse-glimmer-30b-131k.service
 install -m 0644 "${OPS}/systemd/lan-inference-gateway.service" /etc/systemd/system/lan-inference-gateway.service
 install -m 0644 "${OPS}/systemd/ai-metrics-exporter.service" /etc/systemd/system/ai-metrics-exporter.service
@@ -42,7 +59,7 @@ if [[ ! -e ${gateway_env} ]]; then
         "LAN_GATEWAY_CLIENT_TOKEN=${token}" \
         'LAN_INFERENCE_CLIENT_API_KEY_ENV=LAN_GATEWAY_CLIENT_TOKEN' \
         'LAN_INFERENCE_REQUEST_TIMEOUT_SECONDS=3600' \
-        'LAN_INFERENCE_BACKENDS=[{"name":"qwen3.8-27b-q4","base_url":"http://127.0.0.1:8080","models":["qwen3.8-27b-q4-gpukv192"],"health_path":"/health"},{"name":"flash-next-262k","base_url":"http://127.0.0.1:1901","models":["qwen3.8-flash-next-nvfp4-262k"],"health_path":"/health"},{"name":"muse-glimmer-30b-131k","base_url":"http://127.0.0.1:8082","models":["muse-glimmer-30b-kquant17"],"health_path":"/health"}]' \
+        "${GATEWAY_BACKENDS}" \
         > "${gateway_env}"
     chown root:root "${gateway_env}"
     chmod 0600 "${gateway_env}"
@@ -93,13 +110,15 @@ restart_gateway() {
 }
 
 systemctl disable --now freetoken-flash-next-candidate.service || true
-systemctl enable freetoken-qwen3.8-flash-next-262k.service
-systemctl enable llama-qwen3.8-q4-192k.service
+systemctl disable --now freetoken-qwen3.8-flash-next-262k.service || true
+systemctl disable --now llama-qwen3.8-q4-192k.service || true
+rm -f /etc/systemd/system/freetoken-flash-next-candidate.service /etc/systemd/system/freetoken-qwen3.8-flash-next-262k.service /etc/systemd/system/llama-qwen3.8-q4-192k.service
+systemctl daemon-reload
+systemctl enable llama-qwen3.8-q4-tensor-262k.service
 systemctl enable llama-muse-glimmer-30b-131k.service
 systemctl enable ai-metrics-exporter.service
 systemctl enable lan-inference-gateway.service
-systemctl restart freetoken-qwen3.8-flash-next-262k.service
-systemctl restart llama-qwen3.8-q4-192k.service
+systemctl restart llama-qwen3.8-q4-tensor-262k.service
 systemctl restart llama-muse-glimmer-30b-131k.service
 systemctl restart ai-metrics-exporter.service
 restart_gateway
@@ -112,4 +131,4 @@ if ip link show tailscale0 >/dev/null 2>&1; then
 fi
 
 nvidia-smi --query-gpu=index,power.limit --format=csv
-systemctl --no-pager --full status nvidia-fan-control.service freetoken-qwen3.8-flash-next-262k.service llama-qwen3.8-q4-192k.service llama-muse-glimmer-30b-131k.service lan-inference-gateway.service ai-metrics-exporter.service
+systemctl --no-pager --full status nvidia-fan-control.service llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service lan-inference-gateway.service ai-metrics-exporter.service

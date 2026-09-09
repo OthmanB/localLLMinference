@@ -23,19 +23,13 @@ from ai_cpu_power_profiler import cpu_utilization_percent, interpolate_power, re
 DEFAULT_BACKENDS = {
     "qwen_27b_q4": {
         "url": "http://127.0.0.1:8080/metrics",
-        "model": "qwen3.8-27b-q4-gpukv192",
-        "gpu": "1",
-    },
-    "flash_next_262k": {
-        "url": "http://127.0.0.1:1901/v1/stats",
-        "model": "qwen3.8-flash-next-nvfp4-262k",
-        "gpu": "0",
-        "format": "freetoken",
+        "model": "qwen3.8-27b-q4-tensor262k",
+        "gpus": ["1", "2"],
     },
     "muse_glimmer_30b_131k": {
         "url": "http://127.0.0.1:8082/metrics",
         "model": "muse-glimmer-30b-kquant17",
-        "gpu": "2",
+        "gpus": ["0"],
     },
 }
 METRIC_LINE = re.compile(r"^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{([^}]*)\})?\s+(.+)$")
@@ -176,14 +170,31 @@ ACCOUNTING_METRIC_DEFINITIONS = {
 }
 
 
-def load_backends() -> dict[str, dict[str, str]]:
+def load_backends() -> dict[str, dict[str, object]]:
     raw = os.getenv("AI_METRICS_BACKENDS")
     if not raw:
         return DEFAULT_BACKENDS
     value = json.loads(raw)
     if not isinstance(value, dict):
         raise ValueError("AI_METRICS_BACKENDS must be a JSON object")
+    if not all(isinstance(name, str) and isinstance(backend, dict) for name, backend in value.items()):
+        raise ValueError("AI_METRICS_BACKENDS values must be JSON objects")
     return value
+
+
+def backend_gpus(backend: Mapping[str, object]) -> tuple[str, ...]:
+    """Return physical GPU indices assigned to a backend, in primary-first order."""
+    configured = backend.get("gpus")
+    if configured is None:
+        configured = [backend.get("gpu")]
+    if not isinstance(configured, list) or not configured or not all(
+        isinstance(gpu, str) and gpu for gpu in configured
+    ):
+        raise ValueError("each metrics backend requires a non-empty gpus list")
+    gpus = tuple(str(gpu) for gpu in configured)
+    if len(gpus) != len(set(gpus)):
+        raise ValueError("each metrics backend must list each GPU only once")
+    return gpus
 
 
 def escape_label(value: object) -> str:
@@ -466,7 +477,7 @@ def load_json_config(path: str | None) -> dict[str, object]:
 
 
 class MetricsState:
-    def __init__(self, backends: dict[str, dict[str, str]], accounting: CostAccounting) -> None:
+    def __init__(self, backends: dict[str, dict[str, object]], accounting: CostAccounting) -> None:
         self.backends = backends
         self.accounting = accounting
         self.lock = threading.Lock()
@@ -523,7 +534,13 @@ class MetricsState:
             "# HELP ai_model_cached_input_accounting_info Cached-input accounting mode for the runtime.",
             "# TYPE ai_model_cached_input_accounting_info gauge",
         ]
-        gpu_models = {str(backend["gpu"]): str(backend["model"]) for backend in self.backends.values()}
+        gpu_models: dict[str, str] = {}
+        configured_models: set[str] = set()
+        for backend in self.backends.values():
+            model = str(backend["model"])
+            configured_models.add(model)
+            for gpu in backend_gpus(backend):
+                gpu_models[gpu] = model
         gpu_info: dict[str, Mapping[str, object]] = {}
         nvidia_ok = False
         try:
@@ -535,44 +552,65 @@ class MetricsState:
         model_observations: dict[str, dict[str, object]] = {}
         for backend in self.backends.values():
             model = str(backend["model"])
-            gpu = str(backend["gpu"])
-            gpu_uuid = str(gpu_info.get(gpu, {}).get("gpu_uuid", f"unresolved-gpu-{gpu}"))
-            label_values = {
-                "host_id": self.accounting.host_id,
-                "model": model,
-                "gpu": gpu,
-                "gpu_uuid": gpu_uuid,
+            gpus = backend_gpus(backend)
+            primary_gpu = gpus[0]
+            gpu_uuids = {
+                gpu: str(gpu_info.get(gpu, {}).get("gpu_uuid", f"unresolved-gpu-{gpu}"))
+                for gpu in gpus
             }
-            labels = add_labels(None, label_values)
             scrape_error = 0
             try:
+                primary_labels = {
+                    "host_id": self.accounting.host_id,
+                    "model": model,
+                    "gpu": primary_gpu,
+                    "gpu_uuid": gpu_uuids[primary_gpu],
+                }
                 if backend.get("format", "prometheus") == "freetoken":
                     parsed, observation = parse_freetoken_stats(
-                        fetch_json(str(backend["url"])), label_values, comments_seen, self.rate_state
+                        fetch_json(str(backend["url"])), primary_labels, comments_seen, self.rate_state
                     )
                     cached_mode = "unobserved_assumed_uncached"
                 else:
                     parsed, observation = parse_llama_metrics(
-                        fetch_metrics(str(backend["url"])), label_values, comments_seen, self.rate_state
+                        fetch_metrics(str(backend["url"])), primary_labels, comments_seen, self.rate_state
                     )
                     cached_mode = "observed"
                 lines.extend(parsed)
-                lines.append(f"ai_model_up{labels} 1")
-                lines.append(
-                    f"ai_model_cached_input_accounting_info{add_labels(None, label_values | {'mode': cached_mode})} 1"
-                )
-                model_observations[gpu_uuid] = {
-                    "model": model,
-                    "prompt_tokens": observation["prompt_tokens"],
-                    "cached_prompt_tokens": observation["cached_prompt_tokens"],
-                    "completion_tokens": observation["completion_tokens"],
-                    "active": observation["requests_active"] > 0,
-                    "cached_input_mode": cached_mode,
-                }
+                for gpu in gpus:
+                    label_values = {
+                        "host_id": self.accounting.host_id,
+                        "model": model,
+                        "gpu": gpu,
+                        "gpu_uuid": gpu_uuids[gpu],
+                    }
+                    labels = add_labels(None, label_values)
+                    lines.append(f"ai_model_up{labels} 1")
+                    lines.append(
+                        f"ai_model_cached_input_accounting_info{add_labels(None, label_values | {'mode': cached_mode})} 1"
+                    )
+                    model_observations[gpu_uuids[gpu]] = {
+                        "model": model,
+                        "prompt_tokens": observation["prompt_tokens"] if gpu == primary_gpu else 0.0,
+                        "cached_prompt_tokens": observation["cached_prompt_tokens"] if gpu == primary_gpu else 0.0,
+                        "completion_tokens": observation["completion_tokens"] if gpu == primary_gpu else 0.0,
+                        "active": observation["requests_active"] > 0,
+                        "cached_input_mode": cached_mode,
+                        "account_tokens": gpu == primary_gpu,
+                    }
             except (OSError, ValueError, KeyError):
-                lines.append(f"ai_model_up{labels} 0")
                 scrape_error = 1
-            lines.append(f"ai_model_scrape_error{labels} {scrape_error}")
+            for gpu in gpus:
+                label_values = {
+                    "host_id": self.accounting.host_id,
+                    "model": model,
+                    "gpu": gpu,
+                    "gpu_uuid": gpu_uuids[gpu],
+                }
+                labels = add_labels(None, label_values)
+                if scrape_error:
+                    lines.append(f"ai_model_up{labels} 0")
+                lines.append(f"ai_model_scrape_error{labels} {scrape_error}")
 
         energy_gpus: dict[str, dict[str, object]] = {}
         if nvidia_ok:
@@ -627,11 +665,17 @@ class MetricsState:
                     f"ai_host_power_attribution_watts{add_labels(None, host_labels | {'source': source_name})} {value}"
                 )
 
+        configured_model_gpus: dict[str, set[str]] = {}
+        for uuid, sample in energy_gpus.items():
+            model = sample.get("model")
+            if isinstance(model, str):
+                configured_model_gpus.setdefault(model, set()).add(uuid)
+
         self.accounting.observe(timestamp_seconds, energy_gpus, model_observations, self.cpu_power)
         add_metric_definitions(lines, ACCOUNTING_METRIC_DEFINITIONS, comments_seen)
         for name, labels, value in self.accounting.configuration_metrics(timestamp_seconds):
             lines.append(f"{name}{add_labels(None, labels)} {value}")
-        for name, labels, value in self.accounting.metrics():
+        for name, labels, value in self.accounting.metrics(configured_models, configured_model_gpus):
             lines.append(f"{name}{add_labels(None, labels)} {value}")
         try:
             lines.extend(host_memory_metrics(comments_seen, self.accounting.host_id))
