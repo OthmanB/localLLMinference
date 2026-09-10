@@ -36,11 +36,8 @@ to match the target machine.
 
 ```bash
 sudo env \
-  AI_SERVER_USER=llm \
   AI_SERVER_LAN_SUBNET=192.0.2.0/24 \
   AI_SERVER_PROMETHEUS_IP=192.0.2.10 \
-  AI_SERVER_LLAMA_CPP_ROOT=/opt/llama.cpp \
-  AI_SERVER_MODEL_PATH=/var/lib/ai-server/models/Qwen3.8-27B-UD-Q4_K_M.gguf \
   /path/to/localLLMinference/operations/install.sh
 ```
 

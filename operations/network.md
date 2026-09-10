@@ -27,6 +27,6 @@ reuse a GitHub CLI token as an application credential. Use `tailscale ip -4` and
 ## Firewall
 
 Allow TCP 8088 from the configured LAN subnet and the Tailscale interface. Allow
-TCP 9108 only from the configured monitoring host. Do not allow TCP 8080 from
-any external interface.
+TCP 9108 and 9109 only from the configured monitoring host. Do not allow TCP 8080
+from any external interface.
 Do not add router port forwarding.

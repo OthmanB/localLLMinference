@@ -19,15 +19,15 @@ python3 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 export LAN_INFERENCE_BACKENDS='[
   {
-    "name": "llama-cpp",
+    "name": "qwen3.8-27b-q4-tensor-262k",
     "base_url": "http://127.0.0.1:8080",
-    "models": ["qwen3.8-27b-q5-gpukv64"],
+    "models": ["qwen3.8-27b-q4-tensor262k"],
     "health_path": "/health"
   },
   {
-    "name": "freetoken",
-    "base_url": "http://127.0.0.1:1919",
-    "models": ["qwen3.8-27b-nvfp4"],
+    "name": "muse-glimmer-30b-131k",
+    "base_url": "http://127.0.0.1:8082",
+    "models": ["muse-glimmer-30b-kquant17"],
     "health_path": "/health"
   }
 ]'
@@ -49,11 +49,12 @@ export VLLM_UPSTREAM_TOKEN='replace-with-a-backend-secret'
 
 Then add `"api_key_env": "VLLM_UPSTREAM_TOKEN"` to that backend object. Do not place secrets in `LAN_INFERENCE_BACKENDS`.
 
-Two mutually exclusive Qwen profiles can be prepared on GPU 0: FreeToken for
-short-context work, and llama.cpp for a native long-context window. See the
-local runtime documentation for the selected backend. Configure only the
-currently active profile as ready, and expose only this authenticated gateway
-to the LAN.
+The supported production profile lists both backends at once: the Qwen tensor
+split on GPUs 1 and 2 (llama.cpp on `127.0.0.1:8080`) and Muse Glimmer on
+GPU 0 (llama.cpp on `127.0.0.1:8082`), as installed by
+`operations/install.sh`. The gateway itself is runtime-independent; any
+OpenAI-compatible backend can be listed here. Configure only the currently
+active backends as ready, and expose only this authenticated gateway to the LAN.
 
 ## Routing and health
 
@@ -66,7 +67,7 @@ curl http://gateway-host:8088/v1/models
 curl http://gateway-host:8088/readyz
 curl http://gateway-host:8088/v1/chat/completions \
   -H 'content-type: application/json' \
-  -d '{"model":"qwen3.8-27b-q5-gpukv64","messages":[{"role":"user","content":"Explain this error."}]}'
+  -d '{"model":"qwen3.8-27b-q4-tensor262k","messages":[{"role":"user","content":"Explain this error."}]}'
 ```
 
 ## Verification

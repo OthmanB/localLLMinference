@@ -18,7 +18,7 @@ nvidia-smi
 The installer is idempotent for the generated secrets. It installs the
 canonical units, preserves an existing gateway token, applies the GPU power and
 fan settings, disables the old user llama services, starts Qwen tensor and Muse,
-and starts the gateway and exporter:
+and starts the gateway, exporter, and CPU power profiler:
 
 ```bash
 sudo /path/to/localLLMinference/operations/install.sh
@@ -67,8 +67,9 @@ and GPU 2 at 85%, Qwen reports model ID `qwen3.8-27b-q4-tensor262k` across GPUs
 requires a token, the exporter is reachable by Prometheus, and no retired model
 service started.
 
-The full deployment history and NAS configuration are in
-`deployment-record.md`.
+The supported deployment shape is in `deployment-record.md`; the full
+deployment history and local configuration stay in the ignored
+`deployment-record.local.md`.
 
 ## CPU Power Profiler & Monitoring
 
@@ -102,8 +103,9 @@ sudo docker exec prometheus promtool check config /etc/prometheus/prometheus.yml
 curl -s 'http://<NAS_IP>:9090/api/v1/query' --data-urlencode 'query=up{job="ai-server-cpu-power"}'
 ```
 
-The AI server firewall must allow 9109 from the monitoring host only:
-`sudo ufw allow from <MONITOR_IP> to any port 9109 proto tcp`.
+The AI server firewall must allow 9109 from the monitoring host only
+(`operations/install.sh` applies `ufw allow from <MONITOR_IP> to any port 9109
+proto tcp`; add it manually on a host installed before that rule existed).
 
 ### Cost config: CPU power and baseline mode (privileged)
 

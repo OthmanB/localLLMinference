@@ -36,7 +36,9 @@ for path in \
     /etc/systemd/system/llama-qwen3.8-q4-tensor-262k.service \
     /etc/systemd/system/llama-muse-glimmer-30b-131k.service \
     /etc/systemd/system/lan-inference-gateway.service \
-    /etc/systemd/system/ai-metrics-exporter.service; do
+    /etc/systemd/system/ai-metrics-exporter.service \
+    /etc/systemd/system/ai-cpu-power-profiler.service \
+    /etc/ai-server/cpu-power-profiler.json; do
     if [[ -e ${path} ]]; then
         install -m 0600 "${path}" "${BACKUP_DIR}/$(basename "${path}")"
     fi
@@ -50,6 +52,12 @@ install -m 0644 "${OPS}/systemd/llama-qwen3.8-q4-tensor-262k.service" /etc/syste
 install -m 0644 "${OPS}/systemd/llama-muse-glimmer-30b-131k.service" /etc/systemd/system/llama-muse-glimmer-30b-131k.service
 install -m 0644 "${OPS}/systemd/lan-inference-gateway.service" /etc/systemd/system/lan-inference-gateway.service
 install -m 0644 "${OPS}/systemd/ai-metrics-exporter.service" /etc/systemd/system/ai-metrics-exporter.service
+install -m 0644 "${OPS}/systemd/ai-cpu-power-profiler.service" /etc/systemd/system/ai-cpu-power-profiler.service
+
+if [[ -f /etc/udev/rules.d/99-ai-powercap.rules ]]; then
+    rm -f /etc/udev/rules.d/99-ai-powercap.rules
+    udevadm control --reload-rules
+fi
 
 gateway_env=${ETC}/lan-inference-gateway.env
 if [[ ! -e ${gateway_env} ]]; then
@@ -84,6 +92,10 @@ fi
 if [[ ! -e ${pricing_config} ]]; then
     install -m 0640 -o root -g obenomar "${OPS}/config/ai-api-pricing.json" "${pricing_config}"
 fi
+profiler_config=${ETC}/cpu-power-profiler.json
+if [[ ! -e ${profiler_config} ]]; then
+    install -m 0644 "${OPS}/config/cpu-power-profiler.json.example" "${profiler_config}"
+fi
 
 systemctl daemon-reload
 systemctl enable nvidia-power-limit.service
@@ -117,18 +129,21 @@ systemctl daemon-reload
 systemctl enable llama-qwen3.8-q4-tensor-262k.service
 systemctl enable llama-muse-glimmer-30b-131k.service
 systemctl enable ai-metrics-exporter.service
+systemctl enable ai-cpu-power-profiler.service
 systemctl enable lan-inference-gateway.service
 systemctl restart llama-qwen3.8-q4-tensor-262k.service
 systemctl restart llama-muse-glimmer-30b-131k.service
 systemctl restart ai-metrics-exporter.service
+systemctl restart ai-cpu-power-profiler.service
 restart_gateway
 
 ufw allow from "${LAN_SUBNET}" to any port 8088 proto tcp
 ufw allow from "${PROMETHEUS_IP}" to any port 9108 proto tcp
+ufw allow from "${PROMETHEUS_IP}" to any port 9109 proto tcp
 ufw deny 8080/tcp
 if ip link show tailscale0 >/dev/null 2>&1; then
     ufw allow in on tailscale0 to any port 8088 proto tcp
 fi
 
 nvidia-smi --query-gpu=index,power.limit --format=csv
-systemctl --no-pager --full status nvidia-fan-control.service llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service lan-inference-gateway.service ai-metrics-exporter.service
+systemctl --no-pager --full status nvidia-fan-control.service llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service lan-inference-gateway.service ai-metrics-exporter.service ai-cpu-power-profiler.service

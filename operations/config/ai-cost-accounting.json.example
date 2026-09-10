@@ -3,12 +3,12 @@
   "timezone": "Asia/Tokyo",
   "max_sample_gap_seconds": 20,
   "baseline": {
-    "mode": "wall_idle_total_w",
-    "wall_idle_total_w": 300,
+    "mode": "wall_idle_plus_cpu_w",
     "default_gpu_idle_reference_w": 20,
     "gpu_idle_reference_w_by_uuid": {},
-    "measured_at": "2026-09-07T20:05:00+09:00",
-    "method": "UPS draw minus NAS power; includes three idle GPUs at 20 W each"
+    "measured_at": "2026-09-08T00:00:00+09:00",
+    "method": "Rest wall 200 W (UPS) minus CPU idle 73 W (RAPL package floor). GPU idle stays in base; GPU added as excess above 20 W/GPU ref; CPU added in full from RAPL.",
+    "base_idle_total_w": 127
   },
   "cpu_power": {
     "profiler_url": "http://127.0.0.1:9109/metrics",

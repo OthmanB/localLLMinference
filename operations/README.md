@@ -27,8 +27,9 @@ Operational reference for a self-hosted AI server. Research results stay under
 - `network.md`: LAN, gateway, firewall, and Tailscale access.
 - `monitoring.md`: Prometheus and Grafana setup.
 - `clients.md`: OpenCode, Oh My Pi, and generic OpenAI-compatible client setup.
-- `deployment-record.md`: host inventory, installation history, final topology,
-  validation results, and remaining acceptance checks.
+- `deployment-record.md`: public template for the supported deployment shape.
+  Keep the actual inventory, installation history, and validation results in
+  the ignored `deployment-record.local.md`.
 
 ## API
 
@@ -55,7 +56,12 @@ For remote access, replace the host with the Tailscale address or MagicDNS name.
 After Tailscale authentication, run:
 
 ```bash
-sudo /path/to/localLLMinference/operations/install.sh
+sudo env \
+  AI_SERVER_LAN_SUBNET=192.0.2.0/24 \
+  AI_SERVER_PROMETHEUS_IP=192.0.2.10 \
+  /path/to/localLLMinference/operations/install.sh
 ```
 
-The installer creates the gateway token only if it does not already exist.
+The installer installs the model, gateway, metrics exporter, and CPU power
+profiler services and the firewall rules for 8088, 9108, and 9109. It creates
+the gateway token only if it does not already exist.

@@ -1,5 +1,7 @@
 # Merge this scrape job into the Prometheus configuration on the monitoring host.
-# Replace the placeholders with the AI server's current LAN address and hostname.
+# Replace the placeholders with the AI server's current LAN address and the
+# exporter's host_id (default "ai-server"), which must match the host_id label
+# the exporter and profiler emit so dashboard host filters apply to `up` too.
 # The exporter is reachable from the monitoring host; llama.cpp itself remains
 # loopback-only.
 scrape_configs:
@@ -9,7 +11,7 @@ scrape_configs:
     static_configs:
       - targets: ["<AI_SERVER_LAN_IP>:9108"]
         labels:
-          host: <AI_SERVER_HOST>
+          host_id: <AI_SERVER_HOST_ID>
 
   # CPU power/utilization profiler (RAPL package power + learned bucket curve).
   - job_name: ai-server-cpu-power
@@ -18,4 +20,4 @@ scrape_configs:
     static_configs:
       - targets: ["<AI_SERVER_LAN_IP>:9109"]
         labels:
-          host: <AI_SERVER_HOST>
+          host_id: <AI_SERVER_HOST_ID>

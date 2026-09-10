@@ -36,8 +36,8 @@ Host memory metrics are exposed as:
 The Prometheus scrape job is in `config/prometheus-ai-server.yml`. Grafana
 should use the existing Prometheus data source and import
 `config/grafana-ai-server-dashboard.json` into dashboard UID
-`ai-server-qwen-q4`. The authenticated API procedure is documented in
-`deployment-record.md`; verify the resulting dashboard at
+`ai-server-qwen-q4`. The authenticated import procedure is kept in the
+ignored `deployment-record.local.md`; verify the resulting dashboard at
 `/d/ai-server-qwen-q4`.
 
 After changing the exporter or dashboard source files, restart the exporter and
@@ -68,9 +68,11 @@ RAPL energy counters are root-only (sysfs mode `0440`) and the powercap domain
 can boot disabled. udev cannot change sysfs attribute permissions, so the
 profiler unit fixes both at start with root-privileged `ExecStartPre=+` lines:
 it writes `1` to the domain `enabled` files and then `chmod o+r` the
-`energy_uj` counters, while the service itself stays unprivileged. Run
-`sudo operations/install-cpu-power-profiler.sh` once to install the unit and
-the config from `config/cpu-power-profiler.json.example`.
+`energy_uj` counters, while the service itself stays unprivileged.
+`operations/install.sh` installs the unit and the config from
+`config/cpu-power-profiler.json.example`; run
+`sudo operations/install-cpu-power-profiler.sh` instead on a host that does not
+run the full installer.
 `ai_cpu_profiler_rapl_available` is 1 when the RAPL `package-0` energy counter
 is readable and exposes a nonzero `max_energy_range_uj`; it deliberately does
 not require the powercap `enabled` flag to be nonzero. Some kernels report
@@ -168,7 +170,7 @@ monitoring host therefore provides `up{job="ai-server"}`: `0` means the target
 could not be scraped, whether from power-off, network loss, or exporter failure.
 On its next successful sample, a changed Linux boot ID records the interval in
 `ai_host_reboot_downtime_seconds_total` instead of
-`ai_energy_integration_gap_seconds_total`; neither counter adds the 300 W host
+`ai_energy_integration_gap_seconds_total`; neither counter adds the host idle
 baseline. A changed boot ID confirms a reboot, not whether it was deliberate or
 caused by power loss.
 
@@ -179,8 +181,9 @@ when a new exporter series starts partway through that window.
 
 Because that view depends on the selected dashboard time range, the
 `Whole-Host Electricity Cost` stat is not a daily or billing total. At the idle
-300 W baseline and the current TEPCO scenario (33.71 JPY/kWh), the host costs
-roughly 10 JPY per hour. For calendar totals use the `Host Cost Today`,
+draw of roughly 200 W (127 W base plus the ~73 W CPU floor) and the current
+TEPCO scenario (33.71 JPY/kWh), the host costs roughly 7 JPY per hour. For
+calendar totals use the `Host Cost Today`,
 `Host Cost This Week`, and `Host Cost This Month` panels and the `Host
 Electricity Cost To Date` time series, which reset at their own JST boundaries.
 
