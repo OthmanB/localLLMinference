@@ -2,7 +2,7 @@
 
 The inference endpoint is OpenAI-compatible and is exposed through the
 authenticated gateway. Use the gateway on port 8088; do not configure clients
-to call llama.cpp directly on port 8080.
+to call the loopback model servers on ports 8080, 8081, or 8082.
 
 ## Common Environment
 
@@ -36,16 +36,30 @@ printf '\n'
 export AI_SERVER_API_KEY
 ```
 
-The available model identifiers are:
+The active `atx-dual` profile exposes these staged llamAmpere identifiers:
 
 ```text
-qwen3.8-27b-q4-tensor262k
+qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+qwen3.8-27b-atx-iq4xs-m-262144
 muse-glimmer-30b-kquant17
 ```
 
-Qwen tensor runs across GPUs 1 and 2 with a 262144-token limit and defaults to
-medium reasoning; clients can select the supported reasoning effort per request.
-Muse Glimmer runs on GPU 0 with a 131072-token limit, accepts text and
+The `gpu1` and `gpu2` IDs select deterministic lanes. The pooled ID distributes
+requests across both replicas. For pooled conversations, send a stable header:
+
+```text
+X-Inference-Session: <stable-conversation-id>
+```
+
+The gateway returns `X-Inference-Replica: gpu1|gpu2`. It does not retry a
+request after upstream dispatch, and it does not automatically fall back to the
+stock profile.
+
+The native llamAmpere 262144-token gate passed on both GPUs and during
+concurrent isolated execution. The three Qwen IDs above are therefore the
+validated staged contract; live service acceptance remains pending. Muse Glimmer runs
+on GPU 0 with a 131072-token limit, accepts text and
 inline-image input, and supports `low`, `medium`, `high`, or `xhigh` reasoning;
 `high` is the recommended local agent default.
 
@@ -71,8 +85,42 @@ environment reference:
         "apiKey": "{env:AI_SERVER_API_KEY}"
       },
       "models": {
-        "qwen3.8-27b-q4-tensor262k": {
-          "name": "Qwen3.8-27B Q4 Tensor, 262k",
+        "qwen3.8-27b-atx-iq4xs-m-262144-gpu1": {
+          "name": "Qwen3.8-27B ATX llamAmpere GPU1, validated 262k",
+          "limit": {
+            "context": 262144,
+            "output": 8192
+          },
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "variants": {
+            "none": {"reasoningEffort": "none"},
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"},
+            "xhigh": {"reasoningEffort": "xhigh"}
+          }
+        },
+        "qwen3.8-27b-atx-iq4xs-m-262144-gpu2": {
+          "name": "Qwen3.8-27B ATX llamAmpere GPU2, validated 262k",
+          "limit": {
+            "context": 262144,
+            "output": 8192
+          },
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "variants": {
+            "none": {"reasoningEffort": "none"},
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"},
+            "xhigh": {"reasoningEffort": "xhigh"}
+          }
+        },
+        "qwen3.8-27b-atx-iq4xs-m-262144": {
+          "name": "Qwen3.8-27B ATX llamAmpere pool, validated 262k",
           "limit": {
             "context": 262144,
             "output": 8192
@@ -112,7 +160,9 @@ environment reference:
 
 Use `http://<AI_SERVER_TAILSCALE_IP>:8088/v1` instead of the LAN URL for a client that
 reaches the server through Tailscale. Start OpenCode from a shell where
-`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select either model.
+`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select a lane, the
+pool, or Muse. If the context gate fails, update the three Qwen IDs and context
+limits together; do not leave a 262144 alias pointing at a 245760 service.
 
 The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
@@ -130,8 +180,24 @@ providers:
     api: openai-completions
     apiKey: AI_SERVER_API_KEY
     models:
-      - id: qwen3.8-27b-q4-tensor262k
-        name: Qwen3.8-27B Q4 Tensor, 262k
+      - id: qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+         name: Qwen3.8-27B ATX llamAmpere GPU1, validated 262k
+        reasoning: true
+        input: [text]
+        contextWindow: 262144
+        maxTokens: 8192
+        compat:
+          supportsReasoningEffort: true
+      - id: qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+         name: Qwen3.8-27B ATX llamAmpere GPU2, validated 262k
+        reasoning: true
+        input: [text]
+        contextWindow: 262144
+        maxTokens: 8192
+        compat:
+          supportsReasoningEffort: true
+      - id: qwen3.8-27b-atx-iq4xs-m-262144
+         name: Qwen3.8-27B ATX llamAmpere pool, validated 262k
         reasoning: true
         input: [text]
         contextWindow: 262144
@@ -158,7 +224,7 @@ Export `AI_SERVER_API_KEY` before launching `omp`. In Oh My Pi, inspect the
 provider and model with:
 
 ```bash
-omp models find qwen3.8-27b-q4-tensor262k
+omp models find qwen3.8-27b-atx-iq4xs-m-262144
 ```
 
 Use `/model` to select the provider-prefixed model interactively. To make it
@@ -166,7 +232,7 @@ the default model, add this to `~/.omp/agent/config.yml`:
 
 ```yaml
 modelRoles:
-  default: ai-server/qwen3.8-27b-q4-tensor262k
+  default: ai-server/qwen3.8-27b-atx-iq4xs-m-262144
 ```
 
 ## Reasoning And Sampling
@@ -215,5 +281,7 @@ curl -sS -H "Authorization: Bearer $AI_SERVER_API_KEY" \
   "$AI_SERVER_BASE_URL/models"
 ```
 
-The response should list both model identifiers. A missing or incorrect token
-should return HTTP 401.
+The response should list the two explicit llamAmpere IDs, the pooled llamAmpere
+ID, and Muse. A missing or incorrect token should return HTTP 401. The stock
+`qwen3.8-27b-q4-tensor262k` ID is available only after an explicit manual
+rollback to `stock-q4-tensor`.

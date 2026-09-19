@@ -20,11 +20,15 @@ from ai_cost_accounting import (
 )
 from ai_metrics_exporter import (
     bucket_points,
+    cached_input_mode,
+    gateway_metrics_lines,
     MetricsState,
     nvidia_metrics,
+    parse_gateway_metrics,
     parse_freetoken_stats,
     parse_llama_metrics,
     retain_nonzero_rate,
+    validate_backend_gpu_ownership,
 )
 from ai_cpu_power_profiler import (
     CpuPowerProfiler,
@@ -89,7 +93,7 @@ class CostAccountingTest(unittest.TestCase):
             330,
         )
 
-    def test_api_pricing_separates_cached_and_output_cost(self) -> None:
+    def test_api_pricing_treats_processed_and_cached_tokens_as_disjoint(self) -> None:
         workload, output_only = api_cost_usd(
             1_000_000,
             1_000_000,
@@ -100,7 +104,7 @@ class CostAccountingTest(unittest.TestCase):
                 "output_usd_per_million_tokens": 2.0,
             },
         )
-        self.assertAlmostEqual(workload, 2.1)
+        self.assertAlmostEqual(workload, 3.1)
         self.assertAlmostEqual(output_only, 2.0)
 
     def test_tariff_components_are_versioned_inputs(self) -> None:
@@ -165,7 +169,7 @@ class CostAccountingTest(unittest.TestCase):
             self.assertAlmostEqual(accounting.state["active_model_energy_joules"]["local\x1fgpu-a"], 1_200)
             self.assertAlmostEqual(accounting.state["host_energy_joules"], 7_500)
             self.assertAlmostEqual(accounting.state["energy_covered_completion_tokens"]["local\x1fgpu-a"], 10)
-            self.assertAlmostEqual(accounting.state["api_workload_cost_usd"]["local\x1fgpu-a\x1fprice\x1fcomparison\x1fobserved"], 0.0002292)
+            self.assertAlmostEqual(accounting.state["api_workload_cost_usd"]["local\x1fgpu-a\x1fprice\x1fcomparison\x1fobserved"], 0.0002412)
             self.assertAlmostEqual(accounting.state["api_output_cost_usd"]["local\x1fgpu-a\x1fprice\x1fcomparison\x1fobserved"], 0.00012)
 
     def test_missing_power_samples_are_reported_not_integrated(self) -> None:
@@ -314,7 +318,6 @@ class CostAccountingTest(unittest.TestCase):
                 accounting.state["energy_covered_completion_tokens"]["local\x1fgpu-a"], 10
             )
 
-
     def test_dual_gpu_model_energy_does_not_duplicate_token_costs(self) -> None:
         timestamp = datetime(2026, 9, 7, tzinfo=UTC).timestamp()
         config = {
@@ -414,6 +417,111 @@ class CostAccountingTest(unittest.TestCase):
 
 
 class MultiGpuExporterTest(unittest.TestCase):
+    def test_backend_gpu_ownership_is_unique_across_backends(self) -> None:
+        with self.assertRaisesRegex(ValueError, "multiple metrics backends"):
+            validate_backend_gpu_ownership(
+                {
+                    "qwen_gpu1": {"gpus": ["1"]},
+                    "qwen_duplicate": {"gpus": ["1"]},
+                }
+            )
+
+    def test_two_independent_qwen_backends_keep_replica_and_cache_status(self) -> None:
+        backends = {
+            "qwen_atx_gpu1": {
+                "url": "http://127.0.0.1:8080/metrics",
+                "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu1",
+                "gpus": ["1"],
+            },
+            "qwen_atx_gpu2": {
+                "url": "http://127.0.0.1:8081/metrics",
+                "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu2",
+                "gpus": ["2"],
+            },
+            "muse": {
+                "url": "http://127.0.0.1:8082/metrics",
+                "model": "muse",
+                "gpus": ["0"],
+            },
+        }
+        gpu_fields = {
+            "name": "3090",
+            "power_limit_watts": 300,
+            "power_watts": 20,
+            "utilization_percent": 0,
+            "temperature_celsius": 40,
+            "memory_used_bytes": 1,
+            "memory_total_bytes": 2,
+        }
+        gpus = [
+            {**gpu_fields, "gpu": str(index), "gpu_uuid": f"gpu-{index}"}
+            for index in range(3)
+        ]
+        llama_metrics = "\n".join(
+            [
+                "llamacpp:requests_processing 0",
+                "llamacpp:prompt_tokens_total 10",
+                "llamacpp:prompt_tokens_cached_total 7",
+                "llamacpp:tokens_predicted_total 20",
+            ]
+        )
+        with patch.dict("os.environ", {"AI_SERVING_PROFILE": "atx-dual"}), patch(
+            "ai_metrics_exporter.read_nvidia_gpus", return_value=gpus
+        ), patch(
+            "ai_metrics_exporter.fetch_metrics",
+            side_effect=[llama_metrics, llama_metrics, llama_metrics],
+        ), patch("ai_metrics_exporter.read_cpu_profiler", return_value=None), patch(
+            "ai_metrics_exporter.read_proc_stat_cpu", return_value=None
+        ):
+            state = MetricsState(backends, CostAccounting.disabled())
+
+        body = state.get()
+        self.assertIn('ai_serving_profile_info{profile="atx-dual"} 1', body)
+        self.assertIn('ai_backend_up{backend="qwen_atx_gpu1",model="qwen3.8-27b-atx-iq4xs-m-262144-gpu1"} 1', body)
+        self.assertIn('ai_backend_up{backend="qwen_atx_gpu2",model="qwen3.8-27b-atx-iq4xs-m-262144-gpu2"} 1', body)
+        self.assertIn('replica="qwen_atx_gpu1"', body)
+        self.assertIn('replica="qwen_atx_gpu2"', body)
+        self.assertIn('model="qwen3.8-27b-atx-iq4xs-m-262144-gpu1",gpu="1",gpu_uuid="gpu-1",mode="unobserved"', body)
+        self.assertIn('model="qwen3.8-27b-atx-iq4xs-m-262144-gpu2",gpu="2",gpu_uuid="gpu-2",mode="unobserved"', body)
+        self.assertIn('model="muse",gpu="0",gpu_uuid="gpu-0",mode="observed"', body)
+        self.assertNotIn(
+            'ai_model_cached_prompt_tokens_total{host_id="unconfigured",model="qwen3.8-27b-atx',
+            body,
+        )
+
+    def test_gateway_observation_is_bounded_and_safe_when_unavailable(self) -> None:
+        samples = parse_gateway_metrics(
+            "\n".join(
+                [
+                    'ai_gateway_pool_route_decisions_total{pool="qwen",replica="gpu1",reason="affinity",session_id="secret"} 3',
+                    'ai_gateway_pool_affinity_hits_total{pool="qwen",replica="gpu1"} 2',
+                    'ai_gateway_pool_affinity_misses_total{pool="qwen",replica="gpu2"} 1',
+                    'ai_gateway_pool_saturation_rejections_total{pool="qwen",replica="gpu1"} 4',
+                    'ai_gateway_pool_cold_failover_total{pool="qwen",replica="gpu2"} 1',
+                ]
+            )
+        )
+        self.assertEqual(samples["route"][("qwen", "gpu1", "affinity")], 3)
+        self.assertNotIn("secret", repr(samples))
+        lines = gateway_metrics_lines(set(), None)
+        self.assertIn("ai_gateway_metrics_up 0.0", lines)
+        self.assertIn('ai_gateway_metrics_observation_info{status="unknown"} 1', lines)
+        self.assertIn(
+            'ai_gateway_pool_saturation_rejections_total{pool="unknown",replica="unknown"} 0.0',
+            lines,
+        )
+
+    def test_llamampere_cache_mode_does_not_normalize_cached_tokens(self) -> None:
+        output, observation = parse_llama_metrics(
+            "llamacpp:prompt_tokens_total 10\nllamacpp:prompt_tokens_cached_total 7",
+            {"model": "qwen", "gpu_uuid": "gpu-1"},
+            set(),
+            cached_input_mode="unobserved",
+        )
+        self.assertEqual(observation["cached_prompt_tokens"], 0.0)
+        self.assertFalse(any(line.startswith("ai_model_cached_prompt_tokens_total") for line in output))
+        self.assertEqual(cached_input_mode({"runtime": "llamAmpere"}), "unobserved")
+
     def test_nvidia_metrics_labels_all_physical_gpus(self) -> None:
         comments: set[str] = set()
         lines = nvidia_metrics(
@@ -464,7 +572,9 @@ class MultiGpuExporterTest(unittest.TestCase):
                 "llamacpp:tokens_predicted_total 20",
             ]
         )
-        with patch("ai_metrics_exporter.read_nvidia_gpus", return_value=gpus), patch(
+        with patch.dict("os.environ", {"AI_SERVING_PROFILE": ""}), patch(
+            "ai_metrics_exporter.read_nvidia_gpus", return_value=gpus
+        ), patch(
             "ai_metrics_exporter.fetch_metrics", side_effect=[llama_metrics, llama_metrics]
         ), patch("ai_metrics_exporter.read_cpu_profiler", return_value=None), patch(
             "ai_metrics_exporter.read_proc_stat_cpu", return_value=None
@@ -475,6 +585,7 @@ class MultiGpuExporterTest(unittest.TestCase):
         self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="qwen",gpu="1"'), 1)
         self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="qwen",gpu="2"'), 1)
         self.assertEqual(body.count('ai_model_up{host_id="unconfigured",model="muse",gpu="0"'), 1)
+        self.assertIn('ai_serving_profile_info{profile="unknown"} 1', body)
         self.assertNotIn("flash_next_262k", body)
         self.assertNotIn("qwen3.8-27b-q4-gpukv192", body)
 

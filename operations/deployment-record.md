@@ -30,15 +30,29 @@ Record these values only in the local deployment record:
 - Reasoning default: `auto` with medium effort for Qwen and high for Muse
 - Sampling parameters supplied by clients
 
+## Staged Profile
+
+The staged target profile is `atx-dual`: two independent llamAmpere replicas,
+GPU 1 on loopback port 8080 and GPU 2 on loopback port 8081, plus the pooled
+gateway model ID `qwen3.8-27b-atx-iq4xs-m-262144` with `X-Inference-Session`
+affinity. Muse Glimmer remains unchanged on GPU 0. The `stock-q4-tensor` profile
+remains the manual rollback option; the two must never run concurrently. The
+isolated native-context gate passed on both GPUs and concurrently; live-service
+acceptance remains outstanding.
+
 ## Qwen Tensor Validation
 
-The validated Qwen tensor profile uses the existing PCIe Gen3 x16 links and
-DDR4-3066 memory configuration. It runs on GPUs 1 and 2 with the native
-262,144-token context, F16 K/V, Flash Attention, and default NCCL.
+The validated 2026-09-09 Qwen tensor profile uses the existing PCIe Gen3 x16
+links and DDR4-3066 memory configuration. It runs on GPUs 1 and 2 with the
+native 262,144-token context, F16 K/V, Flash Attention, and default NCCL.
 
-The production profile passed long-context validation without OOM or swap. The
-selected runtime uses batch/ubatch `2048/1024`; rejected variants included Q5,
-Q8, BF16 K/V, forced NCCL protocols, and one-channel NCCL overrides.
+The production selection measured 856.45 prefill tok/s and 36.95 decode tok/s
+with a 196k input plus 4,096 output workload, and 763.97 prefill tok/s and 33.49
+decode tok/s with a 257k input plus 4,096 output workload. Each Qwen GPU peaked
+at approximately 16,862 MiB with no OOM or swap.
+
+The profile uses batch/ubatch `2048/1024`; rejected variants included Q5, Q8,
+BF16 K/V, forced NCCL protocols, and one-channel NCCL overrides.
 
 ## Required Secrets
 
@@ -56,16 +70,21 @@ overwrite enabled and verify the dashboard UID documented in `monitoring.md`.
 
 ## Validation Checklist
 
-After installation, verify:
+After installation, select a Qwen profile and verify:
 
 ```bash
-  systemctl is-active nvidia-power-limit.service nvidia-fan-control.service
-  systemctl is-active llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service
-  systemctl is-active lan-inference-gateway.service ai-metrics-exporter.service
-  nvidia-smi --query-gpu=index,power.limit --format=csv
-  curl -sS http://127.0.0.1:8080/health
-  curl -sS http://127.0.0.1:8082/health
-  curl -sS http://127.0.0.1:8088/readyz
+cat /etc/ai-server/qwen-serving-profile
+systemctl is-active nvidia-power-limit.service nvidia-fan-control.service
+systemctl is-active llama-muse-glimmer-30b-131k.service
+systemctl is-active llamampere-qwen3.8-atx-iq4xs-m-gpu1.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service  # atx-dual
+systemctl is-active llama-qwen3.8-q4-tensor-262k.service                 # stock-q4-tensor
+systemctl is-active lan-inference-gateway.service ai-metrics-exporter.service
+nvidia-smi --query-gpu=index,power.limit --format=csv
+curl -sS http://127.0.0.1:8080/health
+curl -sS http://127.0.0.1:8081/health
+curl -sS http://127.0.0.1:8082/health
+curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
+  http://127.0.0.1:8088/readyz
 ```
 
 Confirm that the gateway rejects unauthenticated `/v1/*` requests, Prometheus

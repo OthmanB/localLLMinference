@@ -96,10 +96,11 @@ def api_cost_usd(
     cached_rate = price.get("cached_input_usd_per_million_tokens")
     cached_rate = input_rate if cached_rate is None else float(cached_rate)
     output_rate = float(price["output_usd_per_million_tokens"])
-    # Runtime cached-prompt counters are a subset of total prompt tokens.
-    uncached_input_tokens = max(input_tokens - cached_input_tokens, 0.0)
+    # Runtime counters are disjoint: prompt_tokens_total counts processed
+    # tokens excluding cache hits, and prompt_tokens_cached_total counts the
+    # tokens reused from the cache.
     workload = (
-        uncached_input_tokens * input_rate
+        input_tokens * input_rate
         + cached_input_tokens * cached_rate
         + output_tokens * output_rate
     ) / TOKENS_PER_MILLION

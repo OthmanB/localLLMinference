@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+from re import fullmatch
 from urllib.parse import urlsplit
 
 
@@ -69,11 +70,60 @@ class BackendConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class PoolConfig:
+    name: str
+    model: str
+    replicas: tuple[str, ...]
+    session_header: str = "X-Inference-Session"
+    max_inflight: int = 1
+
+    @classmethod
+    def from_mapping(cls, value: object) -> "PoolConfig":
+        if not isinstance(value, dict):
+            raise ConfigurationError("Each pool must be a JSON object.")
+
+        allowed = {"name", "model", "replicas", "session_header", "max_inflight"}
+        unknown = sorted(set(value) - allowed)
+        if unknown:
+            raise ConfigurationError(f"Pool contains unknown fields: {', '.join(unknown)}.")
+
+        name = value.get("name")
+        model = value.get("model")
+        replicas = value.get("replicas")
+        session_header = value.get("session_header", "X-Inference-Session")
+        max_inflight = value.get("max_inflight", 1)
+
+        if not isinstance(name, str) or not name:
+            raise ConfigurationError("Each pool requires a non-empty name.")
+        if not isinstance(model, str) or not model:
+            raise ConfigurationError(f"Pool {name!r} requires a non-empty model.")
+        if not isinstance(replicas, list) or not replicas or not all(
+            isinstance(replica, str) and replica for replica in replicas
+        ):
+            raise ConfigurationError(f"Pool {name!r} replicas must be a non-empty list of names.")
+        if len(replicas) != len(set(replicas)):
+            raise ConfigurationError(f"Pool {name!r} must not list a replica more than once.")
+        if not isinstance(session_header, str) or not _is_http_header_name(session_header):
+            raise ConfigurationError(f"Pool {name!r} session_header must be an HTTP header name.")
+        if isinstance(max_inflight, bool) or not isinstance(max_inflight, int) or max_inflight <= 0:
+            raise ConfigurationError(f"Pool {name!r} max_inflight must be a positive integer.")
+
+        return cls(
+            name=name,
+            model=model,
+            replicas=tuple(replicas),
+            session_header=session_header,
+            max_inflight=max_inflight,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class GatewaySettings:
     backends: tuple[BackendConfig, ...]
     default_backend: str | None = None
     request_timeout_seconds: float = 300.0
     client_api_key_env: str | None = None
+    pools: tuple[PoolConfig, ...] = ()
 
     @classmethod
     def from_env(cls) -> "GatewaySettings":
@@ -86,12 +136,22 @@ class GatewaySettings:
         if not isinstance(configured_backends, list):
             raise ConfigurationError("LAN_INFERENCE_BACKENDS must be a JSON array.")
 
+        raw_pools = os.getenv("LAN_INFERENCE_POOLS", "[]")
+        try:
+            configured_pools = json.loads(raw_pools)
+        except json.JSONDecodeError as error:
+            raise ConfigurationError("LAN_INFERENCE_POOLS must be valid JSON.") from error
+
+        if not isinstance(configured_pools, list):
+            raise ConfigurationError("LAN_INFERENCE_POOLS must be a JSON array.")
+
         timeout = _float_env("LAN_INFERENCE_REQUEST_TIMEOUT_SECONDS", 300.0)
         settings = cls(
             backends=tuple(BackendConfig.from_mapping(item) for item in configured_backends),
             default_backend=os.getenv("LAN_INFERENCE_DEFAULT_BACKEND") or None,
             request_timeout_seconds=timeout,
             client_api_key_env=os.getenv("LAN_INFERENCE_CLIENT_API_KEY_ENV") or None,
+            pools=tuple(PoolConfig.from_mapping(item) for item in configured_pools),
         )
         settings.validate()
         return settings
@@ -104,6 +164,46 @@ class GatewaySettings:
             raise ConfigurationError("LAN_INFERENCE_DEFAULT_BACKEND must name a configured backend.")
         if self.request_timeout_seconds <= 0:
             raise ConfigurationError("LAN_INFERENCE_REQUEST_TIMEOUT_SECONDS must be positive.")
+
+        pool_names = [pool.name for pool in self.pools]
+        if len(pool_names) != len(set(pool_names)):
+            raise ConfigurationError("Pool names must be unique.")
+        pool_models = [pool.model for pool in self.pools]
+        if len(pool_models) != len(set(pool_models)):
+            raise ConfigurationError("Pool model IDs must be unique.")
+
+        backend_names = set(names)
+        for pool in self.pools:
+            if not isinstance(pool.name, str) or not pool.name:
+                raise ConfigurationError("Pool names and model IDs must be non-empty.")
+            if not isinstance(pool.model, str) or not pool.model:
+                raise ConfigurationError("Pool names and model IDs must be non-empty.")
+            if not isinstance(pool.replicas, (list, tuple)) or not pool.replicas or not all(
+                isinstance(replica, str) and replica for replica in pool.replicas
+            ) or len(pool.replicas) != len(set(pool.replicas)):
+                raise ConfigurationError(f"Pool {pool.name!r} replicas must be unique and non-empty.")
+            if not isinstance(pool.session_header, str) or not _is_http_header_name(pool.session_header):
+                raise ConfigurationError(f"Pool {pool.name!r} session_header must be an HTTP header name.")
+            if (
+                isinstance(pool.max_inflight, bool)
+                or not isinstance(pool.max_inflight, int)
+                or pool.max_inflight <= 0
+            ):
+                raise ConfigurationError(f"Pool {pool.name!r} max_inflight must be positive.")
+            unknown = sorted(set(pool.replicas) - backend_names)
+            if unknown:
+                raise ConfigurationError(
+                    f"Pool {pool.name!r} references unknown replicas: {', '.join(unknown)}."
+                )
+            model_owners = {
+                backend.name
+                for backend in self.backends
+                if pool.model in backend.models
+            }
+            if not model_owners.issubset(pool.replicas):
+                raise ConfigurationError(
+                    f"Pool model {pool.model!r} is also configured on a non-replica backend."
+                )
 
     def client_api_key(self) -> str | None:
         if self.client_api_key_env is None:
@@ -119,6 +219,10 @@ class GatewaySettings:
 def _is_http_url(value: str) -> bool:
     parsed = urlsplit(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _is_http_header_name(value: str) -> bool:
+    return fullmatch(r"[!#$%&'*+\-.^_`|~0-9A-Za-z]+", value) is not None
 
 
 def _float_env(name: str, default: float) -> float:

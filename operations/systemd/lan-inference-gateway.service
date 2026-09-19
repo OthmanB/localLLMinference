@@ -1,8 +1,7 @@
 [Unit]
 Description=Authenticated LAN OpenAI inference gateway
 Wants=network-online.target
-After=network-online.target llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service
-Requires=llama-qwen3.8-q4-tensor-262k.service llama-muse-glimmer-30b-131k.service
+After=network-online.target llama-muse-glimmer-30b-131k.service llama-qwen3.8-q4-tensor-262k.service llamampere-qwen3.8-atx-iq4xs-m-gpu1.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
 
 [Service]
 Type=simple
@@ -11,8 +10,10 @@ Group=obenomar
 EnvironmentFile=/etc/ai-server/lan-inference-gateway.env
 WorkingDirectory=/home/obenomar/localLLMinference/lan-inference-gateway
 ExecStart=/home/obenomar/localLLMinference/lan-inference-gateway/.venv/bin/lan-inference-gateway
+ExecStartPre=/usr/local/sbin/ai-qwen-profile-preflight gateway
 Restart=on-failure
 RestartSec=3
+TimeoutStartSec=900
 KillMode=mixed
 TimeoutStopSec=5
 SendSIGKILL=yes

@@ -1,270 +1,899 @@
 {
-  "annotations": {"list": []},
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "graphTooltip": 1,
   "panels": [
     {
       "title": "Model Up",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "max by (host_id, model) (ai_model_up{host_id=~\"$host_id\",model=~\"$model\"})", "legendFormat": "{{model}}", "instant": true, "range": false}],
-      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (host_id, model, gpu, gpu_uuid) (ai_model_up{host_id=~\"$host_id\",model=~\"$model\",gpu=~\".*\",gpu_uuid=~\".*\"})",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "title": "Decode tok/s",
       "description": "Last nonzero decode throughput reported by the runtime. The exporter holds the last measured sample while the runtime reports zero, so idle periods render as a plateau until the next measurement replaces it.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"custom": {"lineInterpolation": "stepAfter"}}, "overrides": []},
-      "targets": [{"expr": "ai_model_decode_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 9, "x": 6, "y": 0}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_model_decode_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 6,
+        "y": 0
+      }
     },
     {
       "title": "Prefill tok/s",
       "description": "Last nonzero prefill throughput reported by the runtime. The exporter holds the last measured sample while the runtime reports zero, so idle periods render as a plateau until the next measurement replaces it.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"custom": {"lineInterpolation": "stepAfter"}}, "overrides": []},
-      "targets": [{"expr": "ai_model_prefill_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 9, "x": 15, "y": 0}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineInterpolation": "stepAfter"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_model_prefill_tokens_per_second{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      }
     },
     {
       "title": "GPU Power",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "targets": [
-        {"expr": "ai_gpu_power_draw_watts{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "GPU {{gpu}} draw"},
-        {"expr": "ai_gpu_power_limit_watts{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "GPU {{gpu}} limit"}
+        {
+          "expr": "ai_gpu_power_draw_watts{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}} draw"
+        },
+        {
+          "expr": "ai_gpu_power_limit_watts{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}} limit"
+        }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      }
     },
     {
       "title": "GPU Temperature",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "ai_gpu_temperature_celsius{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "GPU {{gpu}} {{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_gpu_temperature_celsius{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      }
     },
     {
       "title": "GPU Utilization",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "ai_gpu_utilization_percent{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "GPU {{gpu}} {{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_gpu_utilization_percent{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      }
     },
     {
       "title": "VRAM Used",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "ai_gpu_memory_used_bytes{host_id=~\"$host_id\",model=~\"$model\"} / 1024 / 1024 / 1024", "legendFormat": "GPU {{gpu}} {{model}} GiB"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_gpu_memory_used_bytes{host_id=~\"$host_id\",model=~\"$model\"} / 1024 / 1024 / 1024",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}} GiB"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      }
     },
     {
       "title": "Host Memory",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "targets": [
-        {"expr": "ai_host_memory_used_bytes{host_id=~\"$host_id\"} / 1024 / 1024 / 1024", "legendFormat": "Used GiB"},
-        {"expr": "ai_host_memory_available_bytes{host_id=~\"$host_id\"} / 1024 / 1024 / 1024", "legendFormat": "Available GiB"}
+        {
+          "expr": "ai_host_memory_used_bytes{host_id=~\"$host_id\"} / 1024 / 1024 / 1024",
+          "legendFormat": "Used GiB"
+        },
+        {
+          "expr": "ai_host_memory_available_bytes{host_id=~\"$host_id\"} / 1024 / 1024 / 1024",
+          "legendFormat": "Available GiB"
+        }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      }
     },
     {
       "title": "Active Requests",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "ai_model_requests_active{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_model_requests_active{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      }
     },
     {
       "title": "Generated Tokens",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "ai_model_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_model_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      }
     },
     {
       "title": "Active Direct-GPU Energy",
       "description": "Measured GPU draw integrated only while the model request gauge was active in both endpoint samples. This is not a whole-host estimate.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "kwatth"}, "overrides": []},
-      "targets": [{"expr": "(last_over_time(ai_model_active_gpu_energy_joules_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_energy_joules_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) / 3600000", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "(last_over_time(ai_model_active_gpu_energy_joules_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_energy_joules_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) / 3600000",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      }
     },
     {
       "title": "Estimated Whole-Host Energy",
       "description": "Base idle draw, plus live CPU package power in wall_idle_plus_cpu_w mode, plus measured GPU power above the configured idle reference. This is a host-level estimate and cannot be attributed to an individual model.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "kwatth"}, "overrides": []},
-      "targets": [{"expr": "(last_over_time(ai_host_estimated_energy_joules_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_estimated_energy_joules_total{host_id=~\"$host_id\"}[$__range])) / 3600000", "legendFormat": "Host"}],
-      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 40}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "(last_over_time(ai_host_estimated_energy_joules_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_estimated_energy_joules_total{host_id=~\"$host_id\"}[$__range])) / 3600000",
+          "legendFormat": "Host"
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 40
+      }
     },
     {
       "title": "Whole-Host Electricity Cost",
-      "description": "Configured tariff scenario applied to estimated whole-host energy over the selected dashboard time range only; it is not a daily or billing total. The ~200 W idle whole-host draw (base + idle CPU) costs roughly 7 JPY per hour at the September TEPCO rate (33.71 JPY/kWh). For daily, weekly, and monthly totals use the Cost To Date panels below.",
+      "description": "Configured tariff scenario applied to estimated whole-host energy over the selected dashboard time range only; it is not a daily or billing total. This is the all-in electricity view: it already includes the idle baseline. The ~200 W idle whole-host draw (base + idle CPU) costs roughly 7 JPY per hour at the September TEPCO rate (33.71 JPY/kWh). For daily, weekly, and monthly totals use the Cost To Date panels below.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_host_electricity_cost_jpy_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_electricity_cost_jpy_total{host_id=~\"$host_id\"}[$__range])", "legendFormat": "{{tariff_id}}"}],
-      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 40}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_host_electricity_cost_jpy_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_electricity_cost_jpy_total{host_id=~\"$host_id\"}[$__range])",
+          "legendFormat": "{{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 40
+      }
     },
     {
       "title": "Excluded Host-Energy Time",
       "description": "Time excluded from the whole-host estimate because nvidia-smi samples were missing, late, or had an incomplete GPU set.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_energy_integration_gap_seconds_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_energy_integration_gap_seconds_total{host_id=~\"$host_id\"}[$__range])", "legendFormat": "Excluded seconds"}],
-      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 40}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_energy_integration_gap_seconds_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_energy_integration_gap_seconds_total{host_id=~\"$host_id\"}[$__range])",
+          "legendFormat": "Excluded seconds"
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 40
+      }
     },
     {
       "title": "Configured Host Baseline",
       "description": "Currently-configured whole-host baseline. Aggregated by host so a superseded baseline mode (after a mode change) does not keep showing its stale value.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
-      "targets": [{"expr": "max by (host_id) (last_over_time(ai_host_baseline_power_watts{host_id=~\"$host_id\"}[60s]))", "legendFormat": "baseline"}],
-      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 40}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max by (host_id) (last_over_time(ai_host_baseline_power_watts{host_id=~\"$host_id\"}[60s]))",
+          "legendFormat": "baseline"
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 40
+      }
     },
     {
       "title": "Active Direct-GPU Electricity Cost",
-      "description": "Measured active-request GPU energy priced with each configured electricity tariff scenario. It deliberately excludes host baseline power.",
+      "description": "Marginal electricity for measured active-request GPU energy under each configured tariff. It deliberately excludes the host baseline (platform, CPU, idle GPUs) and hardware cost, so it is not the all-in cost of serving and must not be read as an API-equivalent bill.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])", "legendFormat": "{{model}} {{tariff_id}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 45}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])",
+          "legendFormat": "{{model}} UUID {{gpu_uuid}} {{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 45
+      }
     },
     {
       "title": "Equivalent Remote API Workload Cost",
-      "description": "Observed input, cached-input, and output token deltas priced under each configured API comparison scenario. These are comparisons, not local billing records.",
+      "description": "Counterfactual list price of the same observed token flow: processed input tokens at the input rate, cached input tokens at the cached rate, and output tokens at the output rate, converted at the planning FX rate. Provider cache behavior and model capability are not equalised, so this is a directional comparison, not a bill.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_model_api_workload_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_api_workload_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])", "legendFormat": "{{model}} / {{provider}} {{remote_model}} / {{scenario}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 45}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_model_api_workload_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_api_workload_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])",
+          "legendFormat": "{{model}} UUID {{gpu_uuid}} / {{provider}} {{remote_model}} / {{scenario}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      }
     },
     {
       "title": "Direct GPU Electricity per 1K Energy-Covered Output Tokens",
-      "description": "Direct-GPU electricity cost divided by completions observed in active energy intervals. It stays unavailable until at least one completion has matching energy coverage and excludes whole-host baseline power.",
+      "description": "Direct-GPU electricity cost divided by completions observed in active energy intervals. It stays unavailable until at least one completion has matching energy coverage and excludes whole-host baseline power and hardware cost.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "(1000 * sum by (model, tariff_id) (last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) / on (model) group_left sum by (model) (last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]))) unless on (model) (sum by (model) (last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) == 0)", "legendFormat": "{{model}} {{tariff_id}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 53}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "(1000 * sum by (model, gpu_uuid, tariff_id) (last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) / on (model, gpu_uuid) group_left sum by (model, gpu_uuid) (last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]))) unless on (model, gpu_uuid) (sum by (model, gpu_uuid) (last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])) == 0)",
+          "legendFormat": "{{model}} UUID {{gpu_uuid}} {{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 53
+      }
     },
     {
       "title": "Energy-Covered Output Tokens",
       "description": "Completions observed in intervals where both endpoint samples reported an active model request. This is the denominator for direct-GPU cost per output token.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])", "legendFormat": "{{model}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 53}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range]) - first_over_time(ai_model_energy_covered_completion_tokens_total{host_id=~\"$host_id\",model=~\"$model\"}[$__range])",
+          "legendFormat": "{{model}} UUID {{gpu_uuid}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 53
+      }
     },
     {
       "title": "AI Server Scrape Reachability",
       "description": "Prometheus evaluates this from the monitoring host. A value of 0 means the AI exporter could not be scraped; it can represent a powered-off host, network loss, or exporter failure.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "targets": [{"expr": "up{job=\"ai-server\",host=~\"$host_id\"}", "legendFormat": "{{instance}}", "instant": true, "range": false}],
-      "gridPos": {"h": 5, "w": 8, "x": 0, "y": 61}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"ai-server\",host=~\"$host_id\"}",
+          "legendFormat": "{{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 61
+      }
     },
     {
       "title": "Confirmed Reboot Downtime",
       "description": "Elapsed time between the last sample before and first sample after a changed host boot ID. No host baseline is charged for this interval. It proves a reboot occurred, not why it occurred.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
-      "targets": [{"expr": "last_over_time(ai_host_reboot_downtime_seconds_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_reboot_downtime_seconds_total{host_id=~\"$host_id\"}[$__range])", "legendFormat": "Confirmed reboot downtime"}],
-      "gridPos": {"h": 5, "w": 8, "x": 8, "y": 61}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "last_over_time(ai_host_reboot_downtime_seconds_total{host_id=~\"$host_id\"}[$__range]) - first_over_time(ai_host_reboot_downtime_seconds_total{host_id=~\"$host_id\"}[$__range])",
+          "legendFormat": "Confirmed reboot downtime"
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 61
+      }
     },
     {
       "title": "Current Host Boot",
       "description": "Kernel boot time reported by the exporter. Multiplied by 1000 because Grafana renders dateTimeAsIso in epoch milliseconds. A changed value confirms the host rebooted since the preceding series.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "dateTimeAsIso"}, "overrides": []},
-      "targets": [{"expr": "ai_host_boot_time_seconds{host_id=~\"$host_id\"} * 1000", "legendFormat": "Boot time", "instant": true, "range": false}],
-      "gridPos": {"h": 5, "w": 8, "x": 16, "y": 61}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_host_boot_time_seconds{host_id=~\"$host_id\"} * 1000",
+          "legendFormat": "Boot time",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 61
+      }
     },
     {
       "title": "Host Electricity Cost To Date",
       "description": "Cumulative whole-host electricity cost since the current JST calendar-day, Monday, and month start. The whole-host series already contains the idle baseline, so the curve rises linearly while idle and steepens while GPUs are active. Each curve resets at its own JST period boundary.",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY", "min": 0, "custom": {"lineInterpolation": "linear"}}, "overrides": []},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY",
+          "min": 0,
+          "custom": {
+            "lineInterpolation": "linear"
+          }
+        },
+        "overrides": []
+      },
       "targets": [
-        {"expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} day"},
-        {"expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} week"},
-        {"expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}} month"}
+        {
+          "expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}} day"
+        },
+        {
+          "expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}} week"
+        },
+        {
+          "expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}} month"
+        }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 66}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 66
+      }
     },
     {
       "title": "Host Cost Today",
       "description": "Host electricity cost accumulated since midnight JST for each configured tariff scenario.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
-      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 66}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_host_electricity_cost_jpy_today{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 66
+      }
     },
     {
       "title": "Host Cost This Week",
       "description": "Host electricity cost accumulated since Monday 00:00 JST for each configured tariff scenario.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
-      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 66}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_host_electricity_cost_jpy_week_to_date{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 66
+      }
     },
     {
       "title": "Host Cost This Month",
       "description": "Host electricity cost accumulated since the first day of the month 00:00 JST for each configured tariff scenario. Excludes the fixed monthly basic charge.",
       "type": "stat",
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-      "fieldConfig": {"defaults": {"unit": "currencyJPY"}, "overrides": []},
-      "targets": [{"expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}", "legendFormat": "{{tariff_id}}"}],
-       "gridPos": {"h": 4, "w": 4, "x": 20, "y": 66}
-     },
-     {
-       "title": "CPU Power & Utilization",
-       "description": "CPU package power used by host accounting (source label: rapl -> interpolated bucket curve -> linear) alongside /proc/stat utilization.",
-       "type": "timeseries",
-       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-       "targets": [
-         {"expr": "ai_host_cpu_power_watts{host_id=~\"$host_id\"}", "legendFormat": "{{source}} watts"},
-         {"expr": "ai_host_cpu_utilization_percent{host_id=~\"$host_id\"}", "legendFormat": "CPU utilization %"}
-       ],
-       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 74}
-     },
-     {
-       "title": "Learned CPU Power Curve",
-       "description": "Median and stddev of RAPL-measured CPU package power per 5-point utilization bucket; each bucket keeps a moving window of the last 20 samples.",
-       "type": "timeseries",
-       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-       "targets": [
-         {"expr": "ai_cpu_power_bucket_median_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% median"},
-         {"expr": "ai_cpu_power_bucket_stddev_watts{host_id=~\"$host_id\"}", "legendFormat": "{{bucket}}% stddev"}
-       ],
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 74}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
       },
-      {
-        "title": "Host Power Attribution (base / cpu / gpu)",
-        "description": "Whole-host power split in wall_idle_plus_cpu_w mode: base (platform + idle GPUs) + live CPU package power + GPU draw above the idle reference, stacked to the estimated whole-host draw. Present only while the baseline mode is wall_idle_plus_cpu_w.",
-        "type": "timeseries",
-        "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-        "fieldConfig": {"defaults": {"unit": "watt", "custom": {"fillOpacity": 12, "stacking": {"mode": "normal", "group": "a"}}}, "overrides": []},
-        "targets": [
-          {"expr": "sum by (source) (ai_host_power_attribution_watts{host_id=~\"$host_id\"})", "legendFormat": "{{source}}"}
-        ],
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 82}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "ai_host_electricity_cost_jpy_month_to_date{host_id=~\"$host_id\"}",
+          "legendFormat": "{{tariff_id}}"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 66
       }
-    ],
+    },
+    {
+      "title": "CPU Power & Utilization",
+      "description": "CPU package power used by host accounting (source label: rapl -> interpolated bucket curve -> linear) alongside /proc/stat utilization.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_host_cpu_power_watts{host_id=~\"$host_id\"}",
+          "legendFormat": "{{source}} watts"
+        },
+        {
+          "expr": "ai_host_cpu_utilization_percent{host_id=~\"$host_id\"}",
+          "legendFormat": "CPU utilization %"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 74
+      }
+    },
+    {
+      "title": "Learned CPU Power Curve",
+      "description": "Median and stddev of RAPL-measured CPU package power per 5-point utilization bucket; each bucket keeps a moving window of the last 20 samples.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "ai_cpu_power_bucket_median_watts{host_id=~\"$host_id\"}",
+          "legendFormat": "{{bucket}}% median"
+        },
+        {
+          "expr": "ai_cpu_power_bucket_stddev_watts{host_id=~\"$host_id\"}",
+          "legendFormat": "{{bucket}}% stddev"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 74
+      }
+    },
+    {
+      "title": "Host Power Attribution (base / cpu / gpu)",
+      "description": "Whole-host power split in wall_idle_plus_cpu_w mode: base (platform + idle GPUs) + live CPU package power + GPU draw above the idle reference, stacked to the estimated whole-host draw. Present only while the baseline mode is wall_idle_plus_cpu_w.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "custom": {
+            "fillOpacity": 12,
+            "stacking": {
+              "mode": "normal",
+              "group": "a"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (source) (ai_host_power_attribution_watts{host_id=~\"$host_id\"})",
+          "legendFormat": "{{source}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 82
+      }
+    },
+    {
+      "type": "text",
+      "title": "How to read the cost panels",
+      "description": "Scope notes for the cost and API-comparison panels.",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Cost panel scope**\n\n- **Active Direct-GPU Electricity Cost** is a *marginal* figure: only the energy the serving GPUs draw while requests are active. It excludes the host baseline (platform + CPU + idle GPUs) and hardware cost.\n- **Equivalent Remote API Workload Cost** prices the observed token flow at configured provider list rates (processed input, cached input, output) using the planning FX rate. It is a counterfactual, not a bill, and assumes the provider would hit the same cache behaviour; model capability is not equalised.\n- For the **all-in electricity** view use **Whole-Host Electricity Cost** and the Host Cost Today/Week/Month panels; that series already contains the idle baseline.\n- Measured production windows: whole-host electricity was within about 10% of the off-peak API-equivalent, while active-GPU energy alone was roughly half of it. The marginal panel is the right lens for incremental decisions; the host panels are the right lens for the true running cost.",
+        "code": {
+          "language": "markdown",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "targets": []
+    },
+    {
+      "title": "Active Serving Profile",
+      "description": "Profile reported by the exporter. The atx-dual profile has two independent llamAmpere replicas and unchanged Muse.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (profile) (ai_serving_profile_info)",
+          "legendFormat": "{{profile}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 96
+      }
+    },
+    {
+      "title": "Replica Health",
+      "description": "One series per configured replica, identified by model, physical GPU, GPU UUID, and exporter backend.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (host_id, model, gpu, gpu_uuid, replica) (ai_replica_up{host_id=~\"$host_id\",model=~\"$model\"})",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}} ({{replica}})",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 5,
+        "w": 18,
+        "x": 6,
+        "y": 96
+      }
+    },
+    {
+      "title": "Gateway Pool Counters",
+      "description": "Bounded gateway pool route, affinity, saturation, and cold-failover counters. Session IDs are never exported.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (pool, replica, reason) (rate(ai_gateway_pool_route_decisions_total[$__rate_interval]))",
+          "legendFormat": "route {{pool}} {{replica}} {{reason}}"
+        },
+        {
+          "expr": "sum by (pool, replica) (rate(ai_gateway_pool_affinity_hits_total[$__rate_interval]))",
+          "legendFormat": "affinity hit {{pool}} {{replica}}"
+        },
+        {
+          "expr": "sum by (pool, replica) (rate(ai_gateway_pool_affinity_misses_total[$__rate_interval]))",
+          "legendFormat": "affinity miss {{pool}} {{replica}}"
+        },
+        {
+          "expr": "sum by (pool, replica) (rate(ai_gateway_pool_saturation_rejections_total[$__rate_interval]))",
+          "legendFormat": "saturation {{pool}} {{replica}}"
+        },
+        {
+          "expr": "sum by (pool, replica) (rate(ai_gateway_pool_cold_failover_total[$__rate_interval]))",
+          "legendFormat": "cold failover {{pool}} {{replica}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 101
+      }
+    },
+    {
+      "title": "Cache Observation",
+      "description": "llamAmpere cached-input accounting is unobserved, not zero. Cache-inclusive cost panels are unavailable for those replicas.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max by (backend, model, mode) (ai_backend_cache_observation_info)",
+          "legendFormat": "{{backend}} {{model}}: {{mode}}",
+          "instant": true,
+          "range": false
+        },
+        {
+          "expr": "max by (model, gpu, gpu_uuid, mode) (ai_model_cached_input_accounting_info{host_id=~\"$host_id\",model=~\"$model\"})",
+          "legendFormat": "{{model}} GPU {{gpu}} UUID {{gpu_uuid}}: {{mode}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 101
+      }
+    }
+  ],
   "schemaVersion": 39,
-  "tags": ["ai-server", "llama.cpp", "muse-glimmer"],
+  "tags": [
+    "ai-server",
+    "freetoken",
+    "llama.cpp",
+    "muse-glimmer"
+  ],
   "templating": {
     "list": [
       {
@@ -280,20 +909,30 @@
         "name": "host_id",
         "label": "Host",
         "type": "query",
-        "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "label_values(ai_host_power_accounting_configured, host_id)",
         "query": "label_values(ai_host_power_accounting_configured, host_id)",
         "includeAll": true,
         "allValue": ".*",
         "multi": true,
         "refresh": 1,
-        "current": {"selected": true, "text": "All", "value": "$__all"}
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
       },
       {
         "name": "model",
         "label": "Model",
         "type": "query",
-        "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "query_result(max by (model) (ai_model_up{host_id=~\"$host_id\"} == 1))",
         "query": "query_result(max by (model) (ai_model_up{host_id=~\"$host_id\"} == 1))",
         "regex": "/model=\"([^\"]+)\"/",
@@ -301,12 +940,19 @@
         "allValue": ".*",
         "multi": true,
         "refresh": 1,
-        "current": {"selected": true, "text": "All", "value": "$__all"}
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
       }
     ]
   },
-  "time": {"from": "now-6h", "to": "now"},
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "title": "AI Server - Inference Models",
   "uid": "ai-server-qwen-q4",
-  "version": 7
+  "version": 8
 }

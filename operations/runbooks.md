@@ -5,70 +5,109 @@
 ```bash
 systemctl status nvidia-power-limit.service
 systemctl status nvidia-fan-control.service
-systemctl status llama-qwen3.8-q4-tensor-262k.service
+systemctl status llamampere-qwen3.8-atx-iq4xs-m-gpu1.service
+systemctl status llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
 systemctl status llama-muse-glimmer-30b-131k.service
 systemctl status lan-inference-gateway.service
 systemctl status ai-metrics-exporter.service
 systemctl status ai-cpu-power-profiler.service
+cat /etc/ai-server/qwen-serving-profile
 nvidia-smi
 ```
 
+The active Qwen profile is selected by the root-only profile switch. The
+`atx-dual` profile owns GPU1/port 8080 and GPU2/port 8081; Muse continues to own
+GPU0/port 8082. The stock Qwen unit is stopped unless `stock-q4-tensor` is
+selected explicitly.
+
+The llamAmpere replicas append to `/var/log/ai-server/llamampere-qwen-gpu1.log`
+and `llamampere-qwen-gpu2.log`; the installer creates that directory and installs
+`/etc/logrotate.d/ai-server` to rotate the files daily. Both `LogsDirectory=` in
+the units and the `append:` targets require the directory to exist before the
+unit starts, so never remove it without recreating it (`systemd-tmpfiles
+--create`).
+
 ## Reinstall or Apply Unit Changes
 
-The installer is idempotent for the generated secrets. It installs the
-canonical units, preserves an existing gateway token, applies the GPU power and
-fan settings, disables the old user llama services, starts Qwen tensor and Muse,
-and starts the gateway, exporter, and CPU power profiler:
+The installer installs the canonical units, preserves an existing gateway token,
+and applies the GPU power and fan settings. It does not choose a Qwen topology.
+After installation, select the profile explicitly:
 
 ```bash
-sudo /path/to/localLLMinference/operations/install.sh
+sudo env \
+  AI_SERVER_LAN_SUBNET=192.0.2.0/24 \
+  AI_SERVER_PROMETHEUS_IP=192.0.2.10 \
+  /path/to/localLLMinference/operations/install.sh
+sudo /usr/local/sbin/ai-qwen-profile-switch atx-dual
 ```
 
 Run this command again after changing a canonical unit file. It performs the
-systemd daemon reload and restarts the affected services.
+systemd daemon reload; the profile switch starts the services for the selected
+topology.
 
 Gateway restart shutdown is bounded to five seconds so an in-flight request
-cannot hold the installer indefinitely; that request may be interrupted during
-an installation or deliberate restart.
+cannot hold the profile switch or a deliberate restart indefinitely; that
+request may be interrupted during a cutover or restart.
 
 ## API Check
 
 ```bash
 curl -sS http://127.0.0.1:8080/health
+curl -sS http://127.0.0.1:8081/health
 curl -sS http://127.0.0.1:8082/health
 curl -sS http://127.0.0.1:8088/healthz
+curl -sS http://127.0.0.1:8088/metrics
+curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
+  http://127.0.0.1:8088/readyz
 curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
   http://127.0.0.1:8088/v1/models
 ```
 
+`/v1/*` and `/readyz` are authenticated. Gateway `/metrics` is the bounded,
+unauthenticated diagnostics endpoint; it must not contain raw session IDs.
+
 ## Restart
 
-Restart the model before the gateway so the dependency remains clear:
+Restart only the services belonging to the selected profile. For `atx-dual`:
 
 ```bash
-sudo systemctl restart llama-qwen3.8-q4-tensor-262k.service
+sudo systemctl restart llamampere-qwen3.8-atx-iq4xs-m-gpu1.service
+sudo systemctl restart llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
 sudo systemctl restart llama-muse-glimmer-30b-131k.service
 sudo systemctl restart lan-inference-gateway.service
 sudo systemctl restart ai-metrics-exporter.service
 ```
 
+Do not start stock Qwen alongside either llamAmpere replica. Use the profile
+switch for a topology change so ports, GPU ownership, environment backups, and
+readiness checks are performed in order.
+
 ## Rollback
 
-Stop only the service being changed. Muse owns GPU0 and Qwen tensor owns GPUs1
-and 2, so they are intended to run together. Do not enable an old Qwen service
-without checking GPU ownership first.
+Rollback is manual, cold, and mutually exclusive. It is not an automatic
+fallback:
+
+```bash
+sudo /usr/local/sbin/ai-qwen-profile-switch stock-q4-tensor
+```
+
+The switch stops the gateway and both llamAmpere units, verifies ports 8080 and
+8081 and GPUs 1 and 2 are clear, installs the stock gateway/exporter profiles,
+starts `llama-qwen3.8-q4-tensor-262k.service`, and verifies authenticated
+gateway routing. If llamAmpere fails, leave it visible through systemd,
+`/readyz`, and Prometheus until the operator chooses restart or rollback.
 
 ## Reboot Acceptance
 
-After a reboot verify that the inference GPUs report their power limits
-(GPUs 0-2 = 300 W), the fixed fan service reports GPU 0 at 70%, GPU 1 at 80%,
-and GPU 2 at 85%, Qwen reports model ID `qwen3.8-27b-q4-tensor262k` across GPUs
-1 and 2, Muse reports model ID `muse-glimmer-30b-kquant17` on GPU0, the gateway
-requires a token, the exporter is reachable by Prometheus, and no retired model
-service started.
+After a reboot verify that the selected profile marker is `atx-dual`, both
+llamAmpere units own only their intended GPU and loopback port, Muse reports
+model ID `muse-glimmer-30b-kquant17` on GPU0, the gateway requires a token for
+`/v1` and `/readyz`, `/metrics` is reachable without a token, the exporter is
+reachable by Prometheus, and the stock Qwen service did not start. If the
+operator selected `stock-q4-tensor`, verify that profile and its single Qwen
+model ID instead.
 
-The supported deployment shape is in `deployment-record.md`; the full
-deployment history and local configuration stay in the ignored
+The local deployment state, active profile, and acceptance gates are in
 `deployment-record.local.md`.
 
 ## CPU Power Profiler & Monitoring
@@ -103,9 +142,8 @@ sudo docker exec prometheus promtool check config /etc/prometheus/prometheus.yml
 curl -s 'http://<NAS_IP>:9090/api/v1/query' --data-urlencode 'query=up{job="ai-server-cpu-power"}'
 ```
 
-The AI server firewall must allow 9109 from the monitoring host only
-(`operations/install.sh` applies `ufw allow from <MONITOR_IP> to any port 9109
-proto tcp`; add it manually on a host installed before that rule existed).
+The AI server firewall must allow 9109 from the monitoring host only:
+`sudo ufw allow from <MONITOR_IP> to any port 9109 proto tcp`.
 
 ### Cost config: CPU power and baseline mode (privileged)
 
@@ -124,9 +162,14 @@ sudo rewrites it as `root:root 0600` and the exporter crash-loops with a
 /etc/ai-server/ai-cost-accounting.json`, then
 `sudo systemctl restart ai-metrics-exporter.service`.
 
-## Reasoning Effort
+## Context And Reasoning Effort
 
-Use the model-specific OpenCode variants: Qwen tensor defaults to `medium` and
+The llamAmpere profile files request context `262144`, and the native 262144
+acceptance gate passed in isolated runs on both GPUs and concurrently. The
+matching `...-262144` IDs are the validated staged configuration; live endpoint
+and cutover acceptance are still required. Muse remains at 131072.
+
+Use the model-specific OpenCode variants: Qwen defaults to `medium` and
 supports `none`, `low`, `medium`, `high`, and `xhigh`; Muse Glimmer defaults to
 `high` and supports `low`, `medium`, `high`, and `xhigh`. Muse does not expose a
 reliable non-thinking mode. For an exact Q4 non-thinking benchmark profile,
@@ -136,12 +179,11 @@ change the general-purpose service for that test.
 Sampling parameters are caller-controlled. Use the Qwen-recommended values for
 the selected thinking or non-thinking mode when reproducibility is required.
 
-Qwen tensor uses the validated 262,144-token context, F16 K/V cache, Flash
-Attention, 2,048 batch size, and 1,024 micro-batch size. The selected runtime
-binary is the `llama.cpp-recent-20260905` build, with NCCL defaults and no UVM
-or NCCL environment overrides. An OpenCode request also contains its system and
-tool context, so a fresh session can still be slow before the first output
-token; subsequent calls benefit from the runtime's populated context cache.
+An OpenCode request also contains its system and tool context, so a fresh
+session can still be slow before the first output token. For pooled llamAmpere
+requests, send a stable `X-Inference-Session` value to preserve replica cache
+locality. The response identifies the selected lane with
+`X-Inference-Replica`.
 
 Thinking example:
 

@@ -39,10 +39,13 @@ sudo env \
   AI_SERVER_LAN_SUBNET=192.0.2.0/24 \
   AI_SERVER_PROMETHEUS_IP=192.0.2.10 \
   /path/to/localLLMinference/operations/install.sh
+sudo /usr/local/sbin/ai-qwen-profile-switch atx-dual
 ```
 
 The reserved documentation network values above are examples only. The full
-variable list is in `operations/config/install.env.example`.
+variable list is in `operations/config/install.env.example`. After installation,
+select the active Qwen topology with `ai-qwen-profile-switch`; it starts the
+matching services and preserves the existing gateway token.
 
 The installer generates the gateway token outside the repository. Never copy
 that token, a Tailscale authentication key, a Grafana password, or a client API

@@ -1,0 +1,28 @@
+[Unit]
+Description=Qwen3.8-27B ATX llamAmpere replica on physical GPU 1
+Wants=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+After=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+Requires=nvidia-power-limit.service
+
+[Service]
+Type=simple
+User=obenomar
+Group=obenomar
+WorkingDirectory=/opt/ai-server/llamampere/36a6bca817
+Environment=CUDA_VISIBLE_DEVICES=1
+Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
+Environment=GGML_Q8_TURBO3_MMA_FUSED=1
+Environment=LD_LIBRARY_PATH=/opt/ai-server/llamampere/36a6bca817/build-sm86/bin
+ExecStartPre=/usr/local/sbin/ai-verify-llamampere-artifacts
+ExecStart=/opt/ai-server/llamampere/36a6bca817/build-sm86/bin/llama-server --model /opt/ai-server/models/qwen3.8-27b-atx-iq4_xs_m/Qwen3.8-27B-ATX-4-XS.gguf --alias qwen3.8-27b-atx-iq4xs-m-262144-gpu1,qwen3.8-27b-atx-iq4xs-m-262144 --ctx-size 262144 --batch-size 4096 --ubatch-size 1024 --threads 8 --threads-batch 8 --n-gpu-layers 99 --flash-attn on --cache-type-k q8_0 --cache-type-v turbo3 --parallel 1 --jinja --fit off --cache-prompt --cache-ram 8192 --ctx-checkpoints 24 --checkpoint-min-step 10240 --spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-p-min 0 --spec-draft-type-k q8_0 --spec-draft-type-v q8_0 --spec-draft-vocab-map /opt/ai-server/llamampere/36a6bca817/docs/mtp-vocab/atx_65536.txt --device CUDA0 --host 127.0.0.1 --port 8080 --metrics --perf --no-ui
+LogsDirectory=ai-server
+StandardOutput=append:/var/log/ai-server/llamampere-qwen-gpu1.log
+StandardError=append:/var/log/ai-server/llamampere-qwen-gpu1.log
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+LimitNOFILE=1048576
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

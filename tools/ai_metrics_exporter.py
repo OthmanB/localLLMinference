@@ -21,10 +21,15 @@ from ai_cpu_power_profiler import cpu_utilization_percent, interpolate_power, re
 
 
 DEFAULT_BACKENDS = {
-    "qwen_27b_q4": {
+    "qwen_atx_gpu1": {
         "url": "http://127.0.0.1:8080/metrics",
-        "model": "qwen3.8-27b-q4-tensor262k",
-        "gpus": ["1", "2"],
+        "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu1",
+        "gpus": ["1"],
+    },
+    "qwen_atx_gpu2": {
+        "url": "http://127.0.0.1:8081/metrics",
+        "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu2",
+        "gpus": ["2"],
     },
     "muse_glimmer_30b_131k": {
         "url": "http://127.0.0.1:8082/metrics",
@@ -44,8 +49,8 @@ MODEL_METRIC_DEFINITIONS = {
     ),
     "ai_model_requests_active": ("Currently active model requests.", "gauge"),
     "ai_model_requests_completed_total": ("Completed model requests since process start.", "counter"),
-    "ai_model_prompt_tokens_total": ("Prompt tokens reported by the runtime since process start.", "counter"),
-    "ai_model_cached_prompt_tokens_total": ("Cached prompt tokens reported by the runtime since process start.", "counter"),
+    "ai_model_prompt_tokens_total": ("Prompt tokens processed by the runtime since process start, excluding cached prompt tokens.", "counter"),
+    "ai_model_cached_prompt_tokens_total": ("Prompt tokens reused from the runtime prefix cache since process start.", "counter"),
     "ai_model_completion_tokens_total": ("Completion tokens since process start.", "counter"),
     "ai_model_request_p95_seconds": ("Request p95 duration.", "gauge"),
     "ai_model_ttft_seconds": ("Mean time to first token.", "gauge"),
@@ -168,17 +173,93 @@ ACCOUNTING_METRIC_DEFINITIONS = {
     "ai_api_price_usd_per_million_tokens": ("Configured remote API token price.", "gauge"),
     "ai_fx_jpy_per_usd": ("Configured USD to JPY exchange rate.", "gauge"),
 }
+EXPORTER_METRIC_DEFINITIONS = {
+    "ai_serving_profile_info": ("Configured active serving profile.", "gauge"),
+    "ai_backend_up": ("Whether the configured backend metrics endpoint is reachable.", "gauge"),
+    "ai_replica_up": ("Whether the configured backend replica metrics endpoint is reachable.", "gauge"),
+    "ai_backend_cache_observation_info": (
+        "Cached-input accounting observation status for a backend.",
+        "gauge",
+    ),
+    "ai_gateway_metrics_up": (
+        "Whether the optional local gateway metrics input was reachable.",
+        "gauge",
+    ),
+    "ai_gateway_metrics_observation_info": (
+        "Observation status for the optional local gateway metrics input.",
+        "gauge",
+    ),
+    "ai_gateway_pool_route_decisions_total": (
+        "Pool route decisions observed from the local gateway.",
+        "counter",
+    ),
+    "ai_gateway_pool_affinity_hits_total": (
+        "Pool session-affinity hits observed from the local gateway.",
+        "counter",
+    ),
+    "ai_gateway_pool_affinity_misses_total": (
+        "Pool session-affinity misses observed from the local gateway.",
+        "counter",
+    ),
+    "ai_gateway_pool_saturation_rejections_total": (
+        "Pool saturation rejections observed from the local gateway.",
+        "counter",
+    ),
+    "ai_gateway_pool_cold_failover_total": (
+        "Cold health-failover events observed from the local gateway.",
+        "counter",
+    ),
+}
+GATEWAY_METRIC_ALIASES = {
+    "ai_gateway_pool_route_decisions_total": "route",
+    "ai_gateway_pool_route_total": "route",
+    "ai_gateway_pool_routes_total": "route",
+    "ai_gateway_route_decisions_total": "route",
+    "gateway_pool_route_decisions_total": "route",
+    "lan_inference_gateway_pool_route_decisions_total": "route",
+    "ai_gateway_pool_affinity_hits_total": "affinity_hits",
+    "ai_gateway_affinity_hits_total": "affinity_hits",
+    "gateway_pool_affinity_hits_total": "affinity_hits",
+    "lan_inference_gateway_pool_affinity_hits_total": "affinity_hits",
+    "ai_gateway_pool_affinity_misses_total": "affinity_misses",
+    "ai_gateway_affinity_misses_total": "affinity_misses",
+    "gateway_pool_affinity_misses_total": "affinity_misses",
+    "lan_inference_gateway_pool_affinity_misses_total": "affinity_misses",
+    "ai_gateway_pool_saturation_rejections_total": "saturation",
+    "ai_gateway_saturation_rejections_total": "saturation",
+    "gateway_pool_saturation_rejections_total": "saturation",
+    "lan_inference_gateway_pool_saturation_rejections_total": "saturation",
+    "ai_gateway_pool_cold_failover_total": "cold_failover",
+    "ai_gateway_cold_failover_total": "cold_failover",
+    "gateway_pool_cold_failover_total": "cold_failover",
+    "lan_inference_gateway_pool_cold_failover_total": "cold_failover",
+}
+GATEWAY_METRIC_NAMES = {
+    "route": "ai_gateway_pool_route_decisions_total",
+    "affinity_hits": "ai_gateway_pool_affinity_hits_total",
+    "affinity_misses": "ai_gateway_pool_affinity_misses_total",
+    "saturation": "ai_gateway_pool_saturation_rejections_total",
+    "cold_failover": "ai_gateway_pool_cold_failover_total",
+}
+DEFAULT_GATEWAY_LABELS = {
+    "pool": "unknown",
+    "replica": "unknown",
+    "reason": "unknown",
+}
+GATEWAY_LABEL_PATTERN = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
 
 
 def load_backends() -> dict[str, dict[str, object]]:
     raw = os.getenv("AI_METRICS_BACKENDS")
     if not raw:
+        validate_backend_gpu_ownership(DEFAULT_BACKENDS)
         return DEFAULT_BACKENDS
     value = json.loads(raw)
     if not isinstance(value, dict):
         raise ValueError("AI_METRICS_BACKENDS must be a JSON object")
     if not all(isinstance(name, str) and isinstance(backend, dict) for name, backend in value.items()):
         raise ValueError("AI_METRICS_BACKENDS values must be JSON objects")
+    validate_backend_gpu_ownership(value)
     return value
 
 
@@ -197,6 +278,38 @@ def backend_gpus(backend: Mapping[str, object]) -> tuple[str, ...]:
     return gpus
 
 
+def validate_backend_gpu_ownership(backends: Mapping[str, Mapping[str, object]]) -> None:
+    """Reject ambiguous physical-GPU ownership across configured backends."""
+    owners: dict[str, str] = {}
+    for backend_name, backend in backends.items():
+        for gpu in backend_gpus(backend):
+            previous_owner = owners.get(gpu)
+            if previous_owner is not None:
+                raise ValueError(
+                    f"GPU {gpu!r} is assigned to multiple metrics backends: "
+                    f"{previous_owner!r} and {backend_name!r}"
+                )
+            owners[gpu] = backend_name
+
+
+def cached_input_mode(backend: Mapping[str, object], backend_name: str = "") -> str:
+    """Identify cache accounting without assuming an unobserved cache is empty."""
+    configured = backend.get("cached_input_mode")
+    if configured in {"observed", "unobserved", "unobserved_assumed_uncached"}:
+        return str(configured)
+
+    runtime = " ".join(
+        str(backend.get(field, ""))
+        for field in ("runtime", "engine", "format", "name", "model")
+    ).lower()
+    runtime = f"{runtime} {backend_name.lower()}"
+    if "llamampere" in runtime or "llama_ampere" in runtime or "atx" in runtime:
+        return "unobserved"
+    if str(backend.get("format", "prometheus")).lower() == "freetoken":
+        return "unobserved_assumed_uncached"
+    return "observed"
+
+
 def escape_label(value: object) -> str:
     return json.dumps(str(value), ensure_ascii=True)
 
@@ -207,6 +320,103 @@ def add_labels(existing: str | None, labels: Mapping[str, object]) -> str:
         values.append(existing)
     values.extend(f"{name}={escape_label(value)}" for name, value in labels.items())
     return "{" + ",".join(values) + "}"
+
+
+def parse_prometheus_labels(encoded: str | None) -> dict[str, str]:
+    if not encoded:
+        return {}
+    labels: dict[str, str] = {}
+    for match in re.finditer(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:\\.|[^"])*)"', encoded):
+        try:
+            labels[match.group(1)] = str(json.loads(f'"{match.group(2)}"'))
+        except ValueError:
+            continue
+    return labels
+
+
+def _bounded_gateway_label(value: object) -> str:
+    value = str(value)
+    return value if GATEWAY_LABEL_PATTERN.fullmatch(value) else "unknown"
+
+
+def parse_gateway_metrics(text: str) -> dict[str, dict[tuple[str, ...], float]]:
+    """Keep only bounded gateway routing counters; never export request identity labels."""
+    samples: dict[str, dict[tuple[str, ...], float]] = {
+        kind: {} for kind in GATEWAY_METRIC_NAMES
+    }
+    for line in text.splitlines():
+        match = METRIC_LINE.match(line)
+        if not match:
+            continue
+        name, _, encoded_labels, value = match.groups()
+        kind = GATEWAY_METRIC_ALIASES.get(name)
+        if kind is None:
+            continue
+        source_labels = parse_prometheus_labels(encoded_labels)
+        pool = _bounded_gateway_label(
+            source_labels.get("pool", source_labels.get("pool_name", DEFAULT_GATEWAY_LABELS["pool"]))
+        )
+        replica = _bounded_gateway_label(
+            source_labels.get(
+                "replica",
+                source_labels.get(
+                    "selected_replica",
+                    source_labels.get(
+                        "backend", source_labels.get("backend_name", DEFAULT_GATEWAY_LABELS["replica"])
+                    ),
+                ),
+            )
+        )
+        if kind == "route":
+            reason = _bounded_gateway_label(
+                source_labels.get("reason", source_labels.get("route_reason", DEFAULT_GATEWAY_LABELS["reason"]))
+            )
+        else:
+            reason = "unknown"
+        key = (pool, replica, reason)
+        values = samples[kind]
+        values[key] = values.get(key, 0.0) + _number(value)
+    return samples
+
+
+def gateway_metrics_lines(
+    comments_seen: set[str],
+    url: str | None,
+) -> list[str]:
+    output: list[str] = []
+    add_metric_definitions(output, EXPORTER_METRIC_DEFINITIONS, comments_seen)
+    gateway_up = 0.0
+    observation_status = "unknown"
+    samples: dict[str, dict[tuple[str, ...], float]] = {
+        kind: {} for kind in GATEWAY_METRIC_NAMES
+    }
+    if url:
+        try:
+            samples = parse_gateway_metrics(fetch_metrics(url))
+            gateway_up = 1.0
+            observation_status = "observed"
+        except (OSError, ValueError, UnicodeError):
+            pass
+
+    output.append(f"ai_gateway_metrics_up {gateway_up}")
+    output.append(
+        f"ai_gateway_metrics_observation_info{add_labels(None, {'status': observation_status})} 1"
+    )
+    for kind, metric_name in GATEWAY_METRIC_NAMES.items():
+        values = samples[kind]
+        if not values:
+            values = {("unknown", "unknown", "unknown"): 0.0}
+        for key, value in values.items():
+            if kind == "route":
+                labels = {
+                    "pool": key[0],
+                    "replica": key[1],
+                    "reason": key[2],
+                }
+            else:
+                labels = {"pool": key[0], "replica": key[1]}
+            output.append(f"{metric_name}{add_labels(None, labels)} {value}")
+    return output
 
 
 def add_model_metric_definitions(
@@ -257,6 +467,7 @@ def parse_llama_metrics(
     labels: Mapping[str, str],
     comments_seen: set[str],
     rate_state: dict[str, float] | None = None,
+    cached_input_mode: str = "observed",
 ) -> tuple[list[str], dict[str, float]]:
     output: list[str] = []
     rate_key = metric_key(labels.get("model", ""), labels.get("gpu_uuid", ""))
@@ -278,15 +489,18 @@ def parse_llama_metrics(
         name, _, existing, value = match.groups()
         numeric_value = _number(value)
         generic_name = LLAMA_TO_MODEL_METRICS.get(name)
-        if generic_name:
+        trusted_cached_metric = not (
+            name == "llamacpp:prompt_tokens_cached_total" and cached_input_mode == "unobserved"
+        )
+        if generic_name and trusted_cached_metric:
             add_model_metric_definitions(output, [generic_name], comments_seen)
         output.append(f"{name}{add_labels(existing, labels)} {value}")
-        if generic_name:
+        if generic_name and trusted_cached_metric:
             retained = retain_nonzero_rate(rate_state, rate_key, generic_name, numeric_value)
             output.append(f"{generic_name}{add_labels(None, labels)} {retained}")
         if name == "llamacpp:prompt_tokens_total":
             observation["prompt_tokens"] = numeric_value
-        elif name == "llamacpp:prompt_tokens_cached_total":
+        elif name == "llamacpp:prompt_tokens_cached_total" and cached_input_mode != "unobserved":
             observation["cached_prompt_tokens"] = numeric_value
         elif name == "llamacpp:tokens_predicted_total":
             observation["completion_tokens"] = numeric_value
@@ -477,9 +691,20 @@ def load_json_config(path: str | None) -> dict[str, object]:
 
 
 class MetricsState:
-    def __init__(self, backends: dict[str, dict[str, object]], accounting: CostAccounting) -> None:
+    def __init__(
+        self,
+        backends: dict[str, dict[str, object]],
+        accounting: CostAccounting,
+        gateway_metrics_url: str | None = None,
+    ) -> None:
+        validate_backend_gpu_ownership(backends)
         self.backends = backends
         self.accounting = accounting
+        self.gateway_metrics_url = (
+            gateway_metrics_url
+            if gateway_metrics_url is not None
+            else os.getenv("AI_GATEWAY_METRICS_URL")
+        )
         self.lock = threading.Lock()
         self.rate_state: dict[str, float] = {}
         self.previous_proc: tuple[float, float] | None = None
@@ -534,6 +759,9 @@ class MetricsState:
             "# HELP ai_model_cached_input_accounting_info Cached-input accounting mode for the runtime.",
             "# TYPE ai_model_cached_input_accounting_info gauge",
         ]
+        add_metric_definitions(lines, EXPORTER_METRIC_DEFINITIONS, comments_seen)
+        profile = os.getenv("AI_SERVING_PROFILE", "unknown").strip() or "unknown"
+        lines.append(f"ai_serving_profile_info{add_labels(None, {'profile': profile})} 1")
         gpu_models: dict[str, str] = {}
         configured_models: set[str] = set()
         for backend in self.backends.values():
@@ -550,7 +778,7 @@ class MetricsState:
             pass
 
         model_observations: dict[str, dict[str, object]] = {}
-        for backend in self.backends.values():
+        for backend_name, backend in self.backends.items():
             model = str(backend["model"])
             gpus = backend_gpus(backend)
             primary_gpu = gpus[0]
@@ -559,6 +787,8 @@ class MetricsState:
                 for gpu in gpus
             }
             scrape_error = 0
+            cached_mode = cached_input_mode(backend, backend_name)
+            backend_up = 0
             try:
                 primary_labels = {
                     "host_id": self.accounting.host_id,
@@ -570,13 +800,16 @@ class MetricsState:
                     parsed, observation = parse_freetoken_stats(
                         fetch_json(str(backend["url"])), primary_labels, comments_seen, self.rate_state
                     )
-                    cached_mode = "unobserved_assumed_uncached"
                 else:
                     parsed, observation = parse_llama_metrics(
-                        fetch_metrics(str(backend["url"])), primary_labels, comments_seen, self.rate_state
+                        fetch_metrics(str(backend["url"])),
+                        primary_labels,
+                        comments_seen,
+                        self.rate_state,
+                        cached_mode,
                     )
-                    cached_mode = "observed"
                 lines.extend(parsed)
+                backend_up = 1
                 for gpu in gpus:
                     label_values = {
                         "host_id": self.accounting.host_id,
@@ -596,10 +829,19 @@ class MetricsState:
                         "completion_tokens": observation["completion_tokens"] if gpu == primary_gpu else 0.0,
                         "active": observation["requests_active"] > 0,
                         "cached_input_mode": cached_mode,
-                        "account_tokens": gpu == primary_gpu,
+                        "account_tokens": gpu == primary_gpu and cached_mode != "unobserved",
                     }
             except (OSError, ValueError, KeyError):
                 scrape_error = 1
+            backend_labels = {
+                "backend": backend_name,
+                "model": model,
+            }
+            lines.append(f"ai_backend_up{add_labels(None, backend_labels)} {backend_up}")
+            lines.append(
+                "ai_backend_cache_observation_info"
+                f"{add_labels(None, backend_labels | {'mode': cached_mode})} 1"
+            )
             for gpu in gpus:
                 label_values = {
                     "host_id": self.accounting.host_id,
@@ -611,6 +853,11 @@ class MetricsState:
                 if scrape_error:
                     lines.append(f"ai_model_up{labels} 0")
                 lines.append(f"ai_model_scrape_error{labels} {scrape_error}")
+                replica_labels = label_values | {
+                    "backend": backend_name,
+                    "replica": backend_name,
+                }
+                lines.append(f"ai_replica_up{add_labels(None, replica_labels)} {backend_up}")
 
         energy_gpus: dict[str, dict[str, object]] = {}
         if nvidia_ok:
@@ -627,6 +874,14 @@ class MetricsState:
                 }
         else:
             lines.append("ai_exporter_nvidia_smi_up 0")
+
+        lines.extend(gateway_metrics_lines(comments_seen, self.gateway_metrics_url))
+
+        configured_model_gpus: dict[str, set[str]] = {}
+        for uuid, sample in energy_gpus.items():
+            model = sample.get("model")
+            if isinstance(model, str):
+                configured_model_gpus.setdefault(model, set()).add(uuid)
 
         self.resolve_cpu_power()
         add_metric_definitions(lines, CPU_METRIC_DEFINITIONS, comments_seen)
@@ -664,12 +919,6 @@ class MetricsState:
                 lines.append(
                     f"ai_host_power_attribution_watts{add_labels(None, host_labels | {'source': source_name})} {value}"
                 )
-
-        configured_model_gpus: dict[str, set[str]] = {}
-        for uuid, sample in energy_gpus.items():
-            model = sample.get("model")
-            if isinstance(model, str):
-                configured_model_gpus.setdefault(model, set()).add(uuid)
 
         self.accounting.observe(timestamp_seconds, energy_gpus, model_observations, self.cpu_power)
         add_metric_definitions(lines, ACCOUNTING_METRIC_DEFINITIONS, comments_seen)
@@ -716,6 +965,7 @@ def main() -> None:
     parser.add_argument("--cost-config")
     parser.add_argument("--pricing-config")
     parser.add_argument("--state-path")
+    parser.add_argument("--gateway-metrics-url")
     args = parser.parse_args()
     if bool(args.cost_config) != bool(args.pricing_config):
         parser.error("--cost-config and --pricing-config must be supplied together")
@@ -728,7 +978,7 @@ def main() -> None:
         if args.cost_config
         else CostAccounting.disabled()
     )
-    state = MetricsState(load_backends(), accounting)
+    state = MetricsState(load_backends(), accounting, args.gateway_metrics_url)
 
     def refresh() -> None:
         while True:

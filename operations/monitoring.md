@@ -4,20 +4,52 @@ Prometheus and Grafana run on the monitoring host. The AI server exporter listen
 on port 9108 and combines llama.cpp, `nvidia-smi`, host-memory, energy,
 electricity-cost, and API-equivalent-cost metrics.
 
-Expected model labels:
+The staged serving profile is `atx-dual`, reported by
+`ai_serving_profile_info{profile="atx-dual"}`. Expected model labels are:
 
 - `model="muse-glimmer-30b-kquant17"`
 - `gpu="0"`
-- `model="qwen3.8-27b-q4-tensor262k"`
-- `gpu="1"` and `gpu="2"`
+- `model="qwen3.8-27b-atx-iq4xs-m-262144-gpu1"`, `gpu="1"`
+- `model="qwen3.8-27b-atx-iq4xs-m-262144-gpu2"`, `gpu="2"`
 
 All exporter-owned GPU and accounting series also include immutable `host_id` and
 `gpu_uuid` labels. Do not identify a GPU solely by the global GPU index.
 
+The llamAmpere model IDs above and their `262144` context passed the isolated
+native-context gate on both GPUs and concurrently. A successful exporter scrape
+still does not substitute for live endpoint and cutover acceptance.
+
 The dashboard should show request processing, prefill tokens/s, decode tokens/s,
 cumulative prompt/generated tokens, GPU utilization, measured power draw and limit,
 temperature, VRAM, host memory, energy, electricity cost, API-equivalent costs,
-and exporter/service health.
+exporter/service health, active profile, per-replica health, gateway pool
+counters, and cache observation status.
+
+The exporter has two independent llamAmpere backends and one unchanged Muse
+backend. The two Qwen backends are `127.0.0.1:8080` on GPU1 and
+`127.0.0.1:8081` on GPU2. Never configure the stock Qwen backend at the same time:
+the exporter rejects duplicate physical GPU ownership.
+
+Exporter health metrics include:
+
+- `ai_replica_up{backend,replica,model,gpu,gpu_uuid}` for each configured model
+  server.
+- `ai_backend_cache_observation_info{backend,model,mode}` and
+  `ai_model_cached_input_accounting_info{model,gpu,gpu_uuid,mode}` for cache
+  status. `mode="unobserved"` is the expected llamAmpere value.
+- `ai_gateway_pool_route_decisions_total{pool,replica,reason}`,
+  `ai_gateway_pool_affinity_hits_total`, `ai_gateway_pool_affinity_misses_total`,
+  `ai_gateway_pool_saturation_rejections_total`, and
+  `ai_gateway_pool_cold_failover_total` for bounded gateway counters.
+
+Gateway pool metrics contain only configured pool, replica, and reason labels;
+session IDs are never labels or logs. The gateway `/metrics` input is
+unauthenticated but bounded, while the exporter endpoint remains firewall-limited
+to Prometheus.
+
+The model selector is based on `ai_model_up == 1`, rather than all historical
+Prometheus label values. This prevents retired model IDs retained in Prometheus
+from leaving panels empty after a service migration.
 
 Throughput plateau semantics: runtimes report zero decode/prefill throughput
 whenever their scheduler is idle. The exporter therefore retains the last nonzero
@@ -36,8 +68,8 @@ Host memory metrics are exposed as:
 The Prometheus scrape job is in `config/prometheus-ai-server.yml`. Grafana
 should use the existing Prometheus data source and import
 `config/grafana-ai-server-dashboard.json` into dashboard UID
-`ai-server-qwen-q4`. The authenticated import procedure is kept in the
-ignored `deployment-record.local.md`; verify the resulting dashboard at
+`ai-server-qwen-q4`. The authenticated API procedure is documented in
+`deployment-record.local.md`; verify the resulting dashboard at
 `/d/ai-server-qwen-q4`.
 
 After changing the exporter or dashboard source files, restart the exporter and
@@ -47,9 +79,10 @@ re-import the dashboard with overwrite enabled:
 sudo systemctl restart ai-metrics-exporter.service
 ```
 
-Run `sudo operations/install.sh` on the AI server to install the permanent
-services and local gateway/exporter configuration. Then import the dashboard
-source on the monitoring host with overwrite enabled.
+Run `operations/install.sh` with `AI_SERVER_LAN_SUBNET` and
+`AI_SERVER_PROMETHEUS_IP` set on the AI server to install the permanent services
+and local gateway/exporter configuration. Then import the dashboard source on
+the monitoring host with overwrite enabled.
 
 ## CPU Power Attribution
 
@@ -68,11 +101,9 @@ RAPL energy counters are root-only (sysfs mode `0440`) and the powercap domain
 can boot disabled. udev cannot change sysfs attribute permissions, so the
 profiler unit fixes both at start with root-privileged `ExecStartPre=+` lines:
 it writes `1` to the domain `enabled` files and then `chmod o+r` the
-`energy_uj` counters, while the service itself stays unprivileged.
-`operations/install.sh` installs the unit and the config from
-`config/cpu-power-profiler.json.example`; run
-`sudo operations/install-cpu-power-profiler.sh` instead on a host that does not
-run the full installer.
+`energy_uj` counters, while the service itself stays unprivileged. Run
+`sudo operations/install-cpu-power-profiler.sh` once to install the unit and
+the config from `config/cpu-power-profiler.json.example`.
 `ai_cpu_profiler_rapl_available` is 1 when the RAPL `package-0` energy counter
 is readable and exposes a nonzero `max_energy_range_uj`; it deliberately does
 not require the powercap `enabled` flag to be nonzero. Some kernels report
@@ -154,10 +185,21 @@ Key counters:
 - `ai_model_api_workload_cost_{usd,jpy}_total`: token-priced remote API comparison including input, cached input, and output.
 - `ai_model_api_output_only_cost_{usd,jpy}_total`: output-only remote API comparison.
 
-The configured llama.cpp runtimes report prompt and cached-prompt counters. Cached
-prompt tokens are treated as a subset of total prompt tokens and replace the
-corresponding regular-input rate. Prices not represented in `ai-api-pricing.json`
-are intentionally absent rather than estimated.
+The stock llama.cpp and Muse runtimes report disjoint prompt counters:
+`llamacpp:prompt_tokens_total` counts processed prompt tokens excluding cached
+ones, and `llamacpp:prompt_tokens_cached_total` counts tokens reused from the
+prefix cache. Each class is priced at its own rate (regular input for processed
+tokens, cached input for reused tokens) and completion tokens are priced at the
+output rate. The `ai_model_prompt_tokens_total` and
+`ai_model_cached_prompt_tokens_total` HELP texts state this split. Prices not
+represented in `ai-api-pricing.json` are intentionally absent rather than
+estimated.
+
+llamAmpere does not expose the cumulative cached-prompt counter required for
+cache-inclusive accounting. Its profile sets `cached_input_mode=unobserved`, so
+the exporter omits the cached-token series and suppresses cache-inclusive cost
+estimates instead of reporting false zero-cache data. The cache observation
+panels must show this unavailable state explicitly.
 
 After each exporter restart, successfully scraped configured models emit zero-valued
 active-energy and API-comparison counters before their first request. This keeps
@@ -170,7 +212,7 @@ monitoring host therefore provides `up{job="ai-server"}`: `0` means the target
 could not be scraped, whether from power-off, network loss, or exporter failure.
 On its next successful sample, a changed Linux boot ID records the interval in
 `ai_host_reboot_downtime_seconds_total` instead of
-`ai_energy_integration_gap_seconds_total`; neither counter adds the host idle
+`ai_energy_integration_gap_seconds_total`; neither counter adds the 300 W host
 baseline. A changed boot ID confirms a reboot, not whether it was deliberate or
 caused by power loss.
 
@@ -181,9 +223,8 @@ when a new exporter series starts partway through that window.
 
 Because that view depends on the selected dashboard time range, the
 `Whole-Host Electricity Cost` stat is not a daily or billing total. At the idle
-draw of roughly 200 W (127 W base plus the ~73 W CPU floor) and the current
-TEPCO scenario (33.71 JPY/kWh), the host costs roughly 7 JPY per hour. For
-calendar totals use the `Host Cost Today`,
+300 W baseline and the current TEPCO scenario (33.71 JPY/kWh), the host costs
+roughly 10 JPY per hour. For calendar totals use the `Host Cost Today`,
 `Host Cost This Week`, and `Host Cost This Month` panels and the `Host
 Electricity Cost To Date` time series, which reset at their own JST boundaries.
 

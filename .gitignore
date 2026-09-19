@@ -3,6 +3,8 @@
 *.env
 *.env.*
 !**/*.env.example
+!operations/config/profiles/*.gateway.env
+!operations/config/profiles/*.metrics.env
 *.local
 *.local.*
 operations/*.local.md
