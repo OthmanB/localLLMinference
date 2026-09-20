@@ -1,8 +1,8 @@
 # AI Server Operations
 
 Operational reference for the self-hosted AI server. Research results stay under
-`../research/`; this directory describes the active profile and its operational
-boundaries.
+`../research/`; this directory describes profile boundaries and installation
+contracts.
 
 ## Staged Profile
 
@@ -25,6 +25,26 @@ record; the live-service acceptance checks remain outstanding.
 The stock two-GPU `stock-q4-tensor` profile remains installed for explicit
 manual rollback. Profiles are mutually exclusive; there is no automatic
 fallback.
+
+## Hardware Profiles
+
+The profile above is the canonical three-GPU RTX 3090 host layout. The
+standalone RTX 5090 profile is separate:
+
+- `hardware/rtx5090/`: opt-in single-card llama.cpp reference profile.
+- It targets physical GPU 0 and loopback port 8080 on the two-RTX 5090 host.
+- It uses distinct unit names and does not participate in the canonical Qwen
+  profile switcher or gateway installation.
+- Its installer requires `AI_SERVER_RTX5090_CONFIRM=install` and refuses active
+  global GPU policy units, known model conflicts, an occupied port, or an
+  already-used selected GPU.
+- It must not be treated as a live deployment until its strict-residency,
+  thermal, quality, and concurrency gates are rerun.
+
+Do not copy the RTX 5090 installer over `operations/install.sh`. The canonical
+installer assumes the three-GPU host paths, account, and topology. Do not run
+both profiles on a host until GPU, port, policy, and log ownership are
+explicitly resolved.
 
 ## Gateway And Metrics
 
@@ -56,6 +76,7 @@ the operator; select `stock-q4-tensor` manually when rollback is required.
 ## Files
 
 - `systemd/`: canonical unit files installed under `/etc/systemd/system/`.
+- `hardware/rtx5090/`: isolated RTX 5090 profile templates and installer.
 - `config/`: secret-free profile, tmpfiles, logrotate, and monitoring configuration.
 - `runbooks.md`: start, stop, recovery, profile switch, and rollback procedures.
 - `network.md`: LAN, gateway, firewall, and Tailscale access.

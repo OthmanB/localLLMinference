@@ -1,0 +1,21 @@
+[Unit]
+Description=Log RTX 5090 Qwen native-context GPU0 telemetry
+Requires=ai-rtx5090-qwen3.8-q4-native.service
+After=ai-rtx5090-qwen3.8-q4-native.service
+ConditionPathExists=@PYTHON@
+ConditionPathExists=/usr/bin/nvidia-smi
+
+[Service]
+Type=simple
+User=@SERVICE_USER@
+Group=@SERVICE_USER@
+WorkingDirectory=@REPO_ROOT@
+ExecStart=@PYTHON@ -u @REPO_ROOT@/tools/qwen_gpu_monitor.py --url http://127.0.0.1:@PORT@/health --gpu @GPU_INDEX@ --interval 15
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:@LOG_DIR@/qwen3.8-q4-native-rtx5090.metrics.jsonl
+StandardError=append:@LOG_DIR@/qwen3.8-q4-native-rtx5090.monitor.log
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

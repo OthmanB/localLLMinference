@@ -46,7 +46,7 @@ start_server_units() {
     stop_conflicting_services
     systemd-run --user --unit=swebench-q4-128k.service \
         --property=Restart=on-failure --property=RestartSec=5 --collect \
-        env CUDA_VISIBLE_DEVICES=0 CUDA_DEVICE_ORDER=PCI_BUS_ID GGML_CUDA_ENABLE_UNIFIED_MEMORY=0 \
+        env CUDA_VISIBLE_DEVICES=0 CUDA_DEVICE_ORDER=PCI_BUS_ID \
         "${LLAMA_SERVER_BIN}" \
         --model "${Q4_MODEL}" \
         --alias qwen3.8-27b-q4-gpukv128 --host 127.0.0.1 --port 8080 \
@@ -56,7 +56,7 @@ start_server_units() {
         --fit off --metrics --perf
     systemd-run --user --unit=swebench-q5-128k.service \
         --property=Restart=on-failure --property=RestartSec=5 --collect \
-        env CUDA_VISIBLE_DEVICES=1 CUDA_DEVICE_ORDER=PCI_BUS_ID GGML_CUDA_ENABLE_UNIFIED_MEMORY=0 \
+        env CUDA_VISIBLE_DEVICES=1 CUDA_DEVICE_ORDER=PCI_BUS_ID \
         "${LLAMA_SERVER_BIN}" \
         --model "${Q5_MODEL}" \
         --alias qwen3.8-27b-q5-gpukv128 --host 127.0.0.1 --port 8081 \

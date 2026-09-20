@@ -1,0 +1,26 @@
+[Unit]
+Description=Qwen3.8-27B Q4 native-context RTX 5090 GPU0 llama.cpp server
+Wants=network-online.target nvidia-persistenced.service
+After=network-online.target nvidia-persistenced.service ai-rtx5090-gpu0-policy.service
+Requires=ai-rtx5090-gpu0-policy.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=@SERVICE_USER@
+Group=@SERVICE_USER@
+Environment=CUDA_VISIBLE_DEVICES=@GPU_INDEX@
+Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
+WorkingDirectory=@LLAMA_CPP_ROOT@
+ExecStart=@LLAMA_SERVER_BIN@ --model @MODEL_PATH@ --alias qwen3.8-27b-q4-gpukv-native-rtx5090 --host 127.0.0.1 --port @PORT@ --ctx-size 262144 --parallel 1 --n-gpu-layers all --kv-offload --cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on --threads 32 --threads-batch 32 --batch-size 2048 --ubatch-size 512 --fit off --metrics --perf --no-ui --reasoning auto --reasoning-effort medium
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+LimitNOFILE=1048576
+StandardOutput=append:@LOG_DIR@/qwen3.8-q4-native-rtx5090.server.log
+StandardError=append:@LOG_DIR@/qwen3.8-q4-native-rtx5090.server.log
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

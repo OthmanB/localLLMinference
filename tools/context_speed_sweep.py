@@ -179,7 +179,6 @@ def measure(model: str, context: int, output_dir: Path, request_timeout: int) ->
             **os.environ,
             "CUDA_VISIBLE_DEVICES": spec["gpu"],
             "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
-            "GGML_CUDA_ENABLE_UNIFIED_MEMORY": "0",
         },
         stdout=log,
         stderr=subprocess.STDOUT,

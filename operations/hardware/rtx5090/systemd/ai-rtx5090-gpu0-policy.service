@@ -1,0 +1,18 @@
+[Unit]
+Description=Apply RTX 5090 GPU0 Qwen profile power and fan policy
+Wants=nvidia-persistenced.service
+After=nvidia-persistenced.service
+ConditionPathExists=/dev/nvidiactl
+ConditionPathExists=@PYTHON@
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-smi -i @GPU_INDEX@ -pm 1
+ExecStart=/usr/bin/nvidia-smi -i @GPU_INDEX@ -pl 500
+ExecStart=@PYTHON@ @REPO_ROOT@/tools/nvidia_fan_control.py --gpu @GPU_INDEX@ --speed 95
+TimeoutStartSec=30s
+RemainAfterExit=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

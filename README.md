@@ -18,6 +18,23 @@ environment or an operating-system secret manager.
 - `swebench/`: reproducible SWE-bench launcher and configuration files.
 - `research/`: benchmark summaries and design notes.
 
+## Hardware Profiles
+
+The canonical operational profile targets the three-GPU RTX 3090 host:
+
+- `atx-dual`: two independent llamAmpere Qwen replicas on physical GPUs 1 and
+  2, with Muse on GPU 0 and the authenticated gateway on port 8088.
+- `stock-q4-tensor`: manual two-GPU llama.cpp rollback/reference profile.
+
+The RTX 5090 material is maintained separately under
+`operations/hardware/rtx5090/`. It is an opt-in standalone llama.cpp reference
+profile for physical GPU 0 on the two-RTX 5090 workstation. It is not a value
+accepted by `qwen-profile-switch.sh`, does not install the gateway, and must
+not be activated concurrently with a service that owns that GPU or port.
+
+The dated plan for consolidating these profiles and evaluating vLLM/SGLang is
+`research/qwen3.8-27b-rtx5090-consolidation-and-serving-plan-2026-09-20.md`.
+
 ## Gateway Development
 
 ```bash

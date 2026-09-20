@@ -20,6 +20,19 @@ The active Qwen profile is selected by the root-only profile switch. The
 GPU0/port 8082. The stock Qwen unit is stopped unless `stock-q4-tensor` is
 selected explicitly.
 
+The standalone RTX 5090 profile is not selected by this switcher. Its status
+uses distinct units:
+
+```bash
+systemctl status ai-rtx5090-gpu0-policy.service
+systemctl status ai-rtx5090-qwen3.8-q4-native.service
+systemctl status ai-rtx5090-monitor.service
+```
+
+Use `operations/hardware/rtx5090/README.md` for its ownership checks and
+installer. Never resolve a conflict by disabling the canonical global GPU
+policy or an unrelated model service from that profile installer.
+
 The llamAmpere replicas append to `/var/log/ai-server/llamampere-qwen-gpu1.log`
 and `llamampere-qwen-gpu2.log`; the installer creates that directory and installs
 `/etc/logrotate.d/ai-server` to rotate the files daily. Both `LogsDirectory=` in
