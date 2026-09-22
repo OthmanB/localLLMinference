@@ -67,6 +67,19 @@ LLAMA_TO_MODEL_METRICS = {
     "llamacpp:prompt_tokens_cached_total": "ai_model_cached_prompt_tokens_total",
     "llamacpp:tokens_predicted_total": "ai_model_completion_tokens_total",
 }
+VLLM_TO_MODEL_COUNTERS = {
+    "vllm:prompt_tokens_total": "ai_model_prompt_tokens_total",
+    "vllm:prompt_tokens_cached_total": "ai_model_cached_prompt_tokens_total",
+    "vllm:generation_tokens_total": "ai_model_completion_tokens_total",
+}
+VLLM_COLD_ADMISSION_METRICS = {
+    "ai_gateway_cold_admission_queue_depth",
+    "ai_gateway_cold_admission_inflight",
+    "ai_gateway_cold_admission_events_total",
+    "ai_gateway_cold_admission_wait_seconds",
+    "ai_gateway_cold_admission_idle_observation_info",
+    "ai_gateway_cold_admission_idle_probe_failures_total",
+}
 RETAINED_RATE_METRICS = (
     "ai_model_decode_tokens_per_second",
     "ai_model_prefill_tokens_per_second",
@@ -382,6 +395,7 @@ def parse_gateway_metrics(text: str) -> dict[str, dict[tuple[str, ...], float]]:
 def gateway_metrics_lines(
     comments_seen: set[str],
     url: str | None,
+    host_id: str | None = None,
 ) -> list[str]:
     output: list[str] = []
     add_metric_definitions(output, EXPORTER_METRIC_DEFINITIONS, comments_seen)
@@ -390,9 +404,11 @@ def gateway_metrics_lines(
     samples: dict[str, dict[tuple[str, ...], float]] = {
         kind: {} for kind in GATEWAY_METRIC_NAMES
     }
+    gateway_text = ""
     if url:
         try:
-            samples = parse_gateway_metrics(fetch_metrics(url))
+            gateway_text = fetch_metrics(url)
+            samples = parse_gateway_metrics(gateway_text)
             gateway_up = 1.0
             observation_status = "observed"
         except (OSError, ValueError, UnicodeError):
@@ -416,6 +432,20 @@ def gateway_metrics_lines(
             else:
                 labels = {"pool": key[0], "replica": key[1]}
             output.append(f"{metric_name}{add_labels(None, labels)} {value}")
+    if host_id:
+        for line in gateway_text.splitlines():
+            match = METRIC_LINE.match(line)
+            if not match:
+                continue
+            name, _, encoded_labels, value = match.groups()
+            if name not in VLLM_COLD_ADMISSION_METRICS:
+                continue
+            source = parse_prometheus_labels(encoded_labels)
+            labels = {"host_id": host_id}
+            for key in ("backend", "model", "event", "outcome", "status", "request_class"):
+                if key in source:
+                    labels[key] = _bounded_gateway_label(source[key])
+            output.append(f"{name}{add_labels(None, labels)} {value}")
     return output
 
 
@@ -516,6 +546,65 @@ def _number(value: object) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+def parse_vllm_metrics(
+    text: str,
+    labels: Mapping[str, str],
+    comments_seen: set[str],
+    rate_state: dict[str, float] | None = None,
+    counter_state: dict[str, tuple[float, float]] | None = None,
+    timestamp_seconds: float | None = None,
+) -> tuple[list[str], dict[str, float]]:
+    """Normalize vLLM counters without exporting its high-cardinality histograms."""
+    observed: dict[str, float] = {}
+    for line in text.splitlines():
+        match = METRIC_LINE.match(line)
+        if not match:
+            continue
+        name, _, encoded_labels, value = match.groups()
+        if parse_prometheus_labels(encoded_labels).get("model_name") != labels["model"]:
+            continue
+        numeric = _number(value)
+        if name in VLLM_TO_MODEL_COUNTERS:
+            observed[VLLM_TO_MODEL_COUNTERS[name]] = numeric
+        elif name == "vllm:num_requests_running":
+            observed["ai_model_requests_active"] = numeric
+        elif name == "vllm:request_success_total":
+            observed["ai_model_requests_completed_total"] = observed.get("ai_model_requests_completed_total", 0.0) + numeric
+        elif name == "vllm:time_to_first_token_seconds_count":
+            observed["_ttft_count"] = numeric
+        elif name == "vllm:time_to_first_token_seconds_sum":
+            observed["_ttft_sum"] = numeric
+    output: list[str] = []
+    add_model_metric_definitions(output, list(MODEL_METRIC_DEFINITIONS), comments_seen)
+    values = {name: observed.get(name, 0.0) for name in MODEL_METRIC_DEFINITIONS}
+    count = observed.get("_ttft_count", 0.0)
+    values["ai_model_ttft_seconds"] = observed.get("_ttft_sum", 0.0) / count if count else 0.0
+    now = time.time() if timestamp_seconds is None else timestamp_seconds
+    rate_key = metric_key(labels.get("model", ""), labels.get("gpu_uuid", ""))
+    for counter_name, rate_name in (
+        ("ai_model_prompt_tokens_total", "ai_model_prefill_tokens_per_second"),
+        ("ai_model_completion_tokens_total", "ai_model_decode_tokens_per_second"),
+    ):
+        state_key = f"{rate_key}:{counter_name}"
+        previous = counter_state.get(state_key) if counter_state is not None else None
+        if counter_state is not None:
+            counter_state[state_key] = (values[counter_name], now)
+        rate = (
+            0.0
+            if previous is None or now <= previous[1]
+            else max(values[counter_name] - previous[0], 0.0) / (now - previous[1])
+        )
+        values[rate_name] = retain_nonzero_rate(rate_state, rate_key, rate_name, rate)
+    encoded_labels = add_labels(None, labels)
+    output.extend(f"{name}{encoded_labels} {value}" for name, value in values.items())
+    return output, {
+        "prompt_tokens": values["ai_model_prompt_tokens_total"],
+        "cached_prompt_tokens": values["ai_model_cached_prompt_tokens_total"],
+        "completion_tokens": values["ai_model_completion_tokens_total"],
+        "requests_active": values["ai_model_requests_active"],
+    }
 
 
 def parse_freetoken_stats(
@@ -707,6 +796,7 @@ class MetricsState:
         )
         self.lock = threading.Lock()
         self.rate_state: dict[str, float] = {}
+        self.vllm_counter_state: dict[str, tuple[float, float]] = {}
         self.previous_proc: tuple[float, float] | None = None
         self.cpu_power: float | None = None
         self.cpu_utilization: float | None = None
@@ -800,6 +890,15 @@ class MetricsState:
                     parsed, observation = parse_freetoken_stats(
                         fetch_json(str(backend["url"])), primary_labels, comments_seen, self.rate_state
                     )
+                elif str(backend.get("runtime", "")).lower() == "vllm":
+                    parsed, observation = parse_vllm_metrics(
+                        fetch_metrics(str(backend["url"])),
+                        primary_labels,
+                        comments_seen,
+                        self.rate_state,
+                        self.vllm_counter_state,
+                        timestamp_seconds,
+                    )
                 else:
                     parsed, observation = parse_llama_metrics(
                         fetch_metrics(str(backend["url"])),
@@ -875,7 +974,7 @@ class MetricsState:
         else:
             lines.append("ai_exporter_nvidia_smi_up 0")
 
-        lines.extend(gateway_metrics_lines(comments_seen, self.gateway_metrics_url))
+        lines.extend(gateway_metrics_lines(comments_seen, self.gateway_metrics_url, self.accounting.host_id))
 
         configured_model_gpus: dict[str, set[str]] = {}
         for uuid, sample in energy_gpus.items():
@@ -966,6 +1065,7 @@ def main() -> None:
     parser.add_argument("--pricing-config")
     parser.add_argument("--state-path")
     parser.add_argument("--gateway-metrics-url")
+    parser.add_argument("--host-id", default=os.getenv("AI_METRICS_HOST_ID", "unconfigured"))
     args = parser.parse_args()
     if bool(args.cost_config) != bool(args.pricing_config):
         parser.error("--cost-config and --pricing-config must be supplied together")
@@ -978,6 +1078,7 @@ def main() -> None:
         if args.cost_config
         else CostAccounting.disabled()
     )
+    accounting.host_id = args.host_id
     state = MetricsState(load_backends(), accounting, args.gateway_metrics_url)
 
     def refresh() -> None:

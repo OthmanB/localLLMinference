@@ -69,10 +69,11 @@ Measurement sources:
 | `ai-qwen3.8-vllm-tp2-gateway.service` | Public port 8080 OpenAI chat gateway |
 | `ai-qwen3.8-vllm-tp2-monitor@0.service` | GPU 0 telemetry |
 | `ai-qwen3.8-vllm-tp2-monitor@1.service` | GPU 1 telemetry |
+| `ai-qwen3.8-vllm-tp2-metrics.service` | Tailscale-only Prometheus exporter on port 9108 |
 | `llama-qwen3.8-q4-native.service` | Disabled legacy Q4 rollback backend |
 | `ai-qwen3.8-q4-native-monitor.service` | Disabled legacy Q4 monitor |
 
-All four deployed units are enabled at boot. The backend requires the existing
+All deployed units are enabled at boot. The backend requires the existing
 Qwen GPU policy, which applies the 500 W power cap and 95% fan target to both
 GPUs.
 
@@ -83,13 +84,15 @@ systemctl is-active \
   ai-qwen3.8-vllm-tp2.service \
   ai-qwen3.8-vllm-tp2-gateway.service \
   ai-qwen3.8-vllm-tp2-monitor@0.service \
-  ai-qwen3.8-vllm-tp2-monitor@1.service
+  ai-qwen3.8-vllm-tp2-monitor@1.service \
+  ai-qwen3.8-vllm-tp2-metrics.service
 
 systemctl is-enabled \
   ai-qwen3.8-vllm-tp2.service \
   ai-qwen3.8-vllm-tp2-gateway.service \
   ai-qwen3.8-vllm-tp2-monitor@0.service \
-  ai-qwen3.8-vllm-tp2-monitor@1.service
+  ai-qwen3.8-vllm-tp2-monitor@1.service \
+  ai-qwen3.8-vllm-tp2-metrics.service
 
 curl -fsS http://127.0.0.1:8080/healthz
 curl -fsS http://127.0.0.1:8080/readyz
@@ -116,6 +119,27 @@ Treat a sustained temperature at or above 85 C, unexpected GPU ownership, an
 unhealthy `/readyz`, or a private vLLM listener exposed beyond loopback as an
 operational failure. Roll back rather than changing the qualified runtime in
 place.
+
+## Prometheus Export
+
+Install or refresh the exporter after deploying the vLLM service:
+
+```bash
+sudo /home/michel/LLMs-tests/localLLMinference/operations/install-qwen3.8-vllm-tp2-metrics.sh
+systemctl status ai-qwen3.8-vllm-tp2-metrics.service
+```
+
+The installer discovers this machine's Tailscale IPv4 address and binds port
+9108 only to that address. It does not open a LAN listener and does not enable
+the unqualified CPU-power profiler. On `rtx-4000-test`, merge
+`operations/config/prometheus-rtx5090-vllm-tp2.yml` and replace
+`<RTX5090_TAILSCALE_IP>` with the address printed by the installer.
+
+The exporter normalizes vLLM token counters, active requests, mean TTFT, and
+counter-derived prefill/decode rates into `ai_model_*` metrics. It also relays
+the gateway's bounded `ai_gateway_cold_admission_*` metrics with `host_id`, so
+Grafana can show cold-work queue depth, waits, and admission outcomes without
+scraping the public gateway directly.
 
 ## Client Check
 

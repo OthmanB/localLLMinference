@@ -27,6 +27,7 @@ from ai_metrics_exporter import (
     parse_gateway_metrics,
     parse_freetoken_stats,
     parse_llama_metrics,
+    parse_vllm_metrics,
     retain_nonzero_rate,
     validate_backend_gpu_ownership,
 )
@@ -417,6 +418,36 @@ class CostAccountingTest(unittest.TestCase):
 
 
 class MultiGpuExporterTest(unittest.TestCase):
+    def test_vllm_parser_normalizes_counters_and_rates(self) -> None:
+        labels = {"host_id": "test", "model": "qwen", "gpu": "0", "gpu_uuid": "gpu-a"}
+        metrics = "\n".join(
+            [
+                'vllm:prompt_tokens_total{model_name="qwen"} 100',
+                'vllm:prompt_tokens_cached_total{model_name="qwen"} 80',
+                'vllm:generation_tokens_total{model_name="qwen"} 40',
+                'vllm:num_requests_running{model_name="qwen"} 2',
+                'vllm:request_success_total{model_name="qwen",finished_reason="stop"} 3',
+                'vllm:request_success_total{model_name="qwen",finished_reason="length"} 1',
+                'vllm:time_to_first_token_seconds_count{model_name="qwen"} 4',
+                'vllm:time_to_first_token_seconds_sum{model_name="qwen"} 8',
+            ]
+        )
+        counters: dict[str, tuple[float, float]] = {}
+        rates: dict[str, float] = {}
+        first, observation = parse_vllm_metrics(metrics, labels, set(), rates, counters, 10)
+        second, _ = parse_vllm_metrics(
+            metrics.replace(" 100", " 120", 1).replace(" 40", " 50", 1),
+            labels,
+            set(),
+            rates,
+            counters,
+            20,
+        )
+        self.assertEqual(observation["requests_active"], 2)
+        self.assertIn('ai_model_requests_completed_total{host_id="test",model="qwen",gpu="0",gpu_uuid="gpu-a"} 4.0', first)
+        self.assertIn('ai_model_ttft_seconds{host_id="test",model="qwen",gpu="0",gpu_uuid="gpu-a"} 2.0', first)
+        self.assertIn('ai_model_prefill_tokens_per_second{host_id="test",model="qwen",gpu="0",gpu_uuid="gpu-a"} 2.0', second)
+        self.assertIn('ai_model_decode_tokens_per_second{host_id="test",model="qwen",gpu="0",gpu_uuid="gpu-a"} 1.0', second)
     def test_backend_gpu_ownership_is_unique_across_backends(self) -> None:
         with self.assertRaisesRegex(ValueError, "multiple metrics backends"):
             validate_backend_gpu_ownership(

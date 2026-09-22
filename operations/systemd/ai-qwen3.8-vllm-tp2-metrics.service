@@ -1,0 +1,19 @@
+[Unit]
+Description=Prometheus exporter for Qwen3.8 vLLM TP2
+Wants=network-online.target
+After=network-online.target ai-qwen3.8-vllm-tp2.service ai-qwen3.8-vllm-tp2-gateway.service
+
+[Service]
+Type=simple
+User=michel
+Group=michel
+EnvironmentFile=/etc/ai-server/ai-qwen3.8-vllm-tp2-metrics.env
+StateDirectory=ai-qwen3.8-vllm-tp2-metrics
+WorkingDirectory=/home/michel/LLMs-tests/localLLMinference
+ExecStart=/usr/bin/python3 /home/michel/LLMs-tests/localLLMinference/tools/ai_metrics_exporter.py --host ${AI_METRICS_LISTEN_HOST} --host-id ${AI_METRICS_HOST_ID} --port 9108 --state-path /var/lib/ai-qwen3.8-vllm-tp2-metrics/cost-accounting-state.json
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
