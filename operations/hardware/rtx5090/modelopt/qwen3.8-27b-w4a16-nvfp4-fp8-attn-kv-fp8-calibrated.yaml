@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Phase E variant of the pinned Qwen3.5 dense ModelOpt recipe. It preserves the
+# Phase C/D mixed W4A16 NVFP4/FP8 weight contract but calibrates FP8 KV scales.
+
+imports:
+  base_disable_all: configs/ptq/units/base_disable_all
+  default_disabled_quantizers: configs/ptq/units/default_disabled_quantizers
+  fp8: configs/numerics/fp8
+  kv_fp8: configs/ptq/units/kv_fp8
+  nvfp4: configs/numerics/nvfp4
+
+metadata:
+  recipe_type: ptq
+  description: >-
+    Qwen3.8-27B dense W4A16 NVFP4 MLP/lm_head, FP8 attention, and calibrated
+    FP8 KV-cache PTQ recipe. Derived from ModelOpt commit
+    87c9f8cf83021957d1a1a575c90c9a4eaaf7ef0c.
+quantize:
+  algorithm:
+    method: max
+    layerwise:
+      enable: false
+  quant_cfg:
+    - $import: base_disable_all
+
+    # Preserve the current checkpoint's NVFP4 MLP and lm_head weight contract.
+    - quantizer_name: '*mlp*gate_proj*weight_quantizer*'
+      cfg: {$import: nvfp4}
+    - quantizer_name: '*mlp*up_proj*weight_quantizer*'
+      cfg: {$import: nvfp4}
+    - quantizer_name: '*mlp*down_proj*weight_quantizer*'
+      cfg: {$import: nvfp4}
+
+    - quantizer_name: '*self_attn*weight_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*self_attn*input_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.in_proj_qkv*weight_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.in_proj_qkv*input_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.in_proj_z*weight_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.in_proj_z*input_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.out_proj*weight_quantizer'
+      cfg: {$import: fp8}
+    - quantizer_name: '*linear_attn.out_proj*input_quantizer'
+      cfg: {$import: fp8}
+
+    # Unlike the former kv_fp8_cast recipe, this records data-derived K/V scales.
+    - $import: kv_fp8
+    - $import: default_disabled_quantizers
+    - quantizer_name: '*linear_attn.in_proj_a*'
+      enable: false
+    - quantizer_name: '*linear_attn.in_proj_b*'
+      enable: false
+    - quantizer_name: '*visual*'
+      enable: false
+    - quantizer_name: '*vision_tower*'
+      enable: false
+    - quantizer_name: '*mtp*'
+      enable: false
+    - quantizer_name: '*lm_head*weight_quantizer'
+      cfg: {$import: nvfp4}

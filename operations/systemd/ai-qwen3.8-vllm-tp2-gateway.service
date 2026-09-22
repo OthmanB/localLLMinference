@@ -1,0 +1,28 @@
+[Unit]
+Description=Public Qwen3.8-27B vLLM TP2 inference gateway
+Wants=network-online.target
+After=network-online.target ai-qwen3.8-vllm-tp2.service
+Requires=ai-qwen3.8-vllm-tp2.service
+BindsTo=ai-qwen3.8-vllm-tp2.service
+PartOf=ai-qwen3.8-vllm-tp2.service
+Conflicts=llama-qwen3.8-q4-native.service
+
+[Service]
+Type=simple
+User=michel
+Group=michel
+EnvironmentFile=/etc/ai-server/ai-qwen3.8-vllm-tp2-gateway.env
+Environment=PYTHONPATH=/home/michel/LLMs-tests/localLLMinference/lan-inference-gateway/src
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/home/michel/LLMs-tests/localLLMinference/lan-inference-gateway
+ExecStart=/home/michel/LLMs-tests/.phase-f1p5-vllm-nightly/bin/python -m uvicorn lan_inference_gateway.app:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+TimeoutStopSec=15
+KillMode=mixed
+LimitNOFILE=1048576
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from lan_inference_gateway.app import create_app
-from lan_inference_gateway.config import BackendConfig, ConfigurationError, GatewaySettings, PoolConfig
+from lan_inference_gateway.config import BackendConfig, ColdAdmissionConfig, ConfigurationError, GatewaySettings, PoolConfig
 
 
 @pytest.fixture
@@ -173,6 +173,89 @@ def _chat_payload(model: str = "model-pooled", stream: bool = False) -> dict[str
         "messages": [{"role": "user", "content": "hello"}],
         "stream": stream,
     }
+
+
+def _admission_settings(**overrides: object) -> GatewaySettings:
+    config = {
+        "metrics_url": "http://127.0.0.1:19090/metrics",
+        "target_model": "long-model",
+        "cold_min_input_tokens": 10,
+        "poll_interval_seconds": 0.01,
+        "queue_timeout_seconds": 0.5,
+    }
+    config.update(overrides)
+    return GatewaySettings(
+        backends=(BackendConfig("long", "http://vllm.test", ("long-model",), cold_admission=ColdAdmissionConfig(**config)),),
+    )
+
+
+@pytest.mark.anyio
+async def test_c2_admission_holds_long_request_until_scheduler_capacity() -> None:
+    scheduler = {"running": 3, "waiting": 0}
+    posts = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal posts
+        if request.url.path == "/metrics":
+            return httpx.Response(
+                200,
+                text=(
+                    f'vllm:num_requests_running{{model_name="long-model"}} {scheduler["running"]}\n'
+                    f'vllm:num_requests_waiting{{model_name="long-model"}} {scheduler["waiting"]}\n'
+                ),
+            )
+        posts += 1
+        return httpx.Response(200, json={"id": "chatcmpl-1", "model": "long-model"})
+
+    app = create_app(_admission_settings(), httpx.MockTransport(handler))
+    long_content = "x" * 80
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://gateway") as client:
+            pending = asyncio.create_task(
+                client.post(
+                    "/v1/chat/completions",
+                    json={"model": "long-model", "messages": [{"role": "user", "content": long_content}]},
+                )
+            )
+            await asyncio.sleep(0.05)
+            assert posts == 0
+            scheduler["running"] = 2
+            response = await pending
+            metrics = await client.get("/metrics")
+
+    assert response.status_code == 200
+    assert response.headers["x-inference-admission"] == "c2"
+    assert float(response.headers["x-inference-gateway-admission-wait-ms"]) > 0
+    assert posts == 1
+    assert "long-model" in metrics.text
+    assert long_content not in metrics.text
+
+
+def test_cold_admission_configuration_is_strict_and_not_poolable() -> None:
+    with pytest.raises(ConfigurationError):
+        BackendConfig.from_mapping(
+            {
+                "name": "long",
+                "base_url": "http://127.0.0.1:18080",
+                "models": ["long-model"],
+                "unexpected": True,
+            }
+        )
+
+    backend = BackendConfig(
+        "long",
+        "http://127.0.0.1:18080",
+        ("long-model",),
+        cold_admission=ColdAdmissionConfig(
+            metrics_url="http://127.0.0.1:18080/metrics",
+            target_model="long-model",
+        ),
+    )
+    with pytest.raises(ConfigurationError):
+        GatewaySettings(
+            backends=(backend, BackendConfig("other", "http://127.0.0.1:18081", ("other",))),
+            pools=(PoolConfig("pool", "pooled", ("long",)),),
+        ).validate()
 
 
 @pytest.mark.anyio

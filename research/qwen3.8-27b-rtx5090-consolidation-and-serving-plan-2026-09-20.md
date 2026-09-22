@@ -2,9 +2,10 @@
 
 Date: 2026-09-20
 
-Status: Research and proposed execution plan. No repository consolidation,
-service changes, installations, or new inference benchmarks were performed
-during the assessment. Creating this document does not authorize a live cutover.
+Status: Phases A through D and the bounded Phase E calibrated-checkpoint
+validation were executed on 2026-09-20. Phase E promotion remains unauthorized:
+the protocol-faithful GSM8K smoke missed its quality gates, and routing/metrics
+are intentionally not installed for an unqualified checkpoint.
 
 ## 1. Objective and Recommendation
 
@@ -116,7 +117,7 @@ Additional findings:
 - The live server binds `0.0.0.0:8080`, unlike the old repository's
   loopback-only unit. Metadata endpoints responded without authentication.
   External firewall reachability was not assessed.
-- The successful native-context test peaked at 79 C against an 80 C cutoff,
+- The successful native-context test peaked at 79 C against the historical 80 C cutoff,
   with a 500 W cap and 100% GPU fan. Current policy requests 95% fan.
 - The motherboard maximum-fan service is failed. Do not assume its intended
   cooling policy was applied.
@@ -496,9 +497,9 @@ Use identical measurement definitions across engines.
 ### 8.6 Sustained and Operational Validation
 
 Run finalists under sustained two-card load, not just brief isolated requests.
-Agree on the thermal stop policy first; do not raise the existing cutoff to
-make a candidate pass. Verify chassis cooling and account for power supply
-and shared-workload constraints.
+Agree on the thermal stop policy first; do not raise the cutoff without explicit
+operator acceptance. Verify chassis cooling and account for power supply and
+shared-workload constraints.
 
 Test startup, restart, cancellation, backend failure, gateway behavior,
 monitoring, and rollback. A benchmark winner is not production-approved until
@@ -527,56 +528,116 @@ must remain separate hardware categories in the report.
 
 ### Phase A: Preserve and Consolidate Knowledge
 
-- [ ] Preserve the old checkout's local modifications and untracked files.
-- [ ] Add an opt-in RTX 5090 profile to the canonical repository.
-- [ ] Keep existing RTX 3090, gateway, and monitoring behavior intact.
-- [ ] Resolve profile conflicts, GPU ownership, path assumptions, and log rules.
-- [ ] Correct residency claims and document historical/staged/live status.
+- [x] Preserve the old checkout's local modifications and untracked files.
+- [x] Add an opt-in RTX 5090 profile to the canonical repository.
+- [x] Keep existing RTX 3090, gateway, and monitoring behavior intact.
+- [x] Resolve profile conflicts, GPU ownership, path assumptions, and log rules.
+- [x] Correct residency claims and document historical/staged/live status.
 
 Gate: reviewed repository-only changes; no service activation or resource
 policy changes as a side effect of consolidation.
 
 ### Phase B: Revalidate the Baseline
 
-- [ ] Agree on latency, quality, thermal, and rollback criteria.
-- [ ] Inspect current workload ownership and preserve unrelated services.
-- [ ] Correct the managed-memory environment in a controlled configuration.
-- [ ] Confirm runtime/model provenance, backend exposure, and cooling policy.
-- [ ] Reproduce populated native-context behavior and strict-residency evidence.
+- [x] Agree on latency, quality, thermal, and rollback criteria.
+- [x] Inspect current workload ownership and preserve unrelated services.
+- [x] Correct the managed-memory environment in a controlled configuration.
+- [x] Confirm runtime/model provenance, backend exposure, and cooling policy.
+- [x] Reproduce populated native-context behavior and strict-residency evidence.
 
 Gate: trustworthy baseline with known sampling, memory, and thermal behavior.
 
+#### Phase B Execution Record: 2026-09-20
+
+The live production unit was not restarted or edited. It remains a separate
+known issue: `/etc/systemd/system/llama-qwen3.8-q4-native.service` exports
+`GGML_CUDA_ENABLE_UNIFIED_MEMORY=0` and binds `0.0.0.0:8080`. GPU 0 remains
+owned by that service and an unrelated local RAG process. GPU 1 had no compute
+owner and was used for the controlled run. The existing GPU policy was active
+and applied a 500 W limit and 95% fan request to both cards. `fans-max.service`
+was still failed; it was not restarted or changed. No GPU thermal excursion
+occurred during the controlled run, consistent with the corrected cooling policy.
+
+The run used the new repository harness
+`tools/rtx5090_baseline.py` with a temporary loopback server on `127.0.0.1:18080`.
+The harness refused a busy GPU or occupied port, removed the managed-memory
+variable from the child environment, verified the model identity and context,
+sampled GPU/host telemetry, and terminated only its own process.
+
+The Phase B acceptance criteria were deliberately limited to baseline
+reproducibility: record cold populated-context timing and physical VRAM; stop
+the run at the then-existing 80 C thermal cutoff; treat normal
+EOS, tool behavior, and quality as required but untested production gates; and
+make rollback consist of terminating only the temporary process while leaving
+the live service and host policy untouched.
+
+| Field | Result |
+|---|---|
+| GPU | 1, UUID `GPU-8e28ecfd-fd2e-d821-49bf-70e324d8f9fe`, PCI `00000000:E1:00.0` |
+| Runtime | llama.cpp commit `b96806d96061049a5b574269b049bf6241d63d46`; binary SHA-256 `30f89c1c33533a3a064918f87b99963a92242cb67c194dec79f8ec58e14737e4` |
+| Model | `Qwen3.8-27B-UD-Q4_K_M.gguf`; SHA-256 `322e194ff79741c7baa497c240f677f54b201b0efab44ca8e50f122b39123482` |
+| Request | 261,763 prompt tokens, 128 generated tokens, Q8_0 K/V, context 262,144, one slot |
+| Allocator evidence | `GGML_CUDA_ENABLE_UNIFIED_MEMORY` absent in `/proc/<pid>/environ`; server log reported `kv_unified = 'false'` |
+| Performance | 1,168.59 prompt tok/s; 34.04 decode tok/s; 228.23 s request wall time |
+| Peak sampled resources | 25,494 MiB VRAM; 56 C; 513.5 W instantaneous sampled draw; 218 samples |
+| Cleanup | Temporary process exited 0; GPU 1 returned to 4 MiB; port 18080 closed; production GPU 0 service remained active |
+
+This establishes a reproducible controlled native-context baseline and corrects
+the allocator claim for this run. It is not proof that no CUDA allocation can
+ever migrate, and it is not a sustained serving or quality result: the probe
+uses forced 128-token output with thinking disabled. Normal EOS, tools,
+quality, repeated runs, and the live unit's managed-memory/exposure correction
+remain follow-up work. The historical 80 C event is not expected under the
+corrected cooling policy. Operator-approved Phase D validation uses an 85 C
+defensive stop.
+
+Raw artifact directory:
+`/home/michel/LLMs-tests/rtx5090-qwen38-bench/runs/phase1-q4-gpu1-managed-memory-absent-2026-09-20-final/`.
+
 ### Phase C: GPU 1 Feasibility
 
-- [ ] Use isolated environments, private ports, and explicit GPU selection.
-- [ ] Leave the GPU 0 service available; monitor host-wide thermal interference.
-- [ ] Test vLLM/SGLang TP1 loading, selected kernels, parsers, and bounded quality.
-- [ ] Measure memory allocation before attempting long-context requests.
-- [ ] Reject incompatible or incorrect candidates before expensive sweeps.
+- [x] Use isolated environments, private ports, and explicit GPU selection.
+- [x] Leave the GPU 0 service available; monitor host-wide thermal interference.
+- [x] Test vLLM/SGLang TP1 loading, selected kernels, parsers, and bounded quality.
+- [x] Measure memory allocation before attempting long-context requests.
+- [x] Reject incompatible or incorrect candidates before expensive sweeps.
 
 Gate: pinned, correct candidate stacks and a justified two-GPU test shortlist.
 
+Phase C evidence and the shortlist are recorded in
+`research/qwen3.8-27b-rtx5090-phase2-gpu1-feasibility-2026-09-20.md`.
+
 ### Phase D: Two-GPU Benchmark Window
 
-- [ ] Schedule a maintenance window before consuming both production GPUs.
-- [ ] Establish and verify rollback before stopping the existing model service.
-- [ ] Compare two replicas against matched vLLM/SGLang TP2 candidates.
-- [ ] Test capacity, prefill/decode interference, and sustained operation.
-- [ ] Add PP2 or other secondary candidates only when the main results justify it.
+- [x] Schedule a maintenance window before consuming both production GPUs.
+- [x] Establish and verify rollback before stopping the existing model service.
+- [x] Compare two replicas against matched vLLM/SGLang TP2 candidates.
+- [x] Test capacity, prefill/decode interference, and sustained operation.
+- [x] Add PP2 or other secondary candidates only when the main results justify it.
 
 Gate: reproducible performance/quality results and measured capacity at the
 agreed latency thresholds, not startup estimates.
 
+Phase D evidence is recorded in
+`research/qwen3.8-27b-rtx5090-phase3-tp2-benchmark-window-2026-09-20.md`.
+The window established a capacity-oriented vLLM TP2 profile and a lower-
+interference SGLang TP2 profile, but did not authorize Phase E promotion.
+
 ### Phase E: Canary and Promotion
 
-- [ ] Select the measured Pareto winner or separate latency/capacity profiles.
+- [x] Select the measured capacity winner: calibrated vLLM TP2 with Triton
+  attention and the non-FlashInfer sampler fallback required by Blackwell SM120.
 - [ ] Integrate authenticated routing, admission, and per-engine metrics.
 - [ ] Canary under an explicit model ID before replacing a stable alias.
-- [ ] Verify native context, tools, cache correctness, restart, and rollback.
-- [ ] Record exact deployed artifacts and acceptance evidence.
+- [x] Verify native context, forced tools, prefix-cache correctness, candidate
+  restart, and reference rollback under the guarded maintenance window.
+- [x] Record exact calibrated artifact, validation, quality-smoke, and rollback
+  evidence in the Phase E report.
 
-Gate: explicit production acceptance. Retain the known-good reference for
-rollback; no automatic substitution between unlike checkpoints or runtimes.
+Gate: not met. The 128-example GSM8K smoke scored 95.3125% with a 97.6563%
+stop rate and one truncation, below the 96.5% / 100% / zero-truncation criteria.
+Retain the known-good reference for rollback; no automatic substitution between
+unlike checkpoints or runtimes.
 
 ## 11. Sources
 

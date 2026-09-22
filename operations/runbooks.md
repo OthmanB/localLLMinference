@@ -33,6 +33,11 @@ Use `operations/hardware/rtx5090/README.md` for its ownership checks and
 installer. Never resolve a conflict by disabling the canonical global GPU
 policy or an unrelated model service from that profile installer.
 
+The deployed RTX 5090 vLLM TP2 replacement has its own public gateway on port
+8080 and is also outside the profile switcher. Use
+`operations/qwen3.8-vllm-tp2-cookbook.md` for its status, restart, initial
+cutover, and rollback procedures. Do not start it alongside the legacy Q4 unit.
+
 The llamAmpere replicas append to `/var/log/ai-server/llamampere-qwen-gpu1.log`
 and `llamampere-qwen-gpu2.log`; the installer creates that directory and installs
 `/etc/logrotate.d/ai-server` to rotate the files daily. Both `LogsDirectory=` in

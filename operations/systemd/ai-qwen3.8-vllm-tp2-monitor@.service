@@ -1,0 +1,21 @@
+[Unit]
+Description=Qwen3.8-27B vLLM TP2 GPU %i telemetry
+Requires=ai-qwen3.8-vllm-tp2.service
+BindsTo=ai-qwen3.8-vllm-tp2.service
+After=ai-qwen3.8-vllm-tp2.service
+PartOf=ai-qwen3.8-vllm-tp2.service
+ConditionPathExists=/usr/bin/nvidia-smi
+ConditionPathExists=/home/michel/LLMs-tests/localLLMinference/tools/qwen_gpu_monitor.py
+
+[Service]
+Type=simple
+User=michel
+Group=michel
+WorkingDirectory=/home/michel/LLMs-tests/localLLMinference
+ExecStart=/home/michel/LLMs-tests/.phase-f1p5-vllm-nightly/bin/python -u /home/michel/LLMs-tests/localLLMinference/tools/qwen_gpu_monitor.py --url http://127.0.0.1:18081/health --gpu %i --interval 15
+Restart=on-failure
+RestartSec=10
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

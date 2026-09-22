@@ -1,0 +1,49 @@
+[Unit]
+Description=Private Qwen3.8-27B vLLM TP2 backend
+Wants=network-online.target nvidia-persistenced.service
+After=network-online.target nvidia-persistenced.service nvidia-qwen3.8-gpu0-policy.service
+Requires=nvidia-qwen3.8-gpu0-policy.service
+Conflicts=llama-qwen3.8-q4-native.service
+Before=ai-qwen3.8-vllm-tp2-gateway.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=michel
+Group=michel
+EnvironmentFile=/etc/ai-server/ai-qwen3.8-vllm-tp2.env
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/home/michel/LLMs-tests/localLLMinference
+ExecStart=/home/michel/LLMs-tests/.phase-f1p5-vllm-nightly/bin/vllm serve /home/michel/LLMs-tests/rtx5090-qwen38-bench/runs/phase-e-kv-fp8-calibration-2026-09-20T052906Z/export \
+    --trust-remote-code \
+    --tensor-parallel-size 2 \
+    --max-model-len 262144 \
+    --gpu-memory-utilization 0.90 \
+    --max-num-seqs 3 \
+    --kv-cache-dtype fp8_e4m3 \
+    --attention-config '{"backend":"TRITON_ATTN","use_trtllm_attention":false}' \
+    --enable-prefix-caching \
+    --cudagraph-metrics \
+    --cudagraph-capture-sizes 1 3 \
+    --compilation-config '{"cudagraph_mode":"FULL_DECODE_ONLY"}' \
+    --gdn-prefill-backend triton \
+    --max-num-batched-tokens 4096 \
+    --long-prefill-token-threshold 256 \
+    --enable-chunked-prefill \
+    --reasoning-parser qwen3 \
+    --tool-call-parser qwen3_coder \
+    --enable-auto-tool-choice \
+    --host 127.0.0.1 \
+    --port 18081 \
+    --served-model-name qwen3.8-27b-q4-gpukv-native
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=900
+TimeoutStopSec=90
+KillMode=mixed
+LimitNOFILE=1048576
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

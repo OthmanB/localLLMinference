@@ -8,12 +8,14 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from re import fullmatch
 from typing import Any
+from uuid import uuid4
 
 import httpx
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from .adapters import adapter_for
+from .admission import AdmissionCancelled, AdmissionExpired, AdmissionQueueFull, ColdAdmissionController
 from .config import BackendConfig, ConfigurationError, GatewaySettings, PoolConfig
 from .models import ChatCompletionRequest
 from .routing import (
@@ -44,6 +46,11 @@ def create_app(
 ) -> FastAPI:
     resolved_settings = settings or GatewaySettings.from_env()
     registry = BackendRegistry(resolved_settings)
+    admission_controllers = {
+        backend.name: ColdAdmissionController(backend.name, backend.cold_admission)
+        for backend in resolved_settings.backends
+        if backend.cold_admission is not None
+    }
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -61,14 +68,19 @@ def create_app(
     )
     app.state.settings = resolved_settings
     app.state.registry = registry
+    app.state.admission_controllers = admission_controllers
 
     @app.middleware("http")
     async def authenticate_lan_clients(request: Request, call_next: Any) -> Response:
+        request_id = uuid4().hex
+        request.state.gateway_request_id = request_id
         if request.url.path.startswith("/v1/") or request.url.path == "/readyz":
             try:
                 expected_api_key = resolved_settings.client_api_key()
             except ConfigurationError:
-                return openai_error("Gateway authentication is misconfigured.", 500, "server_error")
+                response = openai_error("Gateway authentication is misconfigured.", 500, "server_error")
+                response.headers["X-Gateway-Request-ID"] = request_id
+                return response
 
             if expected_api_key is not None:
                 authorization = request.headers.get("authorization", "")
@@ -77,14 +89,19 @@ def create_app(
                     supplied_api_key.encode("utf-8"),
                     expected_api_key.encode("utf-8"),
                 ):
-                    return openai_error("Invalid API key.", 401, "invalid_api_key")
+                    response = openai_error("Invalid API key.", 401, "invalid_api_key")
+                    response.headers["X-Gateway-Request-ID"] = request_id
+                    return response
 
-        return await call_next(request)
+        response = await call_next(request)
+        response.headers["X-Gateway-Request-ID"] = request_id
+        return response
 
     @app.get("/metrics")
     async def metrics() -> Response:
+        admission_metrics = "".join(controller.metrics.render() for controller in admission_controllers.values())
         return Response(
-            content=registry.metrics.render(),
+            content=registry.metrics.render() + admission_metrics,
             media_type="text/plain; version=0.0.4",
         )
 
@@ -181,7 +198,52 @@ def create_app(
 
         request_body = payload.model_dump(mode="json", exclude_none=True)
         upstream_url = adapter.chat_completions_url(backend)
+        upstream_timeout = (
+            backend.cold_admission.upstream_timeout_seconds
+            if backend.cold_admission is not None
+            else resolved_settings.request_timeout_seconds
+        )
         response_headers = _route_headers(backend, pool_route.failover)
+        admission_release: Any = None
+        admission_controller = admission_controllers.get(backend.name)
+        if admission_controller is not None:
+            try:
+                admission_lease = await admission_controller.acquire(client, request, request_body)
+            except AdmissionQueueFull:
+                if release is not None:
+                    release()
+                return openai_error(
+                    "The long-request admission queue is full.",
+                    503,
+                    "admission_queue_full",
+                    headers={"Retry-After": "1"},
+                )
+            except AdmissionExpired:
+                if release is not None:
+                    release()
+                return openai_error(
+                    "The long-request admission deadline expired.",
+                    504,
+                    "admission_queue_deadline_exceeded",
+                )
+            except AdmissionCancelled:
+                if release is not None:
+                    release()
+                return openai_error("The long request was cancelled before dispatch.", 499, "request_cancelled")
+            if admission_lease is not None:
+                admission_release = admission_lease.release
+                response_headers.update(
+                    {
+                        "X-Inference-Admission": "c2",
+                        "X-Inference-Gateway-Admission-Wait-Ms": str(round(admission_lease.wait_seconds * 1000, 3)),
+                    }
+                )
+
+        def release_all() -> None:
+            if admission_release is not None:
+                admission_release()
+            if release is not None:
+                release()
 
         if payload.stream:
             return await _stream_upstream(
@@ -190,7 +252,8 @@ def create_app(
                 request_body,
                 headers,
                 response_headers,
-                release,
+                release_all,
+                upstream_timeout,
             )
         try:
             return await _request_upstream(
@@ -199,10 +262,10 @@ def create_app(
                 request_body,
                 headers,
                 response_headers,
+                upstream_timeout,
             )
         finally:
-            if release is not None:
-                release()
+            release_all()
 
     return app
 
@@ -213,9 +276,10 @@ async def _request_upstream(
     request_body: dict[str, object],
     headers: dict[str, str],
     response_headers: dict[str, str] | None = None,
+    timeout: float | None = None,
 ) -> Response:
     try:
-        upstream = await client.post(url, json=request_body, headers=headers)
+        upstream = await client.post(url, json=request_body, headers=headers, timeout=timeout)
     except httpx.HTTPError:
         return openai_error("Configured backend is unavailable.", 502, "backend_unavailable")
 
@@ -234,9 +298,16 @@ async def _stream_upstream(
     headers: dict[str, str],
     response_headers: dict[str, str] | None = None,
     release: Any = None,
+    timeout: float | None = None,
 ) -> Response:
     try:
-        upstream_request = client.build_request("POST", url, json=request_body, headers=headers)
+        upstream_request = client.build_request(
+            "POST",
+            url,
+            json=request_body,
+            headers=headers,
+            timeout=timeout,
+        )
         upstream = await client.send(upstream_request, stream=True)
     except httpx.HTTPError:
         if release is not None:

@@ -1,0 +1,9 @@
+[Unit]
+Description=Compatibility dependency for the Qwen3.8 GPU 0 policy
+Requires=nvidia-qwen3.8-gpu-policy.service
+After=nvidia-qwen3.8-gpu-policy.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/true
+RemainAfterExit=yes

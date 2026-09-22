@@ -14,6 +14,91 @@ class ConfigurationError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
+class ColdAdmissionConfig:
+    metrics_url: str
+    target_model: str
+    max_active_leases: int = 3
+    dispatch_running_limit: int = 2
+    cold_min_input_tokens: int = 100_000
+    poll_interval_seconds: float = 1.0
+    queue_depth: int = 3
+    queue_timeout_seconds: float = 900.0
+    upstream_timeout_seconds: float = 600.0
+
+    @classmethod
+    def from_mapping(cls, value: object, backend_name: str) -> "ColdAdmissionConfig":
+        if not isinstance(value, dict):
+            raise ConfigurationError(f"Backend {backend_name!r} cold_admission must be a JSON object.")
+        allowed = {
+            "metrics_url",
+            "target_model",
+            "max_active_leases",
+            "dispatch_running_limit",
+            "cold_min_input_tokens",
+            "poll_interval_seconds",
+            "queue_depth",
+            "queue_timeout_seconds",
+            "upstream_timeout_seconds",
+        }
+        unknown = sorted(set(value) - allowed)
+        if unknown:
+            raise ConfigurationError(
+                f"Backend {backend_name!r} cold_admission has unknown fields: {', '.join(unknown)}."
+            )
+
+        metrics_url = value.get("metrics_url")
+        target_model = value.get("target_model")
+        if not isinstance(metrics_url, str) or not _is_loopback_http_url(metrics_url):
+            raise ConfigurationError(
+                f"Backend {backend_name!r} cold_admission metrics_url must be an absolute loopback HTTP(S) URL."
+            )
+        if not isinstance(target_model, str) or not target_model:
+            raise ConfigurationError(f"Backend {backend_name!r} cold_admission target_model is required.")
+
+        integers = {
+            "max_active_leases": value.get("max_active_leases", 3),
+            "dispatch_running_limit": value.get("dispatch_running_limit", 2),
+            "cold_min_input_tokens": value.get("cold_min_input_tokens", 100_000),
+            "queue_depth": value.get("queue_depth", 3),
+        }
+        for name, item in integers.items():
+            if isinstance(item, bool) or not isinstance(item, int) or item <= 0:
+                raise ConfigurationError(f"Backend {backend_name!r} cold_admission {name} must be positive.")
+
+        poll_interval = value.get("poll_interval_seconds", 1.0)
+        queue_timeout = value.get("queue_timeout_seconds", 900.0)
+        upstream_timeout = value.get("upstream_timeout_seconds", 600.0)
+        for name, item in {
+            "poll_interval_seconds": poll_interval,
+            "queue_timeout_seconds": queue_timeout,
+            "upstream_timeout_seconds": upstream_timeout,
+        }.items():
+            if isinstance(item, bool) or not isinstance(item, (int, float)) or item <= 0:
+                raise ConfigurationError(f"Backend {backend_name!r} cold_admission {name} must be positive.")
+
+        if integers["dispatch_running_limit"] >= integers["max_active_leases"]:
+            raise ConfigurationError(
+                f"Backend {backend_name!r} cold_admission dispatch_running_limit must be below max_active_leases."
+            )
+        if integers["max_active_leases"] > 3:
+            raise ConfigurationError(f"Backend {backend_name!r} cold_admission max_active_leases must not exceed three.")
+        if integers["queue_depth"] > 3:
+            raise ConfigurationError(f"Backend {backend_name!r} cold_admission queue_depth must not exceed three.")
+
+        return cls(
+            metrics_url=metrics_url,
+            target_model=target_model,
+            max_active_leases=integers["max_active_leases"],
+            dispatch_running_limit=integers["dispatch_running_limit"],
+            cold_min_input_tokens=integers["cold_min_input_tokens"],
+            poll_interval_seconds=float(poll_interval),
+            queue_depth=integers["queue_depth"],
+            queue_timeout_seconds=float(queue_timeout),
+            upstream_timeout_seconds=float(upstream_timeout),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class BackendConfig:
     name: str
     base_url: str
@@ -21,11 +106,17 @@ class BackendConfig:
     adapter: str = "openai"
     health_path: str | None = "/health"
     api_key_env: str | None = None
+    cold_admission: ColdAdmissionConfig | None = None
 
     @classmethod
     def from_mapping(cls, value: object) -> "BackendConfig":
         if not isinstance(value, dict):
             raise ConfigurationError("Each backend must be a JSON object.")
+
+        allowed = {"name", "base_url", "models", "adapter", "health_path", "api_key_env", "cold_admission"}
+        unknown = sorted(set(value) - allowed)
+        if unknown:
+            raise ConfigurationError(f"Backend contains unknown fields: {', '.join(unknown)}.")
 
         name = value.get("name")
         base_url = value.get("base_url")
@@ -33,6 +124,11 @@ class BackendConfig:
         adapter = value.get("adapter", "openai")
         health_path = value.get("health_path", "/health")
         api_key_env = value.get("api_key_env")
+        cold_admission = (
+            None
+            if value.get("cold_admission") is None
+            else ColdAdmissionConfig.from_mapping(value["cold_admission"], name if isinstance(name, str) else "<unnamed>")
+        )
 
         if not isinstance(name, str) or not name:
             raise ConfigurationError("Each backend requires a non-empty name.")
@@ -56,6 +152,7 @@ class BackendConfig:
             adapter=adapter,
             health_path=health_path,
             api_key_env=api_key_env,
+            cold_admission=cold_admission,
         )
 
     def upstream_api_key(self) -> str | None:
@@ -213,6 +310,15 @@ class GatewaySettings:
                 raise ConfigurationError(
                     f"Pool {pool.name!r} references unknown replicas: {', '.join(unknown)}."
                 )
+            pooled_admission = [
+                backend.name
+                for backend in self.backends
+                if backend.name in pool.replicas and backend.cold_admission is not None
+            ]
+            if pooled_admission:
+                raise ConfigurationError(
+                    f"Pool {pool.name!r} cannot reference cold_admission backends: {', '.join(sorted(pooled_admission))}."
+                )
             model_owners = {
                 backend.name
                 for backend in self.backends
@@ -237,6 +343,15 @@ class GatewaySettings:
 def _is_http_url(value: str) -> bool:
     parsed = urlsplit(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _is_loopback_http_url(value: str) -> bool:
+    parsed = urlsplit(value)
+    return (
+        parsed.scheme in {"http", "https"}
+        and parsed.hostname in {"127.0.0.1", "localhost", "::1"}
+        and bool(parsed.port or parsed.netloc)
+    )
 
 
 def _is_http_header_name(value: str) -> bool:

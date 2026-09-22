@@ -13,8 +13,9 @@ the `atx-dual` gateway profile.
 - Runtime: stock/local llama.cpp; the binary and commit are host inputs.
 - Endpoint: loopback `127.0.0.1:8080`.
 - Gateway: not installed or configured by this profile.
-- Validation: existing native-context evidence is historical and requires
-  revalidation after the allocator and cooling corrections below.
+- Validation: Phase B/C/D research is complete. The operator-approved 85 C
+  Q4/Q8 two-replica sustained rerun passed at a 79 C GPU 0 peak. Production
+  approval remains open.
 
 This profile is not a production recommendation and is not part of the current
 Qwen profile switcher. It exists to preserve the local RTX 5090 deployment
@@ -89,8 +90,10 @@ ai-rtx5090-monitor.service
 - Model server and monitor use loopback only.
 - The profile uses 500 W and a requested 95% fan speed, subject to board,
   cooling, and power-supply approval.
-- The successful historical 262k test used 100% fan and reached 79 C against
-  an 80 C stop threshold. That is not sustained unattended validation.
+- The historical 262k test reached 79 C against an 80 C stop threshold. The
+  cooling issue is considered resolved by the current host policy; the Phase 1
+  controlled run peaked at 56 C with the 95% fan request. The operator-approved
+  controlled stop threshold is 85 C, not an expected operating condition.
 - The service does not set `GGML_CUDA_ENABLE_UNIFIED_MEMORY`. In the assessed
   llama.cpp revision, setting it to `0` still enables managed allocation because
   the runtime checks only whether the variable exists.
@@ -139,3 +142,6 @@ explicitly first.
 - Test one and two slots with latency-qualified concurrency criteria.
 - Keep the endpoint loopback-only or put it behind the authenticated gateway.
 - Record the runtime commit, model hash, host state, and raw telemetry.
+
+The controlled Phase 1 baseline artifact is outside this repository at:
+`/home/michel/LLMs-tests/rtx5090-qwen38-bench/runs/phase1-q4-gpu1-managed-memory-absent-2026-09-20-final/`.
