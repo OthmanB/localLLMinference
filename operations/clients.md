@@ -52,6 +52,11 @@ requests across both replicas. For pooled conversations, send a stable header:
 X-Inference-Session: <stable-conversation-id>
 ```
 
+OpenCode already sends its session ID as `X-Session-Id`, which the pool also
+accepts, so pooled OpenCode sessions get replica affinity without a custom
+header. Requests without any session header use the least-inflight replica with
+round-robin tie-breaking.
+
 The gateway returns `X-Inference-Replica: gpu1|gpu2`. It does not retry a
 request after upstream dispatch, and it does not automatically fall back to the
 stock profile.
@@ -164,6 +169,13 @@ reaches the server through Tailscale. Start OpenCode from a shell where
 pool, or Muse. If the context gate fails, update the three Qwen IDs and context
 limits together; do not leave a 262144 alias pointing at a 245760 service.
 
+OpenCode sends its session ID to non-OpenCode providers as `X-Session-Id`
+(and `x-session-affinity`), and subagents send `x-parent-session-id`. The
+`atx-dual` pool accepts `X-Session-Id`, so each OpenCode session and each
+subagent session is pinned to a replica for prefix-cache locality, while
+different sessions distribute across the two replicas. No custom header or
+plugin is required.
+
 The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
 the gateway accepts the selected value and forwards it to llama.cpp.
@@ -171,7 +183,8 @@ the gateway accepts the selected value and forwards it to llama.cpp.
 ## Oh My Pi
 
 Oh My Pi reads custom providers from `~/.omp/agent/models.yml`. Add this
-provider without putting the token in the file:
+provider without putting the token in the file. `apiKey` is resolved as an
+environment variable name first, so the token stays out of the file:
 
 ```yaml
 providers:
@@ -181,7 +194,7 @@ providers:
     apiKey: AI_SERVER_API_KEY
     models:
       - id: qwen3.8-27b-atx-iq4xs-m-262144-gpu1
-         name: Qwen3.8-27B ATX llamAmpere GPU1, validated 262k
+        name: Qwen3.8-27B ATX llamAmpere GPU1, validated 262k
         reasoning: true
         input: [text]
         contextWindow: 262144
@@ -189,7 +202,7 @@ providers:
         compat:
           supportsReasoningEffort: true
       - id: qwen3.8-27b-atx-iq4xs-m-262144-gpu2
-         name: Qwen3.8-27B ATX llamAmpere GPU2, validated 262k
+        name: Qwen3.8-27B ATX llamAmpere GPU2, validated 262k
         reasoning: true
         input: [text]
         contextWindow: 262144
@@ -197,7 +210,7 @@ providers:
         compat:
           supportsReasoningEffort: true
       - id: qwen3.8-27b-atx-iq4xs-m-262144
-         name: Qwen3.8-27B ATX llamAmpere pool, validated 262k
+        name: Qwen3.8-27B ATX llamAmpere pool, validated 262k
         reasoning: true
         input: [text]
         contextWindow: 262144
@@ -227,13 +240,29 @@ provider and model with:
 omp models find qwen3.8-27b-atx-iq4xs-m-262144
 ```
 
-Use `/model` to select the provider-prefixed model interactively. To make it
-the default model, add this to `~/.omp/agent/config.yml`:
+Oh My Pi does not send a session header for a custom provider, so its pooled
+requests would be load-balanced across both replicas and lose prompt-cache
+locality. Pin its roles to explicit lanes instead. Put this in
+`~/.omp/agent/config.yml` so the main agent stays on GPU1 and subagents and
+background work use the otherwise idle GPU2:
 
 ```yaml
 modelRoles:
-  default: ai-server/qwen3.8-27b-atx-iq4xs-m-262144
+  default: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+  plan: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+  slow: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+  commit: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+  task: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+  smol: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+  tiny: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+  advisor: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
+  vision: ai-server/muse-glimmer-30b-kquant17
 ```
+
+The explicit `...-gpu1` and `...-gpu2` IDs are singleton lanes that bypass pool
+routing, so each role keeps its own warm prompt cache. The pooled ID stays
+available for interactive `/model` selection when you want the gateway to pick
+a replica.
 
 ## Reasoning And Sampling
 

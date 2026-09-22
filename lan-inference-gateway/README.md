@@ -37,8 +37,12 @@ export LAN_INFERENCE_BACKENDS='[
 
 For independent replicas of one model, keep the explicit model IDs on their
 backends and configure the pooled public ID separately. Pool entries must name
-existing backends; the default session header is `X-Inference-Session` and the
-limit applies independently to each replica:
+existing backends; the limit applies independently to each replica. A pool
+accepts one or more session headers (`session_headers`), checked in order; the
+legacy single-value `session_header` is still supported. With several headers,
+the first one present on the request wins, which lets clients that already send
+a standard header (for example OpenCode's `X-Session-Id`) get affinity without a
+custom header:
 
 ```bash
 export LAN_INFERENCE_POOLS='[
@@ -46,7 +50,7 @@ export LAN_INFERENCE_POOLS='[
     "name": "qwen-atx-pool",
     "model": "qwen3.8-27b-atx-iq4xs-m-262144",
     "replicas": ["qwen_atx_gpu1", "qwen_atx_gpu2"],
-    "session_header": "X-Inference-Session",
+    "session_headers": ["X-Inference-Session", "X-Session-Id"],
     "max_inflight": 1
   }
 ]'
@@ -76,9 +80,10 @@ to the LAN.
 ## Routing and health
 
 Singleton model IDs map exactly to one configured backend. Pool model IDs are
-selected across healthy replicas: a valid `X-Inference-Session` is routed by
-deterministic rendezvous affinity, while requests without that header use the
-least-inflight replica. A pinned saturated replica returns a retryable `503`
+selected across healthy replicas: a request carrying a configured session header
+is routed by deterministic rendezvous affinity, while requests without one use
+the least-inflight replica with round-robin tie-breaking, so sequential traffic
+spreads across the pool. A pinned saturated replica returns a retryable `503`
 rather than spilling the session to another replica.
 
 An unlisted model returns OpenAI-style `model_not_found` unless

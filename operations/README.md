@@ -14,7 +14,8 @@ privileged installer and profile switch complete:
 - llamAmpere replica `qwen3.8-27b-atx-iq4xs-m-262144-gpu2` uses physical GPU 2
   on loopback port 8081.
 - Pooled model ID `qwen3.8-27b-atx-iq4xs-m-262144` selects between those two
-  replicas using `X-Inference-Session` affinity.
+  replicas using session affinity (`X-Inference-Session`, or the `X-Session-Id`
+  header OpenCode already sends).
 - Muse Glimmer remains unchanged on physical GPU 0 and loopback port 8082 as
   `muse-glimmer-30b-kquant17`.
 
@@ -68,6 +69,10 @@ For the pooled model, send a stable conversation identifier:
 ```text
 X-Inference-Session: <stable-conversation-id>
 ```
+
+OpenCode's built-in `X-Session-Id` is also accepted, so its sessions get
+affinity without extra configuration. Requests with no session header use the
+least-inflight replica with round-robin tie-breaking.
 
 Responses include `X-Inference-Replica: gpu1|gpu2`. The gateway does not retry a
 request after upstream dispatch. A failed or saturated replica is surfaced to

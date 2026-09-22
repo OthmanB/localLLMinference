@@ -24,7 +24,8 @@ The token lives in `/etc/ai-server/lan-inference-gateway.env`, owned by root and
 mode 0600. The profile switch preserves it while changing backend topology.
 
 For the pooled Qwen model, clients should send a stable
-`X-Inference-Session: <conversation-id>` header. The gateway returns
+`X-Inference-Session: <conversation-id>` header; the pool also accepts the
+`X-Session-Id` header OpenCode sends automatically. The gateway returns
 `X-Inference-Replica: gpu1|gpu2`. It does not retry after upstream dispatch and
 does not automatically switch to the stock profile.
 

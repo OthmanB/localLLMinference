@@ -74,7 +74,7 @@ class PoolConfig:
     name: str
     model: str
     replicas: tuple[str, ...]
-    session_header: str = "X-Inference-Session"
+    session_headers: tuple[str, ...] = ("X-Inference-Session",)
     max_inflight: int = 1
 
     @classmethod
@@ -82,7 +82,7 @@ class PoolConfig:
         if not isinstance(value, dict):
             raise ConfigurationError("Each pool must be a JSON object.")
 
-        allowed = {"name", "model", "replicas", "session_header", "max_inflight"}
+        allowed = {"name", "model", "replicas", "session_header", "session_headers", "max_inflight"}
         unknown = sorted(set(value) - allowed)
         if unknown:
             raise ConfigurationError(f"Pool contains unknown fields: {', '.join(unknown)}.")
@@ -90,7 +90,8 @@ class PoolConfig:
         name = value.get("name")
         model = value.get("model")
         replicas = value.get("replicas")
-        session_header = value.get("session_header", "X-Inference-Session")
+        session_header = value.get("session_header")
+        session_headers = value.get("session_headers")
         max_inflight = value.get("max_inflight", 1)
 
         if not isinstance(name, str) or not name:
@@ -103,8 +104,20 @@ class PoolConfig:
             raise ConfigurationError(f"Pool {name!r} replicas must be a non-empty list of names.")
         if len(replicas) != len(set(replicas)):
             raise ConfigurationError(f"Pool {name!r} must not list a replica more than once.")
-        if not isinstance(session_header, str) or not _is_http_header_name(session_header):
-            raise ConfigurationError(f"Pool {name!r} session_header must be an HTTP header name.")
+        if session_header is not None and session_headers is not None:
+            raise ConfigurationError(
+                f"Pool {name!r} must set either session_header or session_headers, not both."
+            )
+        if session_headers is None:
+            session_headers = [session_header] if session_header is not None else ["X-Inference-Session"]
+        if not isinstance(session_headers, list) or not session_headers or not all(
+            isinstance(header, str) and _is_http_header_name(header) for header in session_headers
+        ):
+            raise ConfigurationError(
+                f"Pool {name!r} session_headers must be a non-empty list of HTTP header names."
+            )
+        if len(session_headers) != len({header.lower() for header in session_headers}):
+            raise ConfigurationError(f"Pool {name!r} must not repeat a session header.")
         if isinstance(max_inflight, bool) or not isinstance(max_inflight, int) or max_inflight <= 0:
             raise ConfigurationError(f"Pool {name!r} max_inflight must be a positive integer.")
 
@@ -112,7 +125,7 @@ class PoolConfig:
             name=name,
             model=model,
             replicas=tuple(replicas),
-            session_header=session_header,
+            session_headers=tuple(session_headers),
             max_inflight=max_inflight,
         )
 
@@ -182,8 +195,13 @@ class GatewaySettings:
                 isinstance(replica, str) and replica for replica in pool.replicas
             ) or len(pool.replicas) != len(set(pool.replicas)):
                 raise ConfigurationError(f"Pool {pool.name!r} replicas must be unique and non-empty.")
-            if not isinstance(pool.session_header, str) or not _is_http_header_name(pool.session_header):
-                raise ConfigurationError(f"Pool {pool.name!r} session_header must be an HTTP header name.")
+            if not isinstance(pool.session_headers, (list, tuple)) or not pool.session_headers or not all(
+                isinstance(header, str) and _is_http_header_name(header)
+                for header in pool.session_headers
+            ):
+                raise ConfigurationError(
+                    f"Pool {pool.name!r} session_headers must be a non-empty list of HTTP header names."
+                )
             if (
                 isinstance(pool.max_inflight, bool)
                 or not isinstance(pool.max_inflight, int)

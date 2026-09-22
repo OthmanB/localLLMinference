@@ -35,7 +35,8 @@ Record these values only in the local deployment record:
 The staged target profile is `atx-dual`: two independent llamAmpere replicas,
 GPU 1 on loopback port 8080 and GPU 2 on loopback port 8081, plus the pooled
 gateway model ID `qwen3.8-27b-atx-iq4xs-m-262144` with `X-Inference-Session`
-affinity. Muse Glimmer remains unchanged on GPU 0. The `stock-q4-tensor` profile
+affinity (OpenCode's `X-Session-Id` is also accepted). Muse Glimmer remains
+unchanged on GPU 0. The `stock-q4-tensor` profile
 remains the manual rollback option; the two must never run concurrently. The
 isolated native-context gate passed on both GPUs and concurrently; live-service
 acceptance remains outstanding.

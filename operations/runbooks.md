@@ -195,8 +195,10 @@ the selected thinking or non-thinking mode when reproducibility is required.
 An OpenCode request also contains its system and tool context, so a fresh
 session can still be slow before the first output token. For pooled llamAmpere
 requests, send a stable `X-Inference-Session` value to preserve replica cache
-locality. The response identifies the selected lane with
-`X-Inference-Replica`.
+locality; OpenCode's own `X-Session-Id` is accepted as well, so its sessions and
+subagent sessions are pinned automatically. Requests without a session header
+use the least-inflight replica with round-robin tie-breaking. The response
+identifies the selected lane with `X-Inference-Replica`.
 
 Thinking example:
 

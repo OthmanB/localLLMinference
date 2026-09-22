@@ -94,6 +94,7 @@ class BackendRegistry:
             pool.model: {replica: _ReplicaState() for replica in pool.replicas}
             for pool in settings.pools
         }
+        self._round_robin: dict[str, int] = {pool.model: 0 for pool in settings.pools}
         self._state_lock = Lock()
         self._metrics = PoolMetrics(settings.pools)
 
@@ -167,7 +168,20 @@ class BackendRegistry:
 
         with self._state_lock:
             states = self._states[pool.model]
-            return tuple(sorted(pool.replicas, key=lambda replica: (states[replica].inflight, replica)))
+            ordered = sorted(
+                pool.replicas,
+                key=lambda replica: (states[replica].inflight, replica),
+            )
+            # Rotate among the least-inflight replicas so sequential unkeyed
+            # requests spread across the pool instead of always preferring the
+            # alphabetically-first replica.
+            least_inflight = states[ordered[0]].inflight
+            tied = [replica for replica in ordered if states[replica].inflight == least_inflight]
+            rest = [replica for replica in ordered if states[replica].inflight != least_inflight]
+            offset = self._round_robin[pool.model] % len(tied)
+            self._round_robin[pool.model] += 1
+            rotated = tied[offset:] + tied[:offset]
+            return tuple(rotated + rest)
 
     def mark_health(self, pool: PoolConfig, replica: str, healthy: bool) -> None:
         with self._state_lock:

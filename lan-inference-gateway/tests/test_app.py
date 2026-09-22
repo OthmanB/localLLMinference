@@ -594,3 +594,120 @@ def test_pool_environment_configuration_is_strict(monkeypatch) -> None:
 
     with pytest.raises(ConfigurationError):
         GatewaySettings.from_env()
+
+
+@pytest.mark.anyio
+async def test_sequential_unkeyed_requests_alternate_replicas() -> None:
+    received: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return httpx.Response(200)
+        received.append(request.url.host or "")
+        return httpx.Response(200, json={"id": "chatcmpl-1"})
+
+    app = create_app(_pool_settings(), httpx.MockTransport(handler))
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://gateway"
+        ) as client:
+            for _ in range(4):
+                await client.post("/v1/chat/completions", json=_chat_payload())
+
+    assert received == ["gpu1.test", "gpu2.test", "gpu1.test", "gpu2.test"]
+
+
+@pytest.mark.anyio
+async def test_configured_session_headers_are_honored() -> None:
+    settings = GatewaySettings(
+        backends=(
+            BackendConfig("gpu1", "http://gpu1.test", ("model-gpu1",)),
+            BackendConfig("gpu2", "http://gpu2.test", ("model-gpu2",)),
+        ),
+        pools=(
+            PoolConfig(
+                "qwen-pool",
+                "model-pooled",
+                ("gpu1", "gpu2"),
+                session_headers=("X-Inference-Session", "X-Session-Id"),
+                max_inflight=1,
+            ),
+        ),
+    )
+    received: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return httpx.Response(200)
+        received.append(request.url.host or "")
+        return httpx.Response(200, json={"id": "chatcmpl-1"})
+
+    app = create_app(settings, httpx.MockTransport(handler))
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://gateway"
+        ) as client:
+            repeated = [
+                await client.post(
+                    "/v1/chat/completions",
+                    json=_chat_payload(),
+                    headers={"X-Session-Id": "opencode-session"},
+                )
+                for _ in range(3)
+            ]
+
+    assert len({response.headers["x-inference-replica"] for response in repeated}) == 1
+
+
+def test_pool_session_header_configuration(monkeypatch) -> None:
+    monkeypatch.setenv(
+        "LAN_INFERENCE_BACKENDS",
+        json.dumps(
+            [
+                {"name": "gpu1", "base_url": "http://gpu1.test", "models": ["model-gpu1"]},
+                {"name": "gpu2", "base_url": "http://gpu2.test", "models": ["model-gpu2"]},
+            ]
+        ),
+    )
+
+    monkeypatch.setenv(
+        "LAN_INFERENCE_POOLS",
+        json.dumps(
+            [{"name": "pool", "model": "pooled", "replicas": ["gpu1", "gpu2"], "session_header": "X-Inference-Session"}]
+        ),
+    )
+    assert GatewaySettings.from_env().pools[0].session_headers == ("X-Inference-Session",)
+
+    monkeypatch.setenv(
+        "LAN_INFERENCE_POOLS",
+        json.dumps(
+            [
+                {
+                    "name": "pool",
+                    "model": "pooled",
+                    "replicas": ["gpu1", "gpu2"],
+                    "session_headers": ["X-Inference-Session", "X-Session-Id"],
+                }
+            ]
+        ),
+    )
+    assert GatewaySettings.from_env().pools[0].session_headers == ("X-Inference-Session", "X-Session-Id")
+
+    monkeypatch.setenv(
+        "LAN_INFERENCE_POOLS",
+        json.dumps(
+            [
+                {
+                    "name": "pool",
+                    "model": "pooled",
+                    "replicas": ["gpu1", "gpu2"],
+                    "session_header": "X-Inference-Session",
+                    "session_headers": ["X-Session-Id"],
+                }
+            ]
+        ),
+    )
+    with pytest.raises(ConfigurationError):
+        GatewaySettings.from_env()
+
+

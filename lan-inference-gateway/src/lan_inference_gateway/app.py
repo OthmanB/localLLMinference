@@ -127,7 +127,7 @@ def create_app(
         release: Any = None
 
         if pool is not None:
-            session = request.headers.get(pool.session_header)
+            session = _session_header(request, pool.session_headers)
             if session is not None and not _valid_session(session):
                 return openai_error("Invalid inference session header.", 400, "invalid_session")
 
@@ -416,6 +416,14 @@ def _pool_health(
 
 def _valid_session(value: str) -> bool:
     return len(value) <= _MAX_SESSION_LENGTH and fullmatch(_SESSION_PATTERN, value) is not None
+
+
+def _session_header(request: Request, names: tuple[str, ...]) -> str | None:
+    for name in names:
+        value = request.headers.get(name)
+        if value is not None:
+            return value
+    return None
 
 
 def _route_headers(backend: BackendConfig, failover: bool) -> dict[str, str]:
