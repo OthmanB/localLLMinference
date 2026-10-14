@@ -1,0 +1,2101 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "gate-result.json",
+      "measurements": {
+        "comparisons": [
+          {
+            "baseline": {
+              "decode_tok_s": 79.19027939320449,
+              "prefill_tok_s": 988.2400118367565,
+              "wall_seconds": 66.68056321144104
+            },
+            "close_at_15pct_threshold": true,
+            "dual": {
+              "decode_tok_s": 85.65218787807412,
+              "prefill_tok_s": 983.9860742987634,
+              "wall_seconds": 66.63047313690186
+            },
+            "label": "064k",
+            "ratios": {
+              "prefill": 0.9956954408979184,
+              "wall": 0.9992488054670392
+            }
+          },
+          {
+            "baseline": {
+              "decode_tok_s": 79.19027939320449,
+              "prefill_tok_s": 988.2400118367565,
+              "wall_seconds": 66.68056321144104
+            },
+            "close_at_15pct_threshold": true,
+            "dual": {
+              "decode_tok_s": 85.95692215123314,
+              "prefill_tok_s": 971.8263198504915,
+              "wall_seconds": 67.41321778297424
+            },
+            "label": "064k",
+            "ratios": {
+              "prefill": 0.9833909862081396,
+              "wall": 1.0109875282428253
+            }
+          },
+          {
+            "baseline": {
+              "decode_tok_s": 65.49793783836337,
+              "prefill_tok_s": 572.940631830083,
+              "wall_seconds": 346.9975380897522
+            },
+            "close_at_15pct_threshold": true,
+            "dual": {
+              "decode_tok_s": 65.4634685716536,
+              "prefill_tok_s": 578.4144600745295,
+              "wall_seconds": 342.433230638504
+            },
+            "label": "196k",
+            "ratios": {
+              "prefill": 1.0095539187488973,
+              "wall": 0.9868462828976394
+            }
+          },
+          {
+            "baseline": {
+              "decode_tok_s": 65.49793783836337,
+              "prefill_tok_s": 572.940631830083,
+              "wall_seconds": 346.9975380897522
+            },
+            "close_at_15pct_threshold": true,
+            "dual": {
+              "decode_tok_s": 65.2011685271922,
+              "prefill_tok_s": 567.8965001628086,
+              "wall_seconds": 348.7091381549835
+            },
+            "label": "196k",
+            "ratios": {
+              "prefill": 0.9911960657229659,
+              "wall": 1.0049326000255039
+            }
+          }
+        ],
+        "completed_cold_196k_instances": 2,
+        "completed_cold_64k_instances": 2,
+        "partial_results_preserved": true
+      }
+    },
+    {
+      "source_file": "gpu1/requests/depth064k-cold/result.json",
+      "measurements": {
+        "ended_monotonic": 488271.726712462,
+        "ended_wall": 1789743541.1509333,
+        "first_byte_wall": 1789743504.6494296,
+        "label": "064k",
+        "name": "gpu1",
+        "physical_gpu": 1,
+        "port": 18111,
+        "prompt_count": 63964,
+        "started_monotonic": 488205.096237483,
+        "started_wall": 1789743474.5204601,
+        "status": 200,
+        "timings": {
+          "cache_n": 0,
+          "draft_n": 97,
+          "draft_n_accepted": 94,
+          "predicted_ms": 1494.416,
+          "predicted_n": 128,
+          "predicted_per_second": 85.65218787807412,
+          "predicted_per_token_ms": 11.675125,
+          "prompt_ms": 65004.985,
+          "prompt_n": 63964,
+          "prompt_per_second": 983.9860742987634,
+          "prompt_per_token_ms": 1.0162745450565944
+        },
+        "tokens_cached": 64091,
+        "tokens_evaluated": 63964,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 30128.969430923462,
+        "wall_seconds": 66.63047313690186
+      }
+    },
+    {
+      "source_file": "gpu1/requests/depth064k-warm/result.json",
+      "measurements": {
+        "ended_monotonic": 488274.870360388,
+        "ended_wall": 1789743544.2945807,
+        "first_byte_wall": 1789743542.7821941,
+        "label": "064k",
+        "name": "gpu1",
+        "physical_gpu": 1,
+        "port": 18111,
+        "prompt_count": 63964,
+        "started_monotonic": 488272.51981205,
+        "started_wall": 1789743541.9440336,
+        "status": 200,
+        "timings": {
+          "cache_n": 63960,
+          "draft_n": 97,
+          "draft_n_accepted": 94,
+          "predicted_ms": 1506.296,
+          "predicted_n": 128,
+          "predicted_per_second": 84.9766579742627,
+          "predicted_per_token_ms": 11.7679375,
+          "prompt_ms": 710.334,
+          "prompt_n": 4,
+          "prompt_per_second": 5.631153795256879,
+          "prompt_per_token_ms": 177.5835
+        },
+        "tokens_cached": 64091,
+        "tokens_evaluated": 63964,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 838.160514831543,
+        "wall_seconds": 2.3505470752716064
+      }
+    },
+    {
+      "source_file": "gpu1/requests/depth196k-cold/result.json",
+      "measurements": {
+        "ended_monotonic": 488618.059575367,
+        "ended_wall": 1789743887.4837961,
+        "first_byte_wall": 1789743576.8613129,
+        "label": "196k",
+        "name": "gpu1",
+        "physical_gpu": 1,
+        "port": 18111,
+        "prompt_count": 195914,
+        "started_monotonic": 488275.626343525,
+        "started_wall": 1789743545.0505655,
+        "status": 200,
+        "timings": {
+          "cache_n": 0,
+          "draft_n": 103,
+          "draft_n_accepted": 92,
+          "predicted_ms": 1955.289,
+          "predicted_n": 128,
+          "predicted_per_second": 65.4634685716536,
+          "predicted_per_token_ms": 15.2756953125,
+          "prompt_ms": 338708.683,
+          "prompt_n": 195914,
+          "prompt_per_second": 578.4144600745295,
+          "prompt_per_token_ms": 1.7288641087415908
+        },
+        "tokens_cached": 196041,
+        "tokens_evaluated": 195914,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 31810.747385025024,
+        "wall_seconds": 342.433230638504
+      }
+    },
+    {
+      "source_file": "gpu1/requests/depth196k-warm/result.json",
+      "measurements": {
+        "ended_monotonic": 488628.486589459,
+        "ended_wall": 1789743897.9108098,
+        "first_byte_wall": 1789743895.9326928,
+        "label": "196k",
+        "name": "gpu1",
+        "physical_gpu": 1,
+        "port": 18111,
+        "prompt_count": 195914,
+        "started_monotonic": 488624.356357587,
+        "started_wall": 1789743893.780579,
+        "status": 200,
+        "timings": {
+          "cache_n": 195910,
+          "draft_n": 103,
+          "draft_n_accepted": 92,
+          "predicted_ms": 1956.906,
+          "predicted_n": 128,
+          "predicted_per_second": 65.40937582081102,
+          "predicted_per_token_ms": 15.288328125,
+          "prompt_ms": 1810.744,
+          "prompt_n": 4,
+          "prompt_per_second": 2.2090367274446305,
+          "prompt_per_token_ms": 452.686
+        },
+        "tokens_cached": 196041,
+        "tokens_evaluated": 195914,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 2152.113676071167,
+        "wall_seconds": 4.130230665206909
+      }
+    },
+    {
+      "source_file": "gpu2/requests/depth064k-cold/result.json",
+      "measurements": {
+        "ended_monotonic": 488272.508837438,
+        "ended_wall": 1789743541.9330583,
+        "first_byte_wall": 1789743504.6237717,
+        "label": "064k",
+        "name": "gpu2",
+        "physical_gpu": 2,
+        "port": 18112,
+        "prompt_count": 63964,
+        "started_monotonic": 488205.09561956,
+        "started_wall": 1789743474.5198405,
+        "status": 200,
+        "timings": {
+          "cache_n": 0,
+          "draft_n": 97,
+          "draft_n_accepted": 94,
+          "predicted_ms": 1489.118,
+          "predicted_n": 128,
+          "predicted_per_second": 85.95692215123314,
+          "predicted_per_token_ms": 11.633734375,
+          "prompt_ms": 65818.345,
+          "prompt_n": 63964,
+          "prompt_per_second": 971.8263198504915,
+          "prompt_per_token_ms": 1.0289904477518605
+        },
+        "tokens_cached": 64091,
+        "tokens_evaluated": 63964,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 30103.931188583374,
+        "wall_seconds": 67.41321778297424
+      }
+    },
+    {
+      "source_file": "gpu2/requests/depth064k-warm/result.json",
+      "measurements": {
+        "ended_monotonic": 488274.864686769,
+        "ended_wall": 1789743544.2889073,
+        "first_byte_wall": 1789743542.7848945,
+        "label": "064k",
+        "name": "gpu2",
+        "physical_gpu": 2,
+        "port": 18112,
+        "prompt_count": 63964,
+        "started_monotonic": 488272.519200762,
+        "started_wall": 1789743541.9434223,
+        "status": 200,
+        "timings": {
+          "cache_n": 63960,
+          "draft_n": 97,
+          "draft_n_accepted": 94,
+          "predicted_ms": 1499.332,
+          "predicted_n": 128,
+          "predicted_per_second": 85.37135204210941,
+          "predicted_per_token_ms": 11.71353125,
+          "prompt_ms": 711.824,
+          "prompt_n": 4,
+          "prompt_per_second": 5.61936658499854,
+          "prompt_per_token_ms": 177.956
+        },
+        "tokens_cached": 64091,
+        "tokens_evaluated": 63964,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 841.4721488952637,
+        "wall_seconds": 2.345484972000122
+      }
+    },
+    {
+      "source_file": "gpu2/requests/depth196k-cold/result.json",
+      "measurements": {
+        "ended_monotonic": 488624.332960879,
+        "ended_wall": 1789743893.7571824,
+        "first_byte_wall": 1789743576.853217,
+        "label": "196k",
+        "name": "gpu2",
+        "physical_gpu": 2,
+        "port": 18112,
+        "prompt_count": 195914,
+        "started_monotonic": 488275.623822592,
+        "started_wall": 1789743545.0480442,
+        "status": 200,
+        "timings": {
+          "cache_n": 0,
+          "draft_n": 103,
+          "draft_n_accepted": 92,
+          "predicted_ms": 1963.155,
+          "predicted_n": 128,
+          "predicted_per_second": 65.2011685271922,
+          "predicted_per_token_ms": 15.3371484375,
+          "prompt_ms": 344981.876,
+          "prompt_n": 195914,
+          "prompt_per_second": 567.8965001628086,
+          "prompt_per_token_ms": 1.7608842451279643
+        },
+        "tokens_cached": 196041,
+        "tokens_evaluated": 195914,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 31805.17268180847,
+        "wall_seconds": 348.7091381549835
+      }
+    },
+    {
+      "source_file": "gpu2/requests/depth196k-warm/result.json",
+      "measurements": {
+        "ended_monotonic": 488628.471719421,
+        "ended_wall": 1789743897.8959403,
+        "first_byte_wall": 1789743895.9168918,
+        "label": "196k",
+        "name": "gpu2",
+        "physical_gpu": 2,
+        "port": 18112,
+        "prompt_count": 195914,
+        "started_monotonic": 488624.358773543,
+        "started_wall": 1789743893.7829955,
+        "status": 200,
+        "timings": {
+          "cache_n": 195910,
+          "draft_n": 103,
+          "draft_n_accepted": 92,
+          "predicted_ms": 1965.833,
+          "predicted_n": 128,
+          "predicted_per_second": 65.11234677615036,
+          "predicted_per_token_ms": 15.3580703125,
+          "prompt_ms": 1814.601,
+          "prompt_n": 4,
+          "prompt_per_second": 2.2043413400521654,
+          "prompt_per_token_ms": 453.65025
+        },
+        "tokens_cached": 196041,
+        "tokens_evaluated": 195914,
+        "tokens_predicted": 128,
+        "truncated": false,
+        "ttft_ms": 2133.8963508605957,
+        "wall_seconds": 4.112944841384888
+      }
+    },
+    {
+      "source_file": "measurements.json",
+      "measurements": {
+        "pairs": [
+          {
+            "aggregate_decode_tok_s_decode_window": 112.45130340432476,
+            "aggregate_decode_tok_s_work": 85.8042844492471,
+            "aggregate_output_tok_s_pair_wall": 3.7969313849156574,
+            "decode_window_seconds": 2.276540975959506,
+            "decode_work_seconds": 2.9835339999999997,
+            "label": "064k",
+            "pair_ended_wall": 1789743541.939181,
+            "pair_started_wall": 1789743474.516314,
+            "pair_wall_seconds": 67.42286705970764,
+            "request_overlap_fraction_of_pair": 0.9882474282796929,
+            "request_overlap_seconds": 66.6304749789997,
+            "requests": {
+              "gpu1": {
+                "ended_monotonic": 488271.726712462,
+                "ended_wall": 1789743541.1509333,
+                "first_byte_wall": 1789743504.6494296,
+                "label": "064k",
+                "name": "gpu1",
+                "physical_gpu": 1,
+                "port": 18111,
+                "prompt_count": 63964,
+                "started_monotonic": 488205.096237483,
+                "started_wall": 1789743474.5204601,
+                "status": 200,
+                "timings": {
+                  "cache_n": 0,
+                  "draft_n": 97,
+                  "draft_n_accepted": 94,
+                  "predicted_ms": 1494.416,
+                  "predicted_n": 128,
+                  "predicted_per_second": 85.65218787807412,
+                  "predicted_per_token_ms": 11.675125,
+                  "prompt_ms": 65004.985,
+                  "prompt_n": 63964,
+                  "prompt_per_second": 983.9860742987634,
+                  "prompt_per_token_ms": 1.0162745450565944
+                },
+                "tokens_cached": 64091,
+                "tokens_evaluated": 63964,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 30128.969430923462,
+                "wall_seconds": 66.63047313690186
+              },
+              "gpu2": {
+                "ended_monotonic": 488272.508837438,
+                "ended_wall": 1789743541.9330583,
+                "first_byte_wall": 1789743504.6237717,
+                "label": "064k",
+                "name": "gpu2",
+                "physical_gpu": 2,
+                "port": 18112,
+                "prompt_count": 63964,
+                "started_monotonic": 488205.09561956,
+                "started_wall": 1789743474.5198405,
+                "status": 200,
+                "timings": {
+                  "cache_n": 0,
+                  "draft_n": 97,
+                  "draft_n_accepted": 94,
+                  "predicted_ms": 1489.118,
+                  "predicted_n": 128,
+                  "predicted_per_second": 85.95692215123314,
+                  "predicted_per_token_ms": 11.633734375,
+                  "prompt_ms": 65818.345,
+                  "prompt_n": 63964,
+                  "prompt_per_second": 971.8263198504915,
+                  "prompt_per_token_ms": 1.0289904477518605
+                },
+                "tokens_cached": 64091,
+                "tokens_evaluated": 63964,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 30103.931188583374,
+                "wall_seconds": 67.41321778297424
+              }
+            }
+          },
+          {
+            "aggregate_decode_tok_s_decode_window": 169.9533159510372,
+            "aggregate_decode_tok_s_work": 85.17354775773981,
+            "aggregate_output_tok_s_pair_wall": 108.48533257031822,
+            "decode_window_seconds": 1.5062959999777377,
+            "decode_work_seconds": 3.005628,
+            "label": "064k",
+            "pair_ended_wall": 1789743544.2998214,
+            "pair_started_wall": 1789743541.9400554,
+            "pair_wall_seconds": 2.3597660064697266,
+            "request_overlap_fraction_of_pair": 0.9936895067614756,
+            "request_overlap_seconds": 2.3448747190413997,
+            "requests": {
+              "gpu1": {
+                "ended_monotonic": 488274.870360388,
+                "ended_wall": 1789743544.2945807,
+                "first_byte_wall": 1789743542.7821941,
+                "label": "064k",
+                "name": "gpu1",
+                "physical_gpu": 1,
+                "port": 18111,
+                "prompt_count": 63964,
+                "started_monotonic": 488272.51981205,
+                "started_wall": 1789743541.9440336,
+                "status": 200,
+                "timings": {
+                  "cache_n": 63960,
+                  "draft_n": 97,
+                  "draft_n_accepted": 94,
+                  "predicted_ms": 1506.296,
+                  "predicted_n": 128,
+                  "predicted_per_second": 84.9766579742627,
+                  "predicted_per_token_ms": 11.7679375,
+                  "prompt_ms": 710.334,
+                  "prompt_n": 4,
+                  "prompt_per_second": 5.631153795256879,
+                  "prompt_per_token_ms": 177.5835
+                },
+                "tokens_cached": 64091,
+                "tokens_evaluated": 63964,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 838.160514831543,
+                "wall_seconds": 2.3505470752716064
+              },
+              "gpu2": {
+                "ended_monotonic": 488274.864686769,
+                "ended_wall": 1789743544.2889073,
+                "first_byte_wall": 1789743542.7848945,
+                "label": "064k",
+                "name": "gpu2",
+                "physical_gpu": 2,
+                "port": 18112,
+                "prompt_count": 63964,
+                "started_monotonic": 488272.519200762,
+                "started_wall": 1789743541.9434223,
+                "status": 200,
+                "timings": {
+                  "cache_n": 63960,
+                  "draft_n": 97,
+                  "draft_n_accepted": 94,
+                  "predicted_ms": 1499.332,
+                  "predicted_n": 128,
+                  "predicted_per_second": 85.37135204210941,
+                  "predicted_per_token_ms": 11.71353125,
+                  "prompt_ms": 711.824,
+                  "prompt_n": 4,
+                  "prompt_per_second": 5.61936658499854,
+                  "prompt_per_token_ms": 177.956
+                },
+                "tokens_cached": 64091,
+                "tokens_evaluated": 63964,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 841.4721488952637,
+                "wall_seconds": 2.345484972000122
+              }
+            }
+          },
+          {
+            "aggregate_decode_tok_s_decode_window": 31.110721371521628,
+            "aggregate_decode_tok_s_work": 65.33205527500202,
+            "aggregate_output_tok_s_pair_wall": 0.7340902621014462,
+            "decode_window_seconds": 8.228674512007274,
+            "decode_work_seconds": 3.918444,
+            "label": "196k",
+            "pair_ended_wall": 1789743893.7736356,
+            "pair_started_wall": 1789743545.042678,
+            "pair_wall_seconds": 348.73095750808716,
+            "request_overlap_fraction_of_pair": 0.9819410191997782,
+            "request_overlap_seconds": 342.4332318420056,
+            "requests": {
+              "gpu1": {
+                "ended_monotonic": 488618.059575367,
+                "ended_wall": 1789743887.4837961,
+                "first_byte_wall": 1789743576.8613129,
+                "label": "196k",
+                "name": "gpu1",
+                "physical_gpu": 1,
+                "port": 18111,
+                "prompt_count": 195914,
+                "started_monotonic": 488275.626343525,
+                "started_wall": 1789743545.0505655,
+                "status": 200,
+                "timings": {
+                  "cache_n": 0,
+                  "draft_n": 103,
+                  "draft_n_accepted": 92,
+                  "predicted_ms": 1955.289,
+                  "predicted_n": 128,
+                  "predicted_per_second": 65.4634685716536,
+                  "predicted_per_token_ms": 15.2756953125,
+                  "prompt_ms": 338708.683,
+                  "prompt_n": 195914,
+                  "prompt_per_second": 578.4144600745295,
+                  "prompt_per_token_ms": 1.7288641087415908
+                },
+                "tokens_cached": 196041,
+                "tokens_evaluated": 195914,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 31810.747385025024,
+                "wall_seconds": 342.433230638504
+              },
+              "gpu2": {
+                "ended_monotonic": 488624.332960879,
+                "ended_wall": 1789743893.7571824,
+                "first_byte_wall": 1789743576.853217,
+                "label": "196k",
+                "name": "gpu2",
+                "physical_gpu": 2,
+                "port": 18112,
+                "prompt_count": 195914,
+                "started_monotonic": 488275.623822592,
+                "started_wall": 1789743545.0480442,
+                "status": 200,
+                "timings": {
+                  "cache_n": 0,
+                  "draft_n": 103,
+                  "draft_n_accepted": 92,
+                  "predicted_ms": 1963.155,
+                  "predicted_n": 128,
+                  "predicted_per_second": 65.2011685271922,
+                  "predicted_per_token_ms": 15.3371484375,
+                  "prompt_ms": 344981.876,
+                  "prompt_n": 195914,
+                  "prompt_per_second": 567.8965001628086,
+                  "prompt_per_token_ms": 1.7608842451279643
+                },
+                "tokens_cached": 196041,
+                "tokens_evaluated": 195914,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 31805.17268180847,
+                "wall_seconds": 348.7091381549835
+              }
+            }
+          },
+          {
+            "aggregate_decode_tok_s_decode_window": 129.2470375833879,
+            "aggregate_decode_tok_s_work": 65.26052332311683,
+            "aggregate_output_tok_s_pair_wall": 61.66409052857052,
+            "decode_window_seconds": 1.9807030380470678,
+            "decode_work_seconds": 3.922739,
+            "label": "196k",
+            "pair_ended_wall": 1789743897.9258358,
+            "pair_started_wall": 1789743893.774311,
+            "pair_wall_seconds": 4.151524782180786,
+            "request_overlap_fraction_of_pair": 0.9907072928141357,
+            "request_overlap_seconds": 4.112945878005121,
+            "requests": {
+              "gpu1": {
+                "ended_monotonic": 488628.486589459,
+                "ended_wall": 1789743897.9108098,
+                "first_byte_wall": 1789743895.9326928,
+                "label": "196k",
+                "name": "gpu1",
+                "physical_gpu": 1,
+                "port": 18111,
+                "prompt_count": 195914,
+                "started_monotonic": 488624.356357587,
+                "started_wall": 1789743893.780579,
+                "status": 200,
+                "timings": {
+                  "cache_n": 195910,
+                  "draft_n": 103,
+                  "draft_n_accepted": 92,
+                  "predicted_ms": 1956.906,
+                  "predicted_n": 128,
+                  "predicted_per_second": 65.40937582081102,
+                  "predicted_per_token_ms": 15.288328125,
+                  "prompt_ms": 1810.744,
+                  "prompt_n": 4,
+                  "prompt_per_second": 2.2090367274446305,
+                  "prompt_per_token_ms": 452.686
+                },
+                "tokens_cached": 196041,
+                "tokens_evaluated": 195914,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 2152.113676071167,
+                "wall_seconds": 4.130230665206909
+              },
+              "gpu2": {
+                "ended_monotonic": 488628.471719421,
+                "ended_wall": 1789743897.8959403,
+                "first_byte_wall": 1789743895.9168918,
+                "label": "196k",
+                "name": "gpu2",
+                "physical_gpu": 2,
+                "port": 18112,
+                "prompt_count": 195914,
+                "started_monotonic": 488624.358773543,
+                "started_wall": 1789743893.7829955,
+                "status": 200,
+                "timings": {
+                  "cache_n": 195910,
+                  "draft_n": 103,
+                  "draft_n_accepted": 92,
+                  "predicted_ms": 1965.833,
+                  "predicted_n": 128,
+                  "predicted_per_second": 65.11234677615036,
+                  "predicted_per_token_ms": 15.3580703125,
+                  "prompt_ms": 1814.601,
+                  "prompt_n": 4,
+                  "prompt_per_second": 2.2043413400521654,
+                  "prompt_per_token_ms": 453.65025
+                },
+                "tokens_cached": 196041,
+                "tokens_evaluated": 195914,
+                "tokens_predicted": 128,
+                "truncated": false,
+                "ttft_ms": 2133.8963508605957,
+                "wall_seconds": 4.112944841384888
+              }
+            }
+          }
+        ],
+        "requests": [
+          {
+            "decode_ms": 1494.416,
+            "decode_tok_s": 85.65218787807412,
+            "draft_acceptance": 0.9690721649484536,
+            "draft_tokens_accepted": 94,
+            "gpu_clock_mem_mhz": {
+              "count": 68,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 68,
+              "max": 1920.0,
+              "mean": 1566.8382352941176,
+              "min": 1350.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 68,
+              "watt_hours": 5.295413507152306
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 68,
+              "watt_hours": 4.750295302028709
+            },
+            "gpu_pcie_link_gen": {
+              "count": 68,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 68,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 68,
+              "max": 300.68,
+              "mean": 289.7801470588235,
+              "min": 202.16
+            },
+            "gpu_temperature_c": {
+              "count": 68,
+              "max": 61.0,
+              "mean": 57.588235294117645,
+              "min": 50.0
+            },
+            "gpu_utilization_pct": {
+              "count": 68,
+              "max": 100.0,
+              "mean": 94.05882352941177,
+              "min": 50.0
+            },
+            "gpu_vram_mib": {
+              "count": 68,
+              "max": 22814.0,
+              "mean": 22797.676470588234,
+              "min": 22780.0
+            },
+            "label": "064k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 68,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 68,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 68,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 68,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 68,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 68,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 1,
+            "prefill_ms": 65004.985,
+            "prefill_tok_s": 983.9860742987634,
+            "prompt_tokens": 63964,
+            "sample_points": 68,
+            "server_cpu_pct": {
+              "count": 136,
+              "max": 98.9,
+              "mean": 96.7595588235294,
+              "min": 87.6
+            },
+            "server_rss_kib": {
+              "count": 136,
+              "max": 2808480.0,
+              "mean": 2254485.0588235296,
+              "min": 1977620.0
+            },
+            "status": 200,
+            "tokens_cached": 64091,
+            "truncated": false,
+            "ttft_ms": 30128.969430923462,
+            "wall_seconds": 66.63047313690186
+          },
+          {
+            "decode_ms": 1489.118,
+            "decode_tok_s": 85.95692215123314,
+            "draft_acceptance": 0.9690721649484536,
+            "draft_tokens_accepted": 94,
+            "gpu_clock_mem_mhz": {
+              "count": 69,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 69,
+              "max": 1890.0,
+              "mean": 1545.8695652173913,
+              "min": 1290.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 69,
+              "watt_hours": 5.375863863678895
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 69,
+              "watt_hours": 4.949007451870726
+            },
+            "gpu_pcie_link_gen": {
+              "count": 69,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 69,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 69,
+              "max": 299.86,
+              "mean": 289.94304347826085,
+              "min": 205.93
+            },
+            "gpu_temperature_c": {
+              "count": 69,
+              "max": 68.0,
+              "mean": 63.81159420289855,
+              "min": 56.0
+            },
+            "gpu_utilization_pct": {
+              "count": 69,
+              "max": 100.0,
+              "mean": 95.69565217391305,
+              "min": 61.0
+            },
+            "gpu_vram_mib": {
+              "count": 69,
+              "max": 22814.0,
+              "mean": 22797.681159420288,
+              "min": 22780.0
+            },
+            "label": "064k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 69,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 69,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 69,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 69,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 69,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 69,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 2,
+            "prefill_ms": 65818.345,
+            "prefill_tok_s": 971.8263198504915,
+            "prompt_tokens": 63964,
+            "sample_points": 69,
+            "server_cpu_pct": {
+              "count": 138,
+              "max": 98.9,
+              "mean": 96.7804347826087,
+              "min": 87.6
+            },
+            "server_rss_kib": {
+              "count": 138,
+              "max": 2819272.0,
+              "mean": 2262654.724637681,
+              "min": 1977620.0
+            },
+            "status": 200,
+            "tokens_cached": 64091,
+            "truncated": false,
+            "ttft_ms": 30103.931188583374,
+            "wall_seconds": 67.41321778297424
+          },
+          {
+            "decode_ms": 1506.296,
+            "decode_tok_s": 84.9766579742627,
+            "draft_acceptance": 0.9690721649484536,
+            "draft_tokens_accepted": 94,
+            "gpu_clock_mem_mhz": {
+              "count": 2,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 2,
+              "max": 1710.0,
+              "mean": 1650.0,
+              "min": 1590.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 2,
+              "watt_hours": 0.057571285354527615
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 2,
+              "watt_hours": 0.049472762938680526
+            },
+            "gpu_pcie_link_gen": {
+              "count": 2,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 2,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 2,
+              "max": 275.57,
+              "mean": 212.555,
+              "min": 149.54
+            },
+            "gpu_temperature_c": {
+              "count": 2,
+              "max": 60.0,
+              "mean": 59.0,
+              "min": 58.0
+            },
+            "gpu_utilization_pct": {
+              "count": 2,
+              "max": 72.0,
+              "mean": 50.0,
+              "min": 28.0
+            },
+            "gpu_vram_mib": {
+              "count": 2,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "064k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 72.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 82.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 1,
+            "prefill_ms": 710.334,
+            "prefill_tok_s": 5.631153795256879,
+            "prompt_tokens": 63964,
+            "sample_points": 2,
+            "server_cpu_pct": {
+              "count": 4,
+              "max": 98.9,
+              "mean": 98.25,
+              "min": 97.6
+            },
+            "server_rss_kib": {
+              "count": 4,
+              "max": 2819316.0,
+              "mean": 2818236.0,
+              "min": 2817156.0
+            },
+            "status": 200,
+            "tokens_cached": 64091,
+            "truncated": false,
+            "ttft_ms": 838.160514831543,
+            "wall_seconds": 2.3505470752716064
+          },
+          {
+            "decode_ms": 1499.332,
+            "decode_tok_s": 85.37135204210941,
+            "draft_acceptance": 0.9690721649484536,
+            "draft_tokens_accepted": 94,
+            "gpu_clock_mem_mhz": {
+              "count": 2,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 2,
+              "max": 1680.0,
+              "mean": 1672.5,
+              "min": 1665.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 2,
+              "watt_hours": 0.06345016257981059
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 2,
+              "watt_hours": 0.057201570200760686
+            },
+            "gpu_pcie_link_gen": {
+              "count": 2,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 2,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 2,
+              "max": 281.91,
+              "mean": 234.26000000000002,
+              "min": 186.61
+            },
+            "gpu_temperature_c": {
+              "count": 2,
+              "max": 66.0,
+              "mean": 65.0,
+              "min": 64.0
+            },
+            "gpu_utilization_pct": {
+              "count": 2,
+              "max": 82.0,
+              "mean": 60.5,
+              "min": 39.0
+            },
+            "gpu_vram_mib": {
+              "count": 2,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "064k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 72.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 82.0,
+                "pcie_link_gen": {
+                  "count": 2,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 2,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 2,
+            "prefill_ms": 711.824,
+            "prefill_tok_s": 5.61936658499854,
+            "prompt_tokens": 63964,
+            "sample_points": 2,
+            "server_cpu_pct": {
+              "count": 4,
+              "max": 98.9,
+              "mean": 98.25,
+              "min": 97.6
+            },
+            "server_rss_kib": {
+              "count": 4,
+              "max": 2819316.0,
+              "mean": 2818236.0,
+              "min": 2817156.0
+            },
+            "status": 200,
+            "tokens_cached": 64091,
+            "truncated": false,
+            "ttft_ms": 841.4721488952637,
+            "wall_seconds": 2.345484972000122
+          },
+          {
+            "decode_ms": 1955.289,
+            "decode_tok_s": 65.4634685716536,
+            "draft_acceptance": 0.8932038834951457,
+            "draft_tokens_accepted": 92,
+            "gpu_clock_mem_mhz": {
+              "count": 349,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 349,
+              "max": 1980.0,
+              "mean": 1462.0057306590259,
+              "min": 915.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 349,
+              "watt_hours": 26.95757053091478
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 349,
+              "watt_hours": 24.120777645962008
+            },
+            "gpu_pcie_link_gen": {
+              "count": 349,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 349,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 349,
+              "max": 301.84,
+              "mean": 283.96441260744984,
+              "min": 138.06
+            },
+            "gpu_temperature_c": {
+              "count": 349,
+              "max": 69.0,
+              "mean": 66.56446991404012,
+              "min": 55.0
+            },
+            "gpu_utilization_pct": {
+              "count": 349,
+              "max": 100.0,
+              "mean": 96.82521489971347,
+              "min": 0.0
+            },
+            "gpu_vram_mib": {
+              "count": 349,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "196k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 349,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 349,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 349,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 349,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 349,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 349,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 1,
+            "prefill_ms": 338708.683,
+            "prefill_tok_s": 578.4144600745295,
+            "prompt_tokens": 195914,
+            "sample_points": 349,
+            "server_cpu_pct": {
+              "count": 698,
+              "max": 99.7,
+              "mean": 99.1471346704871,
+              "min": 97.1
+            },
+            "server_rss_kib": {
+              "count": 698,
+              "max": 5838012.0,
+              "mean": 4764650.899713467,
+              "min": 4110592.0
+            },
+            "status": 200,
+            "tokens_cached": 196041,
+            "truncated": false,
+            "ttft_ms": 31810.747385025024,
+            "wall_seconds": 342.433230638504
+          },
+          {
+            "decode_ms": 1963.155,
+            "decode_tok_s": 65.2011685271922,
+            "draft_acceptance": 0.8932038834951457,
+            "draft_tokens_accepted": 92,
+            "gpu_clock_mem_mhz": {
+              "count": 355,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 355,
+              "max": 1935.0,
+              "mean": 1419.5492957746478,
+              "min": 825.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 355,
+              "watt_hours": 27.60113478727303
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 355,
+              "watt_hours": 25.37454902324382
+            },
+            "gpu_pcie_link_gen": {
+              "count": 355,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 355,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 355,
+              "max": 301.65,
+              "mean": 285.81695774647886,
+              "min": 135.98
+            },
+            "gpu_temperature_c": {
+              "count": 355,
+              "max": 76.0,
+              "mean": 72.9830985915493,
+              "min": 59.0
+            },
+            "gpu_utilization_pct": {
+              "count": 355,
+              "max": 100.0,
+              "mean": 96.46197183098592,
+              "min": 0.0
+            },
+            "gpu_vram_mib": {
+              "count": 355,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "196k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 355,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 355,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 355,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 355,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 100.0,
+                "pcie_link_gen": {
+                  "count": 355,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 355,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 2,
+            "prefill_ms": 344981.876,
+            "prefill_tok_s": 567.8965001628086,
+            "prompt_tokens": 195914,
+            "sample_points": 355,
+            "server_cpu_pct": {
+              "count": 710,
+              "max": 99.7,
+              "mean": 99.14788732394366,
+              "min": 97.1
+            },
+            "server_rss_kib": {
+              "count": 710,
+              "max": 5838012.0,
+              "mean": 4779658.371830986,
+              "min": 4110592.0
+            },
+            "status": 200,
+            "tokens_cached": 196041,
+            "truncated": false,
+            "ttft_ms": 31805.17268180847,
+            "wall_seconds": 348.7091381549835
+          },
+          {
+            "decode_ms": 1956.906,
+            "decode_tok_s": 65.40937582081102,
+            "draft_acceptance": 0.8932038834951457,
+            "draft_tokens_accepted": 92,
+            "gpu_clock_mem_mhz": {
+              "count": 4,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 4,
+              "max": 1710.0,
+              "mean": 1661.25,
+              "min": 1560.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 4,
+              "watt_hours": 0.1361970045441524
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 4,
+              "watt_hours": 0.11186030080239434
+            },
+            "gpu_pcie_link_gen": {
+              "count": 4,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 4,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 4,
+              "max": 288.77,
+              "mean": 177.44,
+              "min": 128.09
+            },
+            "gpu_temperature_c": {
+              "count": 4,
+              "max": 65.0,
+              "mean": 62.25,
+              "min": 60.0
+            },
+            "gpu_utilization_pct": {
+              "count": 4,
+              "max": 85.0,
+              "mean": 59.5,
+              "min": 0.0
+            },
+            "gpu_vram_mib": {
+              "count": 4,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "196k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 85.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 78.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 1,
+            "prefill_ms": 1810.744,
+            "prefill_tok_s": 2.2090367274446305,
+            "prompt_tokens": 195914,
+            "sample_points": 4,
+            "server_cpu_pct": {
+              "count": 8,
+              "max": 99.7,
+              "mean": 98.85,
+              "min": 98.0
+            },
+            "server_rss_kib": {
+              "count": 8,
+              "max": 5872844.0,
+              "mean": 5870668.0,
+              "min": 5868492.0
+            },
+            "status": 200,
+            "tokens_cached": 196041,
+            "truncated": false,
+            "ttft_ms": 2152.113676071167,
+            "wall_seconds": 4.130230665206909
+          },
+          {
+            "decode_ms": 1965.833,
+            "decode_tok_s": 65.11234677615036,
+            "draft_acceptance": 0.8932038834951457,
+            "draft_tokens_accepted": 92,
+            "gpu_clock_mem_mhz": {
+              "count": 4,
+              "max": 9501.0,
+              "mean": 9501.0,
+              "min": 9501.0
+            },
+            "gpu_clock_sm_mhz": {
+              "count": 4,
+              "max": 1920.0,
+              "mean": 1755.0,
+              "min": 1545.0
+            },
+            "gpu_energy_wh": {
+              "sample_points": 4,
+              "watt_hours": 0.1652670713983035
+            },
+            "gpu_incremental_energy_wh": {
+              "sample_points": 4,
+              "watt_hours": 0.14648955449789017
+            },
+            "gpu_pcie_link_gen": {
+              "count": 4,
+              "max": 3.0,
+              "mean": 3.0,
+              "min": 3.0
+            },
+            "gpu_pcie_link_width": {
+              "count": 4,
+              "max": 8.0,
+              "mean": 8.0,
+              "min": 8.0
+            },
+            "gpu_power_w": {
+              "count": 4,
+              "max": 289.82,
+              "mean": 218.06,
+              "min": 159.72
+            },
+            "gpu_temperature_c": {
+              "count": 4,
+              "max": 74.0,
+              "mean": 71.25,
+              "min": 69.0
+            },
+            "gpu_utilization_pct": {
+              "count": 4,
+              "max": 78.0,
+              "mean": 43.0,
+              "min": 0.0
+            },
+            "gpu_vram_mib": {
+              "count": 4,
+              "max": 22814.0,
+              "mean": 22814.0,
+              "min": 22814.0
+            },
+            "label": "196k",
+            "other_gpu_maxima": {
+              "0": {
+                "max_memory_mib": 1.0,
+                "max_utilization_pct": 0.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 1.0,
+                  "mean": 1.0,
+                  "min": 1.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 16.0,
+                  "mean": 16.0,
+                  "min": 16.0
+                }
+              },
+              "1": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 85.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              },
+              "2": {
+                "max_memory_mib": 22814.0,
+                "max_utilization_pct": 78.0,
+                "pcie_link_gen": {
+                  "count": 4,
+                  "max": 3.0,
+                  "mean": 3.0,
+                  "min": 3.0
+                },
+                "pcie_link_width": {
+                  "count": 4,
+                  "max": 8.0,
+                  "mean": 8.0,
+                  "min": 8.0
+                }
+              }
+            },
+            "physical_gpu": 2,
+            "prefill_ms": 1814.601,
+            "prefill_tok_s": 2.2043413400521654,
+            "prompt_tokens": 195914,
+            "sample_points": 4,
+            "server_cpu_pct": {
+              "count": 8,
+              "max": 99.7,
+              "mean": 98.85,
+              "min": 98.0
+            },
+            "server_rss_kib": {
+              "count": 8,
+              "max": 5872844.0,
+              "mean": 5870668.0,
+              "min": 5868492.0
+            },
+            "status": 200,
+            "tokens_cached": 196041,
+            "truncated": false,
+            "ttft_ms": 2133.8963508605957,
+            "wall_seconds": 4.112944841384888
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "pairs/depth064k-cold/pair-result.json",
+      "measurements": {
+        "aggregate_decode_tok_s_decode_window": 112.45130340432476,
+        "aggregate_decode_tok_s_work": 85.8042844492471,
+        "aggregate_output_tok_s_pair_wall": 3.7969313849156574,
+        "decode_window_seconds": 2.276540975959506,
+        "decode_work_seconds": 2.9835339999999997,
+        "label": "064k",
+        "pair_ended_wall": 1789743541.939181,
+        "pair_started_wall": 1789743474.516314,
+        "pair_wall_seconds": 67.42286705970764,
+        "request_overlap_fraction_of_pair": 0.9882474282796929,
+        "request_overlap_seconds": 66.6304749789997,
+        "requests": {
+          "gpu1": {
+            "ended_monotonic": 488271.726712462,
+            "ended_wall": 1789743541.1509333,
+            "first_byte_wall": 1789743504.6494296,
+            "label": "064k",
+            "name": "gpu1",
+            "physical_gpu": 1,
+            "port": 18111,
+            "prompt_count": 63964,
+            "started_monotonic": 488205.096237483,
+            "started_wall": 1789743474.5204601,
+            "status": 200,
+            "timings": {
+              "cache_n": 0,
+              "draft_n": 97,
+              "draft_n_accepted": 94,
+              "predicted_ms": 1494.416,
+              "predicted_n": 128,
+              "predicted_per_second": 85.65218787807412,
+              "predicted_per_token_ms": 11.675125,
+              "prompt_ms": 65004.985,
+              "prompt_n": 63964,
+              "prompt_per_second": 983.9860742987634,
+              "prompt_per_token_ms": 1.0162745450565944
+            },
+            "tokens_cached": 64091,
+            "tokens_evaluated": 63964,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 30128.969430923462,
+            "wall_seconds": 66.63047313690186
+          },
+          "gpu2": {
+            "ended_monotonic": 488272.508837438,
+            "ended_wall": 1789743541.9330583,
+            "first_byte_wall": 1789743504.6237717,
+            "label": "064k",
+            "name": "gpu2",
+            "physical_gpu": 2,
+            "port": 18112,
+            "prompt_count": 63964,
+            "started_monotonic": 488205.09561956,
+            "started_wall": 1789743474.5198405,
+            "status": 200,
+            "timings": {
+              "cache_n": 0,
+              "draft_n": 97,
+              "draft_n_accepted": 94,
+              "predicted_ms": 1489.118,
+              "predicted_n": 128,
+              "predicted_per_second": 85.95692215123314,
+              "predicted_per_token_ms": 11.633734375,
+              "prompt_ms": 65818.345,
+              "prompt_n": 63964,
+              "prompt_per_second": 971.8263198504915,
+              "prompt_per_token_ms": 1.0289904477518605
+            },
+            "tokens_cached": 64091,
+            "tokens_evaluated": 63964,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 30103.931188583374,
+            "wall_seconds": 67.41321778297424
+          }
+        }
+      }
+    },
+    {
+      "source_file": "pairs/depth064k-warm/pair-result.json",
+      "measurements": {
+        "aggregate_decode_tok_s_decode_window": 169.9533159510372,
+        "aggregate_decode_tok_s_work": 85.17354775773981,
+        "aggregate_output_tok_s_pair_wall": 108.48533257031822,
+        "decode_window_seconds": 1.5062959999777377,
+        "decode_work_seconds": 3.005628,
+        "label": "064k",
+        "pair_ended_wall": 1789743544.2998214,
+        "pair_started_wall": 1789743541.9400554,
+        "pair_wall_seconds": 2.3597660064697266,
+        "request_overlap_fraction_of_pair": 0.9936895067614756,
+        "request_overlap_seconds": 2.3448747190413997,
+        "requests": {
+          "gpu1": {
+            "ended_monotonic": 488274.870360388,
+            "ended_wall": 1789743544.2945807,
+            "first_byte_wall": 1789743542.7821941,
+            "label": "064k",
+            "name": "gpu1",
+            "physical_gpu": 1,
+            "port": 18111,
+            "prompt_count": 63964,
+            "started_monotonic": 488272.51981205,
+            "started_wall": 1789743541.9440336,
+            "status": 200,
+            "timings": {
+              "cache_n": 63960,
+              "draft_n": 97,
+              "draft_n_accepted": 94,
+              "predicted_ms": 1506.296,
+              "predicted_n": 128,
+              "predicted_per_second": 84.9766579742627,
+              "predicted_per_token_ms": 11.7679375,
+              "prompt_ms": 710.334,
+              "prompt_n": 4,
+              "prompt_per_second": 5.631153795256879,
+              "prompt_per_token_ms": 177.5835
+            },
+            "tokens_cached": 64091,
+            "tokens_evaluated": 63964,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 838.160514831543,
+            "wall_seconds": 2.3505470752716064
+          },
+          "gpu2": {
+            "ended_monotonic": 488274.864686769,
+            "ended_wall": 1789743544.2889073,
+            "first_byte_wall": 1789743542.7848945,
+            "label": "064k",
+            "name": "gpu2",
+            "physical_gpu": 2,
+            "port": 18112,
+            "prompt_count": 63964,
+            "started_monotonic": 488272.519200762,
+            "started_wall": 1789743541.9434223,
+            "status": 200,
+            "timings": {
+              "cache_n": 63960,
+              "draft_n": 97,
+              "draft_n_accepted": 94,
+              "predicted_ms": 1499.332,
+              "predicted_n": 128,
+              "predicted_per_second": 85.37135204210941,
+              "predicted_per_token_ms": 11.71353125,
+              "prompt_ms": 711.824,
+              "prompt_n": 4,
+              "prompt_per_second": 5.61936658499854,
+              "prompt_per_token_ms": 177.956
+            },
+            "tokens_cached": 64091,
+            "tokens_evaluated": 63964,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 841.4721488952637,
+            "wall_seconds": 2.345484972000122
+          }
+        }
+      }
+    },
+    {
+      "source_file": "pairs/depth196k-cold/pair-result.json",
+      "measurements": {
+        "aggregate_decode_tok_s_decode_window": 31.110721371521628,
+        "aggregate_decode_tok_s_work": 65.33205527500202,
+        "aggregate_output_tok_s_pair_wall": 0.7340902621014462,
+        "decode_window_seconds": 8.228674512007274,
+        "decode_work_seconds": 3.918444,
+        "label": "196k",
+        "pair_ended_wall": 1789743893.7736356,
+        "pair_started_wall": 1789743545.042678,
+        "pair_wall_seconds": 348.73095750808716,
+        "request_overlap_fraction_of_pair": 0.9819410191997782,
+        "request_overlap_seconds": 342.4332318420056,
+        "requests": {
+          "gpu1": {
+            "ended_monotonic": 488618.059575367,
+            "ended_wall": 1789743887.4837961,
+            "first_byte_wall": 1789743576.8613129,
+            "label": "196k",
+            "name": "gpu1",
+            "physical_gpu": 1,
+            "port": 18111,
+            "prompt_count": 195914,
+            "started_monotonic": 488275.626343525,
+            "started_wall": 1789743545.0505655,
+            "status": 200,
+            "timings": {
+              "cache_n": 0,
+              "draft_n": 103,
+              "draft_n_accepted": 92,
+              "predicted_ms": 1955.289,
+              "predicted_n": 128,
+              "predicted_per_second": 65.4634685716536,
+              "predicted_per_token_ms": 15.2756953125,
+              "prompt_ms": 338708.683,
+              "prompt_n": 195914,
+              "prompt_per_second": 578.4144600745295,
+              "prompt_per_token_ms": 1.7288641087415908
+            },
+            "tokens_cached": 196041,
+            "tokens_evaluated": 195914,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 31810.747385025024,
+            "wall_seconds": 342.433230638504
+          },
+          "gpu2": {
+            "ended_monotonic": 488624.332960879,
+            "ended_wall": 1789743893.7571824,
+            "first_byte_wall": 1789743576.853217,
+            "label": "196k",
+            "name": "gpu2",
+            "physical_gpu": 2,
+            "port": 18112,
+            "prompt_count": 195914,
+            "started_monotonic": 488275.623822592,
+            "started_wall": 1789743545.0480442,
+            "status": 200,
+            "timings": {
+              "cache_n": 0,
+              "draft_n": 103,
+              "draft_n_accepted": 92,
+              "predicted_ms": 1963.155,
+              "predicted_n": 128,
+              "predicted_per_second": 65.2011685271922,
+              "predicted_per_token_ms": 15.3371484375,
+              "prompt_ms": 344981.876,
+              "prompt_n": 195914,
+              "prompt_per_second": 567.8965001628086,
+              "prompt_per_token_ms": 1.7608842451279643
+            },
+            "tokens_cached": 196041,
+            "tokens_evaluated": 195914,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 31805.17268180847,
+            "wall_seconds": 348.7091381549835
+          }
+        }
+      }
+    },
+    {
+      "source_file": "pairs/depth196k-warm/pair-result.json",
+      "measurements": {
+        "aggregate_decode_tok_s_decode_window": 129.2470375833879,
+        "aggregate_decode_tok_s_work": 65.26052332311683,
+        "aggregate_output_tok_s_pair_wall": 61.66409052857052,
+        "decode_window_seconds": 1.9807030380470678,
+        "decode_work_seconds": 3.922739,
+        "label": "196k",
+        "pair_ended_wall": 1789743897.9258358,
+        "pair_started_wall": 1789743893.774311,
+        "pair_wall_seconds": 4.151524782180786,
+        "request_overlap_fraction_of_pair": 0.9907072928141357,
+        "request_overlap_seconds": 4.112945878005121,
+        "requests": {
+          "gpu1": {
+            "ended_monotonic": 488628.486589459,
+            "ended_wall": 1789743897.9108098,
+            "first_byte_wall": 1789743895.9326928,
+            "label": "196k",
+            "name": "gpu1",
+            "physical_gpu": 1,
+            "port": 18111,
+            "prompt_count": 195914,
+            "started_monotonic": 488624.356357587,
+            "started_wall": 1789743893.780579,
+            "status": 200,
+            "timings": {
+              "cache_n": 195910,
+              "draft_n": 103,
+              "draft_n_accepted": 92,
+              "predicted_ms": 1956.906,
+              "predicted_n": 128,
+              "predicted_per_second": 65.40937582081102,
+              "predicted_per_token_ms": 15.288328125,
+              "prompt_ms": 1810.744,
+              "prompt_n": 4,
+              "prompt_per_second": 2.2090367274446305,
+              "prompt_per_token_ms": 452.686
+            },
+            "tokens_cached": 196041,
+            "tokens_evaluated": 195914,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 2152.113676071167,
+            "wall_seconds": 4.130230665206909
+          },
+          "gpu2": {
+            "ended_monotonic": 488628.471719421,
+            "ended_wall": 1789743897.8959403,
+            "first_byte_wall": 1789743895.9168918,
+            "label": "196k",
+            "name": "gpu2",
+            "physical_gpu": 2,
+            "port": 18112,
+            "prompt_count": 195914,
+            "started_monotonic": 488624.358773543,
+            "started_wall": 1789743893.7829955,
+            "status": 200,
+            "timings": {
+              "cache_n": 195910,
+              "draft_n": 103,
+              "draft_n_accepted": 92,
+              "predicted_ms": 1965.833,
+              "predicted_n": 128,
+              "predicted_per_second": 65.11234677615036,
+              "predicted_per_token_ms": 15.3580703125,
+              "prompt_ms": 1814.601,
+              "prompt_n": 4,
+              "prompt_per_second": 2.2043413400521654,
+              "prompt_per_token_ms": 453.65025
+            },
+            "tokens_cached": 196041,
+            "tokens_evaluated": 195914,
+            "tokens_predicted": 128,
+            "truncated": false,
+            "ttft_ms": 2133.8963508605957,
+            "wall_seconds": 4.112944841384888
+          }
+        }
+      }
+    }
+  ]
+}

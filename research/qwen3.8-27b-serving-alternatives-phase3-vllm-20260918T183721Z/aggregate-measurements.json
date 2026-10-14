@@ -1,0 +1,159 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "target-only-8k/probe-summary.json",
+      "measurements": {
+        "health": {
+          "status": 200,
+          "wall_seconds": 0.020137141982559115
+        },
+        "models": {
+          "status": 200,
+          "wall_seconds": 0.0018670379649847746
+        },
+        "code_repeat": {
+          "status": 200,
+          "payload": {
+            "model": "qwen3.8-27b-awq-int4",
+            "temperature": 0,
+            "top_p": 1,
+            "seed": 7,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "usage": {
+            "prompt_tokens": 44,
+            "total_tokens": 70,
+            "completion_tokens": 26
+          },
+          "wall_seconds": 0.4717266860534437,
+          "time_to_first_token_seconds": 0.09248403902165592,
+          "decode_seconds_after_first_token": 0.3792426470317878,
+          "end_to_end_completion_tok_s": 55.116661339473936,
+          "decode_tok_s_after_first_token": 68.5576904483021
+        },
+        "narrative": {
+          "status": 200,
+          "payload": {
+            "model": "qwen3.8-27b-awq-int4",
+            "temperature": 0,
+            "top_p": 1,
+            "seed": 7,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "usage": {
+            "prompt_tokens": 29,
+            "total_tokens": 74,
+            "completion_tokens": 45
+          },
+          "wall_seconds": 0.9308540209895,
+          "time_to_first_token_seconds": 0.2631456759991124,
+          "decode_seconds_after_first_token": 0.6677083449903876,
+          "end_to_end_completion_tok_s": 48.34270356609181,
+          "decode_tok_s_after_first_token": 67.39469461123453
+        },
+        "thinking": {
+          "status": 200,
+          "payload": {
+            "model": "qwen3.8-27b-awq-int4",
+            "temperature": 0,
+            "top_p": 1,
+            "seed": 7,
+            "chat_template_kwargs": {
+              "enable_thinking": true
+            }
+          },
+          "wall_seconds": 2.026100419985596
+        },
+        "tool": {
+          "payload": {
+            "model": "qwen3.8-27b-awq-int4",
+            "tools": [
+              {
+                "function": {
+                  "name": "get_weather",
+                  "parameters": {
+                    "additionalProperties": false
+                  }
+                }
+              }
+            ],
+            "tool_choice": {
+              "function": {
+                "name": "get_weather"
+              }
+            },
+            "temperature": 0,
+            "top_p": 1,
+            "seed": 7,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "wall_seconds": 0.003475231002084911
+        },
+        "json": {
+          "status": 200,
+          "payload": {
+            "model": "qwen3.8-27b-awq-int4",
+            "temperature": 0,
+            "top_p": 1,
+            "seed": 7,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "wall_seconds": 1.2076863319962285
+        }
+      }
+    },
+    {
+      "source_file": "target-only-8k/telemetry-summary.json",
+      "measurements": {
+        "0": {
+          "duration_seconds": 31.157999992370605,
+          "memory_used_mib_max": 1.0,
+          "power_w_max": 20.55,
+          "power_w_mean": 20.21833333333333,
+          "temperature_c_max": 26.0,
+          "clocks_sm_mhz_max": 210.0,
+          "utilization_pct_max": 0.0,
+          "sampled_energy_joules": 629.7359198224545
+        },
+        "1": {
+          "duration_seconds": 31.157000064849854,
+          "memory_used_mib_max": 20632.0,
+          "power_w_max": 193.18,
+          "power_w_mean": 82.77399999999999,
+          "temperature_c_max": 35.0,
+          "clocks_sm_mhz_max": 2010.0,
+          "utilization_pct_max": 0.0,
+          "sampled_energy_joules": 2620.6005978691587
+        },
+        "2": {
+          "duration_seconds": 31.161999940872192,
+          "memory_used_mib_max": 20632.0,
+          "power_w_max": 191.53,
+          "power_w_mean": 75.453,
+          "temperature_c_max": 40.0,
+          "clocks_sm_mhz_max": 1965.0,
+          "utilization_pct_max": 60.0,
+          "sampled_energy_joules": 2392.6877310264113
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,613 @@
+{
+  "date": "2026-10-14",
+  "scope": "Historical test/research exports only; no new inference",
+  "included": [
+    {
+      "path": "tools/deepseek_long_context_benchmark.py",
+      "source": "tools/deepseek_long_context_benchmark.py",
+      "sha256": "ec40e7fcf487d9ef72a7819fe8706d4a1fed52c3d3da634f6ce33e981e106ab0"
+    },
+    {
+      "path": "tools/deepseek_performance_sweep.py",
+      "source": "tools/deepseek_performance_sweep.py",
+      "sha256": "57fe7f9731abe0c83a4708dba80657ef902dfc004ab5d4996b11273f0b9bbaa5"
+    },
+    {
+      "path": "tools/freetoken_context_probe.py",
+      "source": "tools/freetoken_context_probe.py",
+      "sha256": "db57f34e9d9b024139191d4a45d40153311a3374ddac50f9ea4f3e700f3e73b1"
+    },
+    {
+      "path": "tools/large_moe_agentic_reviewer.py",
+      "source": "tools/large_moe_agentic_reviewer.py",
+      "sha256": "8bd0c7c429587f7f5bdd7f5d767b0fec7924c3851474a49ee29982c980009f55"
+    },
+    {
+      "path": "tools/large_moe_probe.py",
+      "source": "tools/large_moe_probe.py",
+      "sha256": "a92855076afe94a4da66a34df14b1646739f5b92090ec222fb46b29258951c82"
+    },
+    {
+      "path": "tools/mistral_agentic_reviewer.py",
+      "source": "tools/mistral_agentic_reviewer.py",
+      "sha256": "c2d1d3bdffa7bb4bea2999ea6747ca5a71a70b9ed81c6f2aae745d414921a5d2"
+    },
+    {
+      "path": "tools/mistral_context_sweep.py",
+      "source": "tools/mistral_context_sweep.py",
+      "sha256": "74b85f43d56320bb78d40f554ed28840b313286857eb140958d8b63f650ff2c8"
+    },
+    {
+      "path": "tools/mistral_review_sweep.py",
+      "source": "tools/mistral_review_sweep.py",
+      "sha256": "5ebb968db351bafa9637f0c035580c692c6e50fad9b76cc7f840b4a6a825526e"
+    },
+    {
+      "path": "tools/mistral_reviewer_ab.py",
+      "source": "tools/mistral_reviewer_ab.py",
+      "sha256": "87a2a6ecc38cf24ef499bdf2c5575c4dbf7dcfe3e8d5b8076f8121ca7dd6eee6"
+    },
+    {
+      "path": "tools/qwen_q4_dual_gpu_layer_benchmark.py",
+      "source": "tools/qwen_q4_dual_gpu_layer_benchmark.py",
+      "sha256": "95e09a68688f68f03b71ce4a960e06d2039e853a9819011b6347a5849adaf598"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02/benchmark_atx.py",
+      "source": "research/hyperqwen-native-262k-2026-10-02/benchmark_atx.py",
+      "sha256": "fa5dde96d6398df3928b2a606364ae05380f35007554835c2c81ad67ca0dc542"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02/benchmark_native.py",
+      "source": "research/hyperqwen-native-262k-2026-10-02/benchmark_native.py",
+      "sha256": "1140f66f6950af59633efabe1f1b854121aa155f40b788ef25f18c243690b35c"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02/native_probe.py",
+      "source": "research/hyperqwen-native-262k-2026-10-02/native_probe.py",
+      "sha256": "0d652b7b0943ca600f30f6b5f0ed333d1f2571ec8d3fad817bb31e56e85b1535"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/analyze_phase1.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/analyze_phase1.py",
+      "sha256": "a31cf36843928f65d267ddc25f447ce99d341c4dc76f910cf1aa1a75ff769084"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/capture_raw_requests.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/capture_raw_requests.py",
+      "sha256": "888248ec03035b71e922fa72e15648b825d5c806ce82f43997b60d76991356be"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/phase1_workload_helper.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/phase1_workload_helper.py",
+      "sha256": "e8065edb008f5e56addff85f1ca16b0c638deaf91361e84336e0895eee86af5b"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/run_batch6144.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/run_batch6144.py",
+      "sha256": "e60415439b2684fa040f556b4cc0ade7bd248b66f212029206a7253b51d40277"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/analyze_phase1.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/analyze_phase1.py",
+      "sha256": "a31cf36843928f65d267ddc25f447ce99d341c4dc76f910cf1aa1a75ff769084"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/phase1_workload_helper.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/phase1_workload_helper.py",
+      "sha256": "e8065edb008f5e56addff85f1ca16b0c638deaf91361e84336e0895eee86af5b"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/run_axis1_sweep.py",
+      "source": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/run_axis1_sweep.py",
+      "sha256": "7aa850964effc2cefc8a6e634575f79b1156a35ef2133659af0f53a24b877b58"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-tp2-20260918T235826Z/run_tp2_experiment.py",
+      "source": "research/qwen3.8-27b-llamampere-tp2-20260918T235826Z/run_tp2_experiment.py",
+      "sha256": "87f8120237f16f6584b317183c29a06b8c227fd76368e909ad9516413e4db7fc"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z/analyze_phase1.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z/analyze_phase1.py",
+      "sha256": "a31cf36843928f65d267ddc25f447ce99d341c4dc76f910cf1aa1a75ff769084"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z/phase1_workload_helper.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z/phase1_workload_helper.py",
+      "sha256": "e8065edb008f5e56addff85f1ca16b0c638deaf91361e84336e0895eee86af5b"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-dual-20260918T144111Z/dual_topology_test.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-dual-20260918T144111Z/dual_topology_test.py",
+      "sha256": "97a3e4833396c22df955f6d8b8d037c3007728f36d863403e9299d2cc0314bca"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-quality-20260918T141239Z/quality_gate.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-quality-20260918T141239Z/quality_gate.py",
+      "sha256": "f19f499796bf48d928c02884a751f48ac659c23f3d37a03866ff82c28dcbfe7c"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-quality-followup-20260918T143447Z/followup.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-quality-followup-20260918T143447Z/followup.py",
+      "sha256": "e13f25d7d18872fbe2e35032e7e777f8fac4e2d384d62d4923ac3db5bc1b3acd"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z/followup-runner.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z/followup-runner.py",
+      "sha256": "8d9641b9932b22ad66a798f55101527a73686e3654832ebf7882f904707a7ec0"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z/objective-rubric-source.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z/objective-rubric-source.py",
+      "sha256": "f19f499796bf48d928c02884a751f48ac659c23f3d37a03866ff82c28dcbfe7c"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z/target-only-8k/probe.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z/target-only-8k/probe.py",
+      "sha256": "537113d4c2521f7addc08d54b6687ce1ad532b808feabfd4a65a8782a1cd5753"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z/target-only-8k/summarize_telemetry.py",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z/target-only-8k/summarize_telemetry.py",
+      "sha256": "4df2f9d368061fface96f3fca2b88193da73777759f8fde632abe989a8511c11"
+    },
+    {
+      "path": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/orchestrated-test.py",
+      "source": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/orchestrated-test.py",
+      "sha256": "2407690ccd5bec20915aa57ab9528235f947d2f9dcf9ea487dff013036a825bf"
+    },
+    {
+      "path": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/probes.py",
+      "source": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/probes.py",
+      "sha256": "8d0dceaa9197feabe168938511758249c2997900459468094b2ca2971811789f"
+    },
+    {
+      "path": "research/run_bonsai_phase2_matrix.py",
+      "source": "research/run_bonsai_phase2_matrix.py",
+      "sha256": "70514ad1c58eb8133abc32d5bac95e3108bdfa72c8fc264040dfdf04cae8de17"
+    },
+    {
+      "path": "research/run_bonsai_phase2_quality.py",
+      "source": "research/run_bonsai_phase2_quality.py",
+      "sha256": "6d84c5fb5ea1cb6f87a267858002f8bf974ad03bbd95ee0c3159ab9108bcbd03"
+    },
+    {
+      "path": "research/run_bonsai_phase2_topology.py",
+      "source": "research/run_bonsai_phase2_topology.py",
+      "sha256": "24bcabcee97513006688e96aaa32ee23b4da347607dc52b02daa6c85daafddba"
+    },
+    {
+      "path": "research/run_bonsai_t8_followup.py",
+      "source": "research/run_bonsai_t8_followup.py",
+      "sha256": "8d9641b9932b22ad66a798f55101527a73686e3654832ebf7882f904707a7ec0"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/context_probe.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/context_probe.py",
+      "sha256": "330ebfc978097d090cc7439b7f9f9707f1a8ef80187a49c5ca22ba8f194b3925"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/execute.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/execute.py",
+      "sha256": "f2e91961218dffd6d7ba3462fe0c22b276635bd5de6ca6a15a52ade8de98f52f"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/extend_iq3.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/extend_iq3.py",
+      "sha256": "39ff6373ab2c88ba42011877d5098353671fd3c13fa9a0e2a3e78d4b037d44a8"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/grade_extensions.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/grade_extensions.py",
+      "sha256": "662a57287e546b86d4bef7793ce1ac707a6fdd02d9b3317005a47630518eff7e"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/probe.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/probe.py",
+      "sha256": "642eede93f6e341957470d9d683af8df92c701a6c3ed01228e7f1ff824646c0d"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/summarize.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/summarize.py",
+      "sha256": "dd2b7e76443361d386996a45389624fc8704d11b1cbbf595171744eb7766d19a"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/summarize_extensions.py",
+      "source": "research/strata-flash-next-gpu0-2026-10-14/summarize_extensions.py",
+      "sha256": "95ded726895c5744c76b9e5183a4c881d7ea6a049974f83cb257c057b9e00e32"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02.md",
+      "source": "research/hyperqwen-native-262k-2026-10-02.md",
+      "sha256": "6bcdf31b5a4a0e592de92db50403b7b1907899d3daf7dbb64e32ec96a1be8555"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dual-gpu-layer-plan-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-dual-gpu-layer-plan-2026-09-09.md",
+      "sha256": "57d02de4724f21a0731e9bb7d0135761fbc00527d07e9cf17bf2bf55b025e95e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dual-gpu-layer-results-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-dual-gpu-layer-results-2026-09-09.md",
+      "sha256": "0f1fd53fcb2f02f0813c940f307673f44426efd9bd13cd0011fd351975a0306a"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-multigpu-runtime-evaluation-plan-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-multigpu-runtime-evaluation-plan-2026-09-09.md",
+      "sha256": "6f4a988f2b3ccda20e7186da49380d417b135684712ed280b14a210583fa4cbc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-multigpu-runtime-evaluation-results-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-multigpu-runtime-evaluation-results-2026-09-09.md",
+      "sha256": "200d5d9b99490dca4e11067c40b902d34e1cff6b44d258331f893d3d31e91319"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-runtime-follow-up-plan-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-runtime-follow-up-plan-2026-09-09.md",
+      "sha256": "6c5815e4d79971c7d48f59211f0688ff0c410e5536873808bc1d89b99850378c"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-runtime-follow-up-results-2026-09-09.md",
+      "source": "research/qwen3.8-27b-q4-runtime-follow-up-results-2026-09-09.md",
+      "sha256": "0f0e886cf4d108fbb799496dda8996edd7118c422321797905a6d33d59e4e47e"
+    },
+    {
+      "path": "research/qwen3.8-27b-tensor-262k-optimization-plan-2026-09-09.md",
+      "source": "research/qwen3.8-27b-tensor-262k-optimization-plan-2026-09-09.md",
+      "sha256": "75c55c1bc2cffb0e206e9d9e45105d1ce2b86aad744a3a489ca2f1a6c7c47100"
+    },
+    {
+      "path": "research/qwen3.8-27b-tensor-262k-optimization-results-2026-09-09.md",
+      "source": "research/qwen3.8-27b-tensor-262k-optimization-results-2026-09-09.md",
+      "sha256": "137008c3619ac587e61abaa61d28b350782dca25b5cf3e082745d7f073cccc5c"
+    },
+    {
+      "path": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30.md",
+      "source": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30.md",
+      "sha256": "751bd26653b0fd238e8888ef7e2444804ce93e20bb1a85d253c5d5380319833e"
+    },
+    {
+      "path": "research/qwen3.8-flash-next-nvfp4-2048-profile-2026-09-08.md",
+      "source": "research/qwen3.8-flash-next-nvfp4-2048-profile-2026-09-08.md",
+      "sha256": "e8781f6c28c0bc211ba0826f5b206b3742ca27a0181393457e4d5bc8f7339827"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14.md",
+      "source": "research/strata-flash-next-gpu0-2026-10-14.md",
+      "sha256": "0f27996d05348d2f21ea3a87a112250c942be19e41e1263971db5a81ab64f20d"
+    },
+    {
+      "path": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/quality-suite.md",
+      "source": "research/qwen3.8-flash-next-gsq-rco-coder-gpu0-2026-09-30/quality-suite.md",
+      "sha256": "b36ea1ba4d6f68e9dffd377459d669e2e0c3c6d259ff8ab5c26301dedd131e48"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02/aggregate-measurements.json",
+      "source": "research/hyperqwen-native-262k-2026-10-02",
+      "sha256": "1c2ea9007b14e5378cf67f9e9de9d5dd511266c09e519d073b177b185c801826"
+    },
+    {
+      "path": "research/large-moe-3gpu-probe-2026-09-04/aggregate-measurements.json",
+      "source": "research/large-moe-3gpu-probe-2026-09-04",
+      "sha256": "c504e14fe31e7e5c71630dcf9cde22ee5c2374943c5091dcdf0ded03bf624e74"
+    },
+    {
+      "path": "research/mistral-small-4-119b-context-sweep/aggregate-measurements.json",
+      "source": "research/mistral-small-4-119b-context-sweep",
+      "sha256": "50c0355543347d423aa2e4ec1c9ecf6fdbd697244da3d107f6267f3a095258ae"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-llamampere-axis1-batch6144-20260919T004351Z",
+      "sha256": "9c485c85e34613ab6279e292f8b1d6c17ff36c07f4791b6133b3770db64d811e"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-llamampere-axis1-sweep-20260918T224901Z",
+      "sha256": "6827669fe57705fd48eb2382e2e1acfbd655676d4278ce2d45e73596fd3e1135"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-native-262144-20260919T/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-llamampere-native-262144-20260919T",
+      "sha256": "6c06e7b6796b798a3c16c186f05d2fe1429dee5ec67242c7f4e1336484f8cb5d"
+    },
+    {
+      "path": "research/qwen3.8-27b-llamampere-tp2-20260918T235826Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-llamampere-tp2-20260918T235826Z",
+      "sha256": "0bfc7fc8672222b352d07c97450aa3d047a5347f6b35ba6a900ba81a2563bdd0"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-196k-long-output-20260909T102855Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-196k-long-output-20260909T102855Z",
+      "sha256": "4d930990a509d9c7edb52cd972d78c3170db0d247265287c65e3c8e7891c1073"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-524k-main196k-sub64k-20260909T093641Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-524k-main196k-sub64k-20260909T093641Z",
+      "sha256": "aad183788fa75cb30d3182bc2b0870184944b3481c7704eaad9c6e12e5d18412"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-524k-main196k-sub64k-stagger5-20260909T094455Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-524k-main196k-sub64k-stagger5-20260909T094455Z",
+      "sha256": "043193ba04c58c6372697346b2b2f7aadb2d163411698e951309fd172eb04150"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-524k-parallel2-full-20260909T092155Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-524k-parallel2-full-20260909T092155Z",
+      "sha256": "c536d4163d47b5a64a06346901ed2a785cb9899c3f33f21c8bc3ea3178a12f68"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-524k-parallel2-smoke-20260909T091847Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-524k-parallel2-smoke-20260909T091847Z",
+      "sha256": "ed6cc43d3678893fb3a1f1c378f24328444034d8bb78647542a8ff41d5c12594"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-524k-production196k-pair-20260909T095203Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-524k-production196k-pair-20260909T095203Z",
+      "sha256": "796e965e127987e544d1e18aec21c50b07dc3d7af440ed86167419484e48dc3e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260911T233046Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260911T233046Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260911T233620Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260911T233620Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260911T233941Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260911T233941Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260912T002842Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260912T002842Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260912T003411Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260912T003411Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260912T004156Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260912T004156Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dflash-20260912T004819Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dflash-20260912T004819Z",
+      "sha256": "5ea374e2314059bf82afb88cce3c4b390c44387c19c2bb38b68d992759ab7efc"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dual-gpu-layer-20260909T015144Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dual-gpu-layer-20260909T015144Z",
+      "sha256": "a79af2c8d759855e4582983acd06c3efea6573d8bfc170a307d5b9381b466951"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-dual-gpu-layer-20260909T023018Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-dual-gpu-layer-20260909T023018Z",
+      "sha256": "8bf92481c18044f633233b73a342ee05baee980418fea37ea926ad896b0bb4bd"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-layer-tensor-pass1-20260909T071123Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-layer-tensor-pass1-20260909T071123Z",
+      "sha256": "8aebc823a7ffd6891556b9250b572cb18b120268565657d4e780457acb7f6056"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-nccl-layer-tensor-20260909T081004Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-nccl-layer-tensor-20260909T081004Z",
+      "sha256": "237a85876ecc5fe88018d13df39bd6c7e6ddf4a95127cc346ccc90a8bd52f9b4"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-nccl-tensor-smoke-20260909T080719Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-nccl-tensor-smoke-20260909T080719Z",
+      "sha256": "9bda6b8242b4b8aa9faed31f0cc400bafa58a8355964adac287d57235105fe8e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-physical-layer-tensor-20260909T085757Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-physical-layer-tensor-20260909T085757Z",
+      "sha256": "d5da964d43db28fa5714834865993862185e583f1993e16ee0d15003a0c9471e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-batch-sweep-20260909T135807Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-batch-sweep-20260909T135807Z",
+      "sha256": "58203abbe9870673f050e62920a43919666dd4a4bb97d97c65e4a649b67fa8a6"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-batch-sweep-20260909T140914Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-batch-sweep-20260909T140914Z",
+      "sha256": "597ba56075e5bc2ad72021ced779c5e55b22d7063aed3a2f3c38045338da0b0f"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-batch2048-ubatch1024-long-20260909T142018Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-batch2048-ubatch1024-long-20260909T142018Z",
+      "sha256": "8f8bc562e38ded77375c200e0125af569d93b8935c83a6f757a7fd0ad39df8fa"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-batch2048-ubatch1024-native-20260909T143100Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-batch2048-ubatch1024-native-20260909T143100Z",
+      "sha256": "f80a8beba3ef2b12cd8d915c9610cdb1cab6aec0b1d1bdeeb561921421a65d90"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-bf16kv-196k-20260909T144329Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-bf16kv-196k-20260909T144329Z",
+      "sha256": "7d26f2e5fd30ca9402ed867c8fc244985121fb30bf0126b481c26e83fc0e4db3"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-layer-pass2-20260909T073730Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-layer-pass2-20260909T073730Z",
+      "sha256": "2c65a5d97427174beee89afaf1e36bbc7a257e780a948255f3f6e775638c2d04"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-nccl-control-20260909T145432Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-nccl-control-20260909T145432Z",
+      "sha256": "a24908590b813f17849192b4a3c48c8cdfba10889a5d49878988f2107728d389"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-nccl-maxctas1-20260909T151718Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-nccl-maxctas1-20260909T151718Z",
+      "sha256": "21243e587643c524076996b34240360e2f1586aedd9fa4041e99de83e4d54b71"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-nccl-protocol-sweep-20260909T150811Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-nccl-protocol-sweep-20260909T150811Z",
+      "sha256": "f85b429868e0b1ecb1dbb5f2b2d48df0c34048685ac59697eeaed791497c80ad"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-nccl-trace-20260909T150034Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-nccl-trace-20260909T150034Z",
+      "sha256": "db6cd07a57ae09c74da50b6f82d55ef133a11d6843add4222d9b27e4b3fce6db"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-nccl-tuning-20260909T150430Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-nccl-tuning-20260909T150430Z",
+      "sha256": "aeee0396e418eda25049835501d33184d3a961a0a1299ecce6c7c64bed7042fe"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-parallel2-moderate-20260909T105636Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-parallel2-moderate-20260909T105636Z",
+      "sha256": "1ceb7df7005bc7fba0b52ffa858b024e28e3f35f18f5e62dc31879938747654f"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-smoke-20260909T070639Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-smoke-20260909T070639Z",
+      "sha256": "28f6b19c63e505fe1f129b0e572a313f88b7226cd5b6f3471adff0718d59e4b7"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-smoke-20260909T070913Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-smoke-20260909T070913Z",
+      "sha256": "fc2771d1b5c2f92635795891b454ab3d0721bdfa7bb77c7a6aa0ae8223c9ba55"
+    },
+    {
+      "path": "research/qwen3.8-27b-q4-tensor-warm-cache-20260909T153433Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q4-tensor-warm-cache-20260909T153433Z",
+      "sha256": "2405f5867514de537fff0f1c9981718a40ad277484608203422b7d19957fe4a5"
+    },
+    {
+      "path": "research/qwen3.8-27b-q5-tensor-262k-long-20260909T120139Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q5-tensor-262k-long-20260909T120139Z",
+      "sha256": "9ad53af1221e9f7f292b21674e9672201031be46fe2d70a5932956000396077e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q5-tensor-262k-smoke-20260909T115827Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q5-tensor-262k-smoke-20260909T115827Z",
+      "sha256": "0656d2ba67a9ce0443a1bd519eb25f3fba596fb60a523a203f8f685930d0505e"
+    },
+    {
+      "path": "research/qwen3.8-27b-q8-0-tensor-262k-long-20260909T133337Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q8-0-tensor-262k-long-20260909T133337Z",
+      "sha256": "3091c39eee98272dbac8d6e8539013f70786c5616bdfa4acfd31a8c167ae7890"
+    },
+    {
+      "path": "research/qwen3.8-27b-q8-0-tensor-262k-smoke-20260909T132957Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-q8-0-tensor-262k-smoke-20260909T132957Z",
+      "sha256": "9a6d56e8cf974a076df5dbaea084fb444077da0993dbbf48c9c6005ad73056e9"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase0-20260918T132414Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase0-20260918T132414Z",
+      "sha256": "f4acc03077c2ed35ce0e4fb8027ee50cbf1646da84e76eb67da9e371d8f5b8db"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-20260918T133922Z",
+      "sha256": "ea0888a95ec7bc437f7d3ac6dc24401ab786b36a15a6709dc2b4bcc00aa58eda"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-dual-20260918T144111Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-dual-20260918T144111Z",
+      "sha256": "aa20ae0dc34ca17b69df647767b6daa51d61ced445512b87cf5e9fafb76dbe10"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-quality-20260918T141239Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-quality-20260918T141239Z",
+      "sha256": "94a00bbb21fc1cbd4377b77dee4514ba95dcc7fc5e0e164ea761dbdc250a440a"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase1-quality-followup-20260918T143447Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase1-quality-followup-20260918T143447Z",
+      "sha256": "56bc22f68a8455ded0560d228117826a62936e3a5a4a70d3008c96dcb7f27e2d"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-20260918T160224Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-20260918T160224Z",
+      "sha256": "67288c8182095579219a8d900b63a45acd2c9c015e017094652a2977f3a1be83"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-quality-20260918T170924Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-quality-20260918T170924Z",
+      "sha256": "4d00b77cc9eea2baaee14acf5e10c15908b8b6fd7f6fb6dfdb513f6176ea2648"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-quality-followup-20260918T173610Z",
+      "sha256": "b2ec7699477a6f5f7949a4cec4792457bc437e0cabe29a54f62f3c60ea379777"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase2-topology-20260918T174849Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase2-topology-20260918T174849Z",
+      "sha256": "2673a50cd83b27e70cffac5632d9d4c1d952783295e907bca82dac6b6d4fa862"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase3-20260918T180203Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase3-20260918T180203Z",
+      "sha256": "24105082fb6956d3b8d1744d0c25939daf32c7d0c880d590c290cd6ff1419db8"
+    },
+    {
+      "path": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-serving-alternatives-phase3-vllm-20260918T183721Z",
+      "sha256": "deac5ea458a364a68f7db2523cc50475b469fdd01a171001e5fae2d1ee545c9d"
+    },
+    {
+      "path": "research/qwen3.8-27b-v0.4.0-ab-2026-09-06/aggregate-measurements.json",
+      "source": "research/qwen3.8-27b-v0.4.0-ab-2026-09-06",
+      "sha256": "3800ec624b4e484f0227784a3c7df59883dba3c3527ca175d80ff3f68e586bf9"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/aggregate-measurements.json",
+      "source": "research/strata-flash-next-gpu0-2026-10-14",
+      "sha256": "bdf6187ebb42788e5d7e5099edc14febcb87c0ef37f69e6c9283de9433210367"
+    },
+    {
+      "path": "research/PUBLICATION-2026-10-14.md",
+      "source": "curated portable publication companion",
+      "sha256": "f474797d7003735d930010cd45c24627eb6459f7a67db8482ce17fe1aca84800"
+    },
+    {
+      "path": "research/strata-flash-next-gpu0-2026-10-14/validated-iq3-512k-profile.json",
+      "source": "curated portable publication companion",
+      "sha256": "933fbf86076f90f8407fe71f19ce52dccab395a0cb773d3ce6e8b561c1d831f0"
+    },
+    {
+      "path": "research/hyperqwen-native-262k-2026-10-02/run-gpu0.sh",
+      "source": "curated portable publication companion",
+      "sha256": "d911e7a3a0a1617d7977035eb1838725243f5f9dbd9ee742643f121dda60dd42"
+    }
+  ],
+  "review_or_omitted_sources": [
+    {
+      "path": "research/qwen3.8-27b-tensor-262k-production-service-migration-plan-2026-09-09.md",
+      "reason": "deployment migration plan, not a test export"
+    }
+  ],
+  "aggregate_source_records": 396,
+  "omitted_artifact_classes": [
+    "weights and packed experts (tens/hundreds of GB per model)",
+    "third-party source checkouts and build trees",
+    "venvs, caches, bytecode",
+    "raw prompts, responses, trajectories, datasets and gold patches",
+    "server/engine logs, resource JSONL and machine/process metadata",
+    "deployment/start-stop/preparation shell wrappers",
+    "upcoming qwen27-vs-flash comparison (owned by separate work)"
+  ],
+  "portability": {
+    "EXPERIMENT_ROOT": "absolute path to this public checkout",
+    "RUNTIME_ROOT": "operator-managed runtime installation parent",
+    "MODEL_STORE": "operator-managed model-data parent",
+    "note": "Source suffixes and historical GPU/port profiles retained. Set environment before importing path-dependent sources. Preparation and service supervision need local configuration."
+  }
+}

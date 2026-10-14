@@ -1,0 +1,148 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "bonsai_pq2_0/requests/T8-code-generation-test/result.json",
+      "measurements": {
+        "finish_reason": "length",
+        "http_status": 200,
+        "rubric": {
+          "checks": {
+            "json_valid": false
+          },
+          "reviewer_required": true
+        },
+        "thinking_observation": {
+          "empty_wrapper": true,
+          "think_tag_present": true
+        },
+        "truncated": true,
+        "wall_seconds": 34.58352208137512
+      }
+    },
+    {
+      "source_file": "bonsai_pq2_0/task-results.json",
+      "measurements": [
+        {
+          "finish_reason": "length",
+          "http_status": 200,
+          "rubric": {
+            "checks": {
+              "json_valid": false
+            },
+            "reviewer_required": true
+          },
+          "thinking_observation": {
+            "empty_wrapper": true,
+            "think_tag_present": true
+          },
+          "truncated": true,
+          "wall_seconds": 34.58352208137512
+        }
+      ]
+    },
+    {
+      "source_file": "bonsai_ptq1_0/requests/T8-code-generation-test/result.json",
+      "measurements": {
+        "finish_reason": "length",
+        "http_status": 200,
+        "rubric": {
+          "checks": {
+            "json_valid": false
+          },
+          "reviewer_required": true
+        },
+        "thinking_observation": {
+          "empty_wrapper": true,
+          "think_tag_present": true
+        },
+        "truncated": true,
+        "wall_seconds": 39.94297981262207
+      }
+    },
+    {
+      "source_file": "bonsai_ptq1_0/task-results.json",
+      "measurements": [
+        {
+          "finish_reason": "length",
+          "http_status": 200,
+          "rubric": {
+            "checks": {
+              "json_valid": false
+            },
+            "reviewer_required": true
+          },
+          "thinking_observation": {
+            "empty_wrapper": true,
+            "think_tag_present": true
+          },
+          "truncated": true,
+          "wall_seconds": 39.94297981262207
+        }
+      ]
+    },
+    {
+      "source_file": "followup-summary.json",
+      "measurements": {
+        "identical_prompt_across_variants": true,
+        "normal_eos": true,
+        "production_interaction": false,
+        "results": {
+          "bonsai_pq2_0": {
+            "cleanup": {
+              "port": 18211,
+              "port_absent_from_ss": true,
+              "port_bind_free_after_stop": true,
+              "production_interaction": false,
+              "systemd_used": false
+            },
+            "finish_reason": "length",
+            "http_status": 200,
+            "rubric": {
+              "checks": {
+                "json_valid": false
+              },
+              "reviewer_required": true
+            },
+            "status": "fail",
+            "truncated": true
+          },
+          "bonsai_ptq1_0": {
+            "cleanup": {
+              "port": 18212,
+              "port_absent_from_ss": true,
+              "port_bind_free_after_stop": true,
+              "production_interaction": false,
+              "systemd_used": false
+            },
+            "finish_reason": "length",
+            "http_status": 200,
+            "rubric": {
+              "checks": {
+                "json_valid": false
+              },
+              "reviewer_required": true
+            },
+            "status": "fail",
+            "truncated": true
+          }
+        },
+        "settings": {
+          "chat_template_kwargs": {
+            "enable_thinking": false
+          },
+          "ignore_eos": false,
+          "min_p": 0.0,
+          "seed": 1729,
+          "stream": false,
+          "temperature": 0.0,
+          "top_k": 0,
+          "top_p": 1.0
+        },
+        "systemd_used": false,
+        "thinking_disabled": true
+      }
+    }
+  ]
+}

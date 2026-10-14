@@ -1,0 +1,99 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "dflash-8k/telemetry-summary.json",
+      "measurements": {
+        "sample_rows": 12,
+        "sample_cycles": 4,
+        "assumed_sample_interval_seconds": 1,
+        "gpu0": {
+          "max_memory_mib": 1.0,
+          "max_power_w": 20.7
+        },
+        "physical_gpu_1_2": {
+          "1": {
+            "max_memory_mib": 23313.0,
+            "max_power_w": 97.86,
+            "max_temp_c": 42.0,
+            "max_clock_mhz": 1965.0,
+            "mean_power_w_active": 97.86
+          },
+          "2": {
+            "max_memory_mib": 23008.0,
+            "max_power_w": 104.22,
+            "max_temp_c": 48.0,
+            "max_clock_mhz": 1920.0,
+            "mean_power_w_active": 104.22
+          }
+        },
+        "active_cycles_both_gpus_over_50w": 1,
+        "approx_energy_j_gpu1_plus_gpu2": 235.015,
+        "approx_energy_j_per_three_scenario_requests": 78.33833333333332
+      }
+    },
+    {
+      "source_file": "mtp-8k/telemetry-summary.json",
+      "measurements": {
+        "sample_rows": 18,
+        "sample_cycles": 6,
+        "assumed_sample_interval_seconds": 1,
+        "gpu0": {
+          "max_memory_mib": 1.0,
+          "max_power_w": 20.58
+        },
+        "physical_gpu_1_2": {
+          "1": {
+            "max_memory_mib": 20573.0,
+            "max_power_w": 299.36,
+            "max_temp_c": 50.0,
+            "max_clock_mhz": 1875.0,
+            "mean_power_w_active": 244.24333333333334
+          },
+          "2": {
+            "max_memory_mib": 20268.0,
+            "max_power_w": 299.43,
+            "max_temp_c": 56.0,
+            "max_clock_mhz": 1920.0,
+            "mean_power_w_active": 244.01666666666668
+          }
+        },
+        "active_cycles_both_gpus_over_50w": 3,
+        "approx_energy_j_gpu1_plus_gpu2": 1302.725,
+        "approx_energy_j_per_three_scenario_requests": 434.2416666666666
+      }
+    },
+    {
+      "source_file": "target-only-8k-retry/telemetry-summary.json",
+      "measurements": {
+        "sample_rows": 18,
+        "sample_cycles": 6,
+        "assumed_sample_interval_seconds": 1,
+        "gpu0": {
+          "max_memory_mib": 1.0,
+          "max_power_w": 20.84
+        },
+        "physical_gpu_1_2": {
+          "1": {
+            "max_memory_mib": 22811.0,
+            "max_power_w": 297.82,
+            "max_temp_c": 46.0,
+            "max_clock_mhz": 1845.0,
+            "mean_power_w_active": 242.82666666666668
+          },
+          "2": {
+            "max_memory_mib": 22506.0,
+            "max_power_w": 295.24,
+            "max_temp_c": 52.0,
+            "max_clock_mhz": 1800.0,
+            "mean_power_w_active": 239.34
+          }
+        },
+        "active_cycles_both_gpus_over_50w": 3,
+        "approx_energy_j_gpu1_plus_gpu2": 1283.53,
+        "approx_energy_j_per_three_scenario_requests": 427.8433333333333
+      }
+    }
+  ]
+}

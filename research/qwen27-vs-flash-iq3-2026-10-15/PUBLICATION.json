@@ -1,0 +1,133 @@
+{
+  "schema": "study-publication-v1",
+  "study": "qwen27-vs-flash-iq3-2026-10-15",
+  "public_base_commit": "1da0562",
+  "campaign_start_utc": "2026-10-14T21:56:22Z",
+  "directory_label_date": "2026-10-15",
+  "aggregate_snapshot_utc": "2026-10-14T22:06:16Z",
+  "aggregate_campaign_phase": "swe-smoke",
+  "aggregate_swe_phase": "smoke_generation",
+  "publication_status": "Aggregate snapshot; consult phase and official coverage before interpreting scores",
+  "previous_archive_manifest": "../publication-manifest-2026-10-14.json",
+  "previous_archive_files": 118,
+  "study_files_including_this_manifest": 17,
+  "hash_scope": "SHA-256 of exported bytes. This manifest does not include its own hash. Source hashes refer to the stable private source snapshot at export, without private paths.",
+  "included": [
+    {
+      "path": "paired_swe.py",
+      "sha256": "19285e66032cbecf2f986d8fb337e73cc6f61a60291abdd8cd21547990fb11fa",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "instrumented_model.py",
+      "sha256": "874b8d0146e7b51f559a90b781c339b23def76e0ad72598900dc6e3648f4f6b8",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "official_eval.py",
+      "sha256": "50bd5ba973b4276625b8844811045e7bc9bedae5f1ee04fff12318b9e91251b2",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "test_paired_swe.py",
+      "sha256": "4c171661b4269ae1cf42741b9d1dd165bf0099f47a8b08abd809640138f72378",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "supplementary_http.py",
+      "sha256": "16e5cdf577715f2e4bbc0ea8f1e8dc3ad79d13a21cbb3bfbb51329bbd97e15d4",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "supplementary_fixtures.py",
+      "sha256": "00c878bd8b2ff3bc87572993345c23c77e9f49849432eea5d81c38624d28fd2d",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "supplementary.py",
+      "sha256": "7d5e210ad4d9c6c01c63310e3a3e982f07a293eaf2561b46c9be2327857ee0c1",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "test_supplementary.py",
+      "sha256": "b13e6cfb157840fcf4bcaa102958e704f630f47bfdd27c1bc44c2875357ad4f1",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "run_campaign.py",
+      "sha256": "9f79fb578aa0efa08bf3049e9550c7587999c794eb7c14b16df6d936de9a4a5b",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "publish_results.py",
+      "sha256": "bb691f36ba0d7ea44e3d92a93cb1fa49105baacfd0f42799e4f249c9650121d5",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "README.md",
+      "sha256": "8323dc1f098a84f88558359b0724003514c960b20a58623cae5007aeb1250bc3",
+      "source_sha256": "d0f853637441306df28394ef1b5b8be9104a539b75d770bcecbd0291f0a95abc",
+      "source_copy": "reviewed documentation adaptation",
+      "changes": "Replaced implementation-only status, distinguished controller/orchestrator ownership, documented global deadlines, smoke-only resume and public prerequisites."
+    },
+    {
+      "path": "PLAN.md",
+      "sha256": "a9503298236ff8a47d5a3f877993ace6f4cec0b136e1dc22d2e6ed0a79e305fb",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "SUPPLEMENTARY.md",
+      "sha256": "0cbe68aa705b5fd93a4a99797681d16881bafc500bb51c382c586f5dd7a96406",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "RESULTS.md",
+      "sha256": "fc0939e83569dd332519911c262aabeafa5ebed16b10c7dc039520364759bead",
+      "source_copy": "byte-identical privacy-filtered running snapshot"
+    },
+    {
+      "path": "results-summary.json",
+      "sha256": "b86ec5e17834501618301b39d6347da3c89b33224895ab19faf4abffb3a8e120",
+      "source_copy": "byte-identical privacy-filtered running snapshot"
+    },
+    {
+      "path": "CAMPAIGN.md",
+      "sha256": "ac2c8e6dfe1def447b456e82fadb84022c3b9fc5ee5e46be921f84e4d80ec515",
+      "source_copy": "authored public campaign guide"
+    }
+  ],
+  "excluded": [
+    "campaign/ and runs/ generated directories",
+    "offline-validation/ and offline-validation-final/",
+    "machine-local server/loader configurations and credentials",
+    "frozen/ snapshots, evaluator rows, gold patches and hidden-test datasets",
+    "private helper/controller snapshots and generated private/ directories",
+    "raw dataset/model outputs, predictions, agent trajectories and SSE streams",
+    "machine/service/process snapshots, telemetry and logs",
+    "model/runtime assets, environments, caches and bytecode"
+  ],
+  "checks": {
+    "python_sources_ast_compile": 10,
+    "swe_environment": {
+      "tests_run": 23,
+      "passed": 21,
+      "skipped": 2
+    },
+    "evalplus_environment": {
+      "tests_run": 12,
+      "passed": 11,
+      "skipped": 1
+    },
+    "optional_tokenizer_test": "Skipped; operator tokenizer environment deliberately unset",
+    "evalplus_cached_datasets_and_sanitizer": "Passed offline in EvalPlus environment",
+    "inference_or_real_container_evaluation_during_export": false,
+    "git_commit_or_push_during_export": false
+  },
+  "review_notes": [
+    "Controller sibling imports and frozen instrumented_model/official_eval module layout retained.",
+    "Source includes --smoke-only and campaign-to-SWE global deadline propagation.",
+    "Campaign fixed loopback endpoints/systemd unit names require local configuration for reproduction; standalone clients support overrides.",
+    "Publisher terminal_errors reads paired attempt reason; field mismatch corrected before publication.",
+    "Publisher refreshes manifest hashes alongside aggregate reports."
+  ]
+}

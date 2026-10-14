@@ -1,0 +1,112 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "results.json",
+      "measurements": {
+        "results": [
+          {
+            "mode": "layer",
+            "parallel_slots": 2,
+            "status": "passed",
+            "stagger_seconds": 5.0,
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 41.0,
+                "memory_used_mib": 19152.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 47.0,
+                "memory_used_mib": 20238.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "requests": [
+              {
+                "slot": 0,
+                "request_started_monotonic": 41848.372431401,
+                "request_finished_monotonic": 42118.021261485,
+                "request_seconds": 269.6488300839992,
+                "usage": {
+                  "completion_tokens": 128,
+                  "prompt_tokens": 196612,
+                  "total_tokens": 196740,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 0
+                  }
+                },
+                "timings": {
+                  "cache_n": 0,
+                  "prompt_n": 196612,
+                  "prompt_ms": 261360.371,
+                  "prompt_per_token_ms": 1.3293205450328567,
+                  "prompt_per_second": 752.2640071550862,
+                  "predicted_n": 128,
+                  "predicted_ms": 7647.426,
+                  "predicted_per_token_ms": 60.21595275590551,
+                  "predicted_per_second": 16.6068949212454
+                },
+                "decode_tok_s": 16.73765787338119,
+                "prefill_tok_s": 752.2640071550863,
+                "status": "passed"
+              },
+              {
+                "slot": 1,
+                "request_started_monotonic": 41853.372514634,
+                "request_finished_monotonic": 42113.143661116,
+                "request_seconds": 259.7711464820022,
+                "usage": {
+                  "completion_tokens": 128,
+                  "prompt_tokens": 65546,
+                  "total_tokens": 65674,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 0
+                  }
+                },
+                "timings": {
+                  "cache_n": 0,
+                  "prompt_n": 65546,
+                  "prompt_ms": 41665.517,
+                  "prompt_per_token_ms": 0.6356683397919018,
+                  "prompt_per_second": 1573.147406283234,
+                  "predicted_n": 128,
+                  "predicted_ms": 217727.833,
+                  "predicted_per_token_ms": 1714.3923858267717,
+                  "predicted_per_second": 0.5832970376368923
+                },
+                "decode_tok_s": 0.5878899276970253,
+                "prefill_tok_s": 1573.1474062832342,
+                "status": "passed"
+              }
+            ],
+            "request_seconds": 269.6488300839992,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 70869.74983764417,
+                "request_average_power_w": 262.8223894595326,
+                "max_temperature_c": 72.0,
+                "max_memory_used_mib": 19166.0
+              },
+              "2": {
+                "request_energy_joules": 70709.05013714173,
+                "request_average_power_w": 262.22643026159216,
+                "max_temperature_c": 79.0,
+                "max_memory_used_mib": 20250.0
+              }
+            },
+            "cpu_request_energy_joules": 26646.472738165914,
+            "total_request_energy_joules": 168225.2727129518,
+            "aggregate_decode_tok_s": 1.150016853252845,
+            "sample_count": 262
+          }
+        ]
+      }
+    }
+  ]
+}

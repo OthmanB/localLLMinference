@@ -1,0 +1,367 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "results.json",
+      "measurements": {
+        "results": [
+          {
+            "mode": "tensor",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 43.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 49.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 6.117524699002388,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 4099,
+              "total_tokens": 4227,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 4099,
+              "prompt_ms": 3725.162,
+              "prompt_per_token_ms": 0.9087977555501341,
+              "prompt_per_second": 1100.3548302060422,
+              "predicted_n": 128,
+              "predicted_ms": 2364.996,
+              "predicted_per_token_ms": 18.622015748031497,
+              "predicted_per_second": 53.69987940782987
+            },
+            "decode_tok_s": 54.12271310395451,
+            "prefill_tok_s": 1100.3548302060422,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 1175.3901686978227,
+                "request_average_power_w": 192.13492818255378,
+                "max_temperature_c": 53.0,
+                "max_memory_used_mib": 16264.0
+              },
+              "2": {
+                "request_energy_joules": 1161.521282486347,
+                "request_average_power_w": 189.86785336163194,
+                "max_temperature_c": 58.0,
+                "max_memory_used_mib": 16264.0
+              }
+            },
+            "cpu_request_energy_joules": 415.9132222315946,
+            "total_request_energy_joules": 2752.8246734157647,
+            "sample_count": 18
+          },
+          {
+            "mode": "tensor",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 46.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 51.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 259.1797883869949,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 196612,
+              "total_tokens": 196740,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 196612,
+              "prompt_ms": 255154.144,
+              "prompt_per_token_ms": 1.2977546843529388,
+              "prompt_per_second": 770.561657035051,
+              "predicted_n": 128,
+              "predicted_ms": 3395.535,
+              "predicted_per_token_ms": 26.736496062992124,
+              "predicted_per_second": 37.40205888026482
+            },
+            "decode_tok_s": 37.696563280896825,
+            "prefill_tok_s": 770.561657035051,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 73669.42400081117,
+                "request_average_power_w": 284.2406209963081,
+                "max_temperature_c": 75.0,
+                "max_memory_used_mib": 16392.0
+              },
+              "2": {
+                "request_energy_joules": 73455.44566092621,
+                "request_average_power_w": 283.41502290003433,
+                "max_temperature_c": 82.0,
+                "max_memory_used_mib": 16392.0
+              }
+            },
+            "cpu_request_energy_joules": 25328.26546134106,
+            "total_request_energy_joules": 172453.13512307845,
+            "sample_count": 257
+          },
+          {
+            "mode": "tensor",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 62.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 69.0,
+                "memory_used_mib": 16102.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 394.35452060300304,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 261765,
+              "total_tokens": 261893,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 261765,
+              "prompt_ms": 389766.779,
+              "prompt_per_token_ms": 1.4889950107921226,
+              "prompt_per_second": 671.5939225800463,
+              "predicted_n": 128,
+              "predicted_ms": 3774.066,
+              "predicted_per_token_ms": 29.717055118110235,
+              "predicted_per_second": 33.65070987099855
+            },
+            "decode_tok_s": 33.91567609045523,
+            "prefill_tok_s": 671.5939225800463,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 112117.68905402174,
+                "request_average_power_w": 284.30684370647975,
+                "max_temperature_c": 78.0,
+                "max_memory_used_mib": 16398.0
+              },
+              "2": {
+                "request_energy_joules": 112261.78379052048,
+                "request_average_power_w": 284.67223760707054,
+                "max_temperature_c": 87.0,
+                "max_memory_used_mib": 16398.0
+              }
+            },
+            "cpu_request_energy_joules": 39036.16126710424,
+            "total_request_energy_joules": 263415.63411164645,
+            "sample_count": 384
+          },
+          {
+            "mode": "layer",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 66.0,
+                "memory_used_mib": 11702.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 76.0,
+                "memory_used_mib": 12724.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 5.885763983002107,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 4099,
+              "total_tokens": 4227,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 4099,
+              "prompt_ms": 2532.381,
+              "prompt_per_token_ms": 0.6178045864845084,
+              "prompt_per_second": 1618.634794685318,
+              "predicted_n": 128,
+              "predicted_ms": 3325.492,
+              "predicted_per_token_ms": 26.184976377952758,
+              "predicted_per_second": 38.18983777438045
+            },
+            "decode_tok_s": 38.49054515843069,
+            "prefill_tok_s": 1618.634794685318,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 1407.7696677835331,
+                "request_average_power_w": 239.18214727079197,
+                "max_temperature_c": 73.0,
+                "max_memory_used_mib": 11840.0
+              },
+              "2": {
+                "request_energy_joules": 1431.037313499815,
+                "request_average_power_w": 243.1353546680777,
+                "max_temperature_c": 83.0,
+                "max_memory_used_mib": 12862.0
+              }
+            },
+            "cpu_request_energy_joules": 545.9561598008706,
+            "total_request_energy_joules": 3384.7631410842187,
+            "sample_count": 15
+          },
+          {
+            "mode": "layer",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 63.0,
+                "memory_used_mib": 11702.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 72.0,
+                "memory_used_mib": 12724.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 218.49563790699904,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 196612,
+              "total_tokens": 196740,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 196612,
+              "prompt_ms": 210973.187,
+              "prompt_per_token_ms": 1.0730432883038676,
+              "prompt_per_second": 931.9288521721008,
+              "predicted_n": 128,
+              "predicted_ms": 6883.301,
+              "predicted_per_token_ms": 54.19922047244095,
+              "predicted_per_second": 18.450449864098633
+            },
+            "decode_tok_s": 18.595728996886812,
+            "prefill_tok_s": 931.928852172101,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 59114.805833924314,
+                "request_average_power_w": 270.55371173627765,
+                "max_temperature_c": 76.0,
+                "max_memory_used_mib": 13250.0
+              },
+              "2": {
+                "request_energy_joules": 59816.08745242028,
+                "request_average_power_w": 273.7633026700539,
+                "max_temperature_c": 85.0,
+                "max_memory_used_mib": 14400.0
+              }
+            },
+            "cpu_request_energy_joules": 22022.839862515186,
+            "total_request_energy_joules": 140953.73314885978,
+            "sample_count": 216
+          },
+          {
+            "mode": "layer",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 63.0,
+                "memory_used_mib": 11702.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 72.0,
+                "memory_used_mib": 12724.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 347.9598729790014,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 261765,
+              "total_tokens": 261893,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 261765,
+              "prompt_ms": 338946.393,
+              "prompt_per_token_ms": 1.2948499341011976,
+              "prompt_per_second": 772.2902659713508,
+              "predicted_n": 128,
+              "predicted_ms": 8175.98,
+              "predicted_per_token_ms": 64.37779527559054,
+              "predicted_per_second": 15.53330609908537
+            },
+            "decode_tok_s": 15.655615595928563,
+            "prefill_tok_s": 772.2902659713508,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 92987.18639704729,
+                "request_average_power_w": 267.23537286340735,
+                "max_temperature_c": 75.0,
+                "max_memory_used_mib": 13764.0
+              },
+              "2": {
+                "request_energy_joules": 94559.72494421586,
+                "request_average_power_w": 271.75468290253787,
+                "max_temperature_c": 85.0,
+                "max_memory_used_mib": 14914.0
+              }
+            },
+            "cpu_request_energy_joules": 35033.14615810003,
+            "total_request_energy_joules": 222580.0574993632,
+            "sample_count": 337
+          }
+        ]
+      }
+    }
+  ]
+}

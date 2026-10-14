@@ -1,0 +1,72 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "results.json",
+      "measurements": {
+        "results": [
+          {
+            "mode": "tensor",
+            "status": "passed",
+            "startup_gpus": {
+              "1": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 0.0,
+                "temperature_c": 40.0,
+                "memory_used_mib": 16184.0,
+                "memory_total_mib": 24576.0
+              },
+              "2": {
+                "power_limit_w": 300.0,
+                "utilization_gpu_percent": 13.0,
+                "temperature_c": 46.0,
+                "memory_used_mib": 16184.0,
+                "memory_total_mib": 24576.0
+              }
+            },
+            "request_seconds": 5.790323449000425,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 4099,
+              "total_tokens": 4227,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 4099,
+              "prompt_ms": 3312.343,
+              "prompt_per_token_ms": 0.8080856306416199,
+              "prompt_per_second": 1237.4926147443064,
+              "predicted_n": 128,
+              "predicted_ms": 2448.271,
+              "predicted_per_token_ms": 19.27772440944882,
+              "predicted_per_second": 51.87334245269416
+            },
+            "decode_tok_s": 52.28179396806971,
+            "prefill_tok_s": 1237.4926147443064,
+            "gpu_request_summary": {
+              "1": {
+                "request_energy_joules": 1224.691005259367,
+                "request_average_power_w": 211.50649286626359,
+                "max_temperature_c": 50.0,
+                "max_memory_used_mib": 16346.0
+              },
+              "2": {
+                "request_energy_joules": 1206.6378220591732,
+                "request_average_power_w": 208.38867339396614,
+                "max_temperature_c": 55.0,
+                "max_memory_used_mib": 16346.0
+              }
+            },
+            "cpu_request_energy_joules": 433.7748396824011,
+            "total_request_energy_joules": 2865.1036670009416,
+            "sample_count": 17
+          }
+        ]
+      }
+    }
+  ]
+}

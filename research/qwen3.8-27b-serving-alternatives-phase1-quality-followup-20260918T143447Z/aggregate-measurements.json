@@ -1,0 +1,185 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "atx/requests/T4-planning-implementation/result.json",
+      "measurements": {
+        "finish_reason": "stop",
+        "http_status": 200,
+        "rubric": {
+          "checks": {
+            "function_correctness": true,
+            "json_valid": true,
+            "required_markers": true
+          },
+          "reviewer_required": true
+        },
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 12389.263,
+          "predicted_n": 525,
+          "predicted_per_second": 42.37540199122417,
+          "predicted_per_token_ms": 23.598596190476194,
+          "prompt_ms": 218.411,
+          "prompt_n": 145,
+          "prompt_per_second": 663.8859764389156,
+          "prompt_per_token_ms": 1.5062827586206897
+        },
+        "truncated": false,
+        "wall_seconds": 12.612609386444092
+      }
+    },
+    {
+      "source_file": "atx/requests/T8-code-generation-test/result.json",
+      "measurements": {
+        "finish_reason": "stop",
+        "http_status": 200,
+        "rubric": {
+          "checks": {
+            "function_correctness": true,
+            "json_valid": true,
+            "required_markers": true
+          },
+          "reviewer_required": true
+        },
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 21541.515,
+          "predicted_n": 911,
+          "predicted_per_second": 42.29043314734363,
+          "predicted_per_token_ms": 23.646009879253565,
+          "prompt_ms": 199.95,
+          "prompt_n": 81,
+          "prompt_per_second": 405.1012753188297,
+          "prompt_per_token_ms": 2.4685185185185183
+        },
+        "truncated": false,
+        "wall_seconds": 21.928894996643066
+      }
+    },
+    {
+      "source_file": "atx/task-results.json",
+      "measurements": [
+        {
+          "finish_reason": "stop",
+          "http_status": 200,
+          "rubric": {
+            "checks": {
+              "function_correctness": true,
+              "json_valid": true,
+              "required_markers": true
+            },
+            "reviewer_required": true
+          },
+          "timings": {
+            "cache_n": 0,
+            "predicted_ms": 12389.263,
+            "predicted_n": 525,
+            "predicted_per_second": 42.37540199122417,
+            "predicted_per_token_ms": 23.598596190476194,
+            "prompt_ms": 218.411,
+            "prompt_n": 145,
+            "prompt_per_second": 663.8859764389156,
+            "prompt_per_token_ms": 1.5062827586206897
+          },
+          "truncated": false,
+          "wall_seconds": 12.612609386444092
+        },
+        {
+          "finish_reason": "stop",
+          "http_status": 200,
+          "rubric": {
+            "checks": {
+              "function_correctness": true,
+              "json_valid": true,
+              "required_markers": true
+            },
+            "reviewer_required": true
+          },
+          "timings": {
+            "cache_n": 0,
+            "predicted_ms": 21541.515,
+            "predicted_n": 911,
+            "predicted_per_second": 42.29043314734363,
+            "predicted_per_token_ms": 23.646009879253565,
+            "prompt_ms": 199.95,
+            "prompt_n": 81,
+            "prompt_per_second": 405.1012753188297,
+            "prompt_per_token_ms": 2.4685185185185183
+          },
+          "truncated": false,
+          "wall_seconds": 21.928894996643066
+        }
+      ]
+    },
+    {
+      "source_file": "followup-summary.json",
+      "measurements": {
+        "both_tasks_pass": true,
+        "normal_eos": true,
+        "physical_gpus": [
+          1
+        ],
+        "sampling": {
+          "chat_template_kwargs": {
+            "enable_thinking": false
+          },
+          "ignore_eos": false,
+          "min_p": 0.0,
+          "n_predict": 1024,
+          "seed": 1729,
+          "stream": false,
+          "temperature": 0.0,
+          "top_k": 0,
+          "top_p": 1.0
+        },
+        "tasks": [
+          {
+            "followup": {
+              "checks": {
+                "function_correctness": true,
+                "json_valid": true,
+                "required_markers": true
+              },
+              "finish_reason": "stop",
+              "http_status": 200,
+              "pass": true,
+              "truncated": false
+            },
+            "prior_atx": {
+              "finish_reason": "length",
+              "truncated": true
+            },
+            "prior_reference": {
+              "finish_reason": "stop",
+              "truncated": false
+            }
+          },
+          {
+            "followup": {
+              "checks": {
+                "function_correctness": true,
+                "json_valid": true,
+                "required_markers": true
+              },
+              "finish_reason": "stop",
+              "http_status": 200,
+              "pass": true,
+              "truncated": false
+            },
+            "prior_atx": {
+              "finish_reason": "length",
+              "truncated": true
+            },
+            "prior_reference": {
+              "finish_reason": "stop",
+              "truncated": false
+            }
+          }
+        ],
+        "thinking_disabled": true
+      }
+    }
+  ]
+}

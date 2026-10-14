@@ -1,0 +1,19 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "results.json",
+      "measurements": {
+        "results": [
+          {
+            "status": "error"
+          },
+          {
+            "status": "error"
+          }
+        ]
+      }
+    }
+  ]
+}

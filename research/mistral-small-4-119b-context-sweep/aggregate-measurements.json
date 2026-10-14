@@ -1,0 +1,1200 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "phase3/summary.json",
+      "measurements": {
+        "phase": 3,
+        "ctx": 131072,
+        "reserve": 8192,
+        "prompt_tokens_typical": 122869,
+        "per_quant": {
+          "mistral-xxs": {
+            "n_runs": 8,
+            "premature_eos_seeds": [
+              42,
+              42
+            ],
+            "wall_seconds_range": [
+              185.04,
+              204.5
+            ],
+            "completion_tokens_range_complete": [
+              245,
+              847
+            ],
+            "fully_resident": true,
+            "max_temperature_c_range": [
+              81.0,
+              85.0
+            ],
+            "representative_complete_review": {
+              "seed": 100,
+              "temperature": 0.8,
+              "completion_tokens": 847,
+              "wall_seconds": 204.5
+            },
+            "runs": [
+              {
+                "seed": 100,
+                "temperature": 0.8,
+                "finish_reason": "stop",
+                "wall_seconds": 204.5,
+                "prompt_tokens": 122869,
+                "completion_tokens": 847,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 1337,
+                "temperature": 0.6,
+                "finish_reason": "stop",
+                "wall_seconds": 196.42,
+                "prompt_tokens": 122869,
+                "completion_tokens": 412,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 1337,
+                "finish_reason": "stop",
+                "wall_seconds": 189.79,
+                "prompt_tokens": 122869,
+                "completion_tokens": 247,
+                "fully_resident": true,
+                "max_temperature_c": 82.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 42,
+                "temperature": 0.6,
+                "finish_reason": "stop",
+                "wall_seconds": 186.94,
+                "prompt_tokens": 122869,
+                "completion_tokens": 34,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": true
+              },
+              {
+                "seed": 42,
+                "finish_reason": "stop",
+                "wall_seconds": 187.94,
+                "prompt_tokens": 122869,
+                "completion_tokens": 15,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": true
+              },
+              {
+                "seed": 7,
+                "temperature": 0.6,
+                "finish_reason": "stop",
+                "wall_seconds": 193.54,
+                "prompt_tokens": 122869,
+                "completion_tokens": 245,
+                "fully_resident": true,
+                "max_temperature_c": 85.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 7,
+                "temperature": 0.8,
+                "finish_reason": "stop",
+                "wall_seconds": 194.27,
+                "prompt_tokens": 122869,
+                "completion_tokens": 465,
+                "fully_resident": true,
+                "max_temperature_c": 82.0,
+                "premature_eos": false
+              },
+              {
+                "temperature": 0.8,
+                "finish_reason": "stop",
+                "wall_seconds": 185.04,
+                "prompt_tokens": 122869,
+                "completion_tokens": 34,
+                "fully_resident": true,
+                "max_temperature_c": 81.0,
+                "premature_eos": true
+              }
+            ]
+          },
+          "mistral-s": {
+            "n_runs": 3,
+            "wall_seconds_range": [
+              194.3,
+              197.04
+            ],
+            "completion_tokens_range_complete": [
+              288,
+              427
+            ],
+            "fully_resident": true,
+            "max_temperature_c_range": [
+              84.0,
+              85.0
+            ],
+            "representative_complete_review": {
+              "seed": 42,
+              "completion_tokens": 427,
+              "wall_seconds": 197.04
+            },
+            "runs": [
+              {
+                "seed": 1337,
+                "finish_reason": "stop",
+                "wall_seconds": 194.35,
+                "prompt_tokens": 122867,
+                "completion_tokens": 308,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 42,
+                "finish_reason": "stop",
+                "wall_seconds": 197.04,
+                "prompt_tokens": 122867,
+                "completion_tokens": 427,
+                "fully_resident": true,
+                "max_temperature_c": 84.0,
+                "premature_eos": false
+              },
+              {
+                "seed": 7,
+                "temperature": 0.8,
+                "finish_reason": "stop",
+                "wall_seconds": 194.3,
+                "prompt_tokens": 122867,
+                "completion_tokens": 288,
+                "fully_resident": true,
+                "max_temperature_c": 85.0,
+                "premature_eos": false
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "source_file": "phase4/ab_results.json",
+      "measurements": {
+        "results": [
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 91.22,
+            "prompt_tokens": 1897,
+            "completion_tokens": 9380,
+            "model": "mistral-xxs",
+            "quant": "IQ3_XXS",
+            "port": 8082,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 41.65,
+            "prompt_tokens": 1927,
+            "completion_tokens": 4309,
+            "model": "mistral-xxs",
+            "quant": "IQ3_XXS",
+            "port": 8082,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 95.2,
+            "prompt_tokens": 924,
+            "completion_tokens": 9832,
+            "model": "mistral-xxs",
+            "quant": "IQ3_XXS",
+            "port": 8082,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 30.93,
+            "prompt_tokens": 1985,
+            "completion_tokens": 3168,
+            "model": "mistral-xxs",
+            "quant": "IQ3_XXS",
+            "port": 8082,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 133.55,
+            "prompt_tokens": 1897,
+            "completion_tokens": 13203,
+            "model": "mistral-s",
+            "quant": "IQ3_S",
+            "port": 8083,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 35.32,
+            "prompt_tokens": 1927,
+            "completion_tokens": 3562,
+            "model": "mistral-s",
+            "quant": "IQ3_S",
+            "port": 8083,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 47.68,
+            "prompt_tokens": 924,
+            "completion_tokens": 4944,
+            "model": "mistral-s",
+            "quant": "IQ3_S",
+            "port": 8083,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 21.72,
+            "prompt_tokens": 1985,
+            "completion_tokens": 2159,
+            "model": "mistral-s",
+            "quant": "IQ3_S",
+            "port": 8083,
+            "ctx": 32768,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 453.8,
+            "prompt_tokens": 1858,
+            "completion_tokens": 16384,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 812.83,
+            "prompt_tokens": 1906,
+            "completion_tokens": 16384,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 559.84,
+            "prompt_tokens": 934,
+            "completion_tokens": 16384,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 866.26,
+            "prompt_tokens": 1930,
+            "completion_tokens": 16384,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/ab_results_qwen.json",
+      "measurements": {
+        "results": [
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 803.69,
+            "prompt_tokens": 1858,
+            "completion_tokens": 27506,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 994.74,
+            "prompt_tokens": 1906,
+            "completion_tokens": 32768,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 1061.91,
+            "prompt_tokens": 934,
+            "completion_tokens": 32768,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "length",
+            "wall_seconds": 999.07,
+            "prompt_tokens": 1930,
+            "completion_tokens": 32768,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/ab_results_qwen234.json",
+      "measurements": {
+        "results": [
+          {
+            "finish_reason": "length",
+            "wall_seconds": 2179.12,
+            "prompt_tokens": 1906,
+            "completion_tokens": 65536,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 1413.38,
+            "prompt_tokens": 934,
+            "completion_tokens": 45433,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          },
+          {
+            "finish_reason": "stop",
+            "wall_seconds": 1455.86,
+            "prompt_tokens": 1930,
+            "completion_tokens": 46315,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/ab_results_qwen_case2.json",
+      "measurements": {
+        "results": [
+          {
+            "finish_reason": "length",
+            "wall_seconds": 3562.22,
+            "prompt_tokens": 1906,
+            "completion_tokens": 98304,
+            "model": "qwen",
+            "quant": "Q4_K_M (production, GPU0)",
+            "port": 8080,
+            "seed": 1337,
+            "temperature": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/agentic-review-2026-09-04/results.json",
+      "measurements": {
+        "results": [
+          {
+            "timed_out": false,
+            "wall_seconds": 5.03,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          },
+          {
+            "timed_out": false,
+            "wall_seconds": 4.57,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/agentic-review-2026-09-04-r2/results.json",
+      "measurements": {
+        "results": [
+          {
+            "timed_out": false,
+            "wall_seconds": 697.26,
+            "api_calls": 60,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          },
+          {
+            "timed_out": false,
+            "wall_seconds": 66.95,
+            "api_calls": 15,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/agentic-review-2026-09-04-r3/results.json",
+      "measurements": {
+        "results": [
+          {
+            "timed_out": false,
+            "wall_seconds": 112.59,
+            "api_calls": 24,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          },
+          {
+            "timed_out": false,
+            "wall_seconds": 56.39,
+            "api_calls": 1,
+            "review_chars": 0,
+            "fully_resident": true,
+            "temperature": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/agentic-review-2026-09-04-r4/results.json",
+      "measurements": {
+        "results": [
+          {
+            "status": "submitted",
+            "steps": 30,
+            "review_chars": 3045,
+            "wall_seconds": 184.81,
+            "fully_resident": true,
+            "temperature": 0.7
+          },
+          {
+            "status": "submitted",
+            "steps": 28,
+            "review_chars": 3665,
+            "wall_seconds": 140.66,
+            "fully_resident": true,
+            "temperature": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "phase4/agentic-review-2026-09-04-r5/results.json",
+      "measurements": {
+        "results": [
+          {
+            "status": "submitted",
+            "steps": 23,
+            "review_chars": 1864,
+            "wall_seconds": 185.53,
+            "fully_resident": true,
+            "temperature": 0.7
+          },
+          {
+            "status": "step_limit",
+            "steps": 30,
+            "review_chars": 0,
+            "wall_seconds": 131.82,
+            "fully_resident": true,
+            "temperature": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "results.json",
+      "measurements": {
+        "results": [
+          {
+            "model": "mistral-xxs",
+            "port": 8082,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 40386.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 59.0,
+                  "memory_used_mib": 21426.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 56.0,
+                  "memory_used_mib": 19898.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 41324.0,
+              "max_temperature_c": 59.0
+            },
+            "startup_process_rss_mib": 1005.44140625,
+            "request_seconds": 5.079904907004675,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 7926,
+              "total_tokens": 8054,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 7926,
+              "prompt_ms": 3683.99,
+              "prompt_per_token_ms": 0.4647981327277315,
+              "prompt_per_second": 2151.4716380880513,
+              "predicted_n": 128,
+              "predicted_ms": 1377.352,
+              "predicted_per_token_ms": 10.845291338582678,
+              "predicted_per_second": 92.20591395663563
+            },
+            "decode_tok_s": 92.93194477519181,
+            "prefill_tok_s": 2151.4716380880513,
+            "sample_count": 4,
+            "max_temperature_c": 69.0,
+            "max_memory_used_mib_total": 41640.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 21584.0,
+              "2": 20056.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 1152.12890625,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 133895872
+          },
+          {
+            "model": "mistral-xxs",
+            "port": 8082,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 40386.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 62.0,
+                  "memory_used_mib": 21554.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 60.0,
+                  "memory_used_mib": 20026.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 41580.0,
+              "max_temperature_c": 62.0
+            },
+            "startup_process_rss_mib": 1102.3125,
+            "request_seconds": 22.56448643299518,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 32502,
+              "total_tokens": 32630,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 32502,
+              "prompt_ms": 20896.777,
+              "prompt_per_token_ms": 0.6429381884191742,
+              "prompt_per_second": 1555.3594700273636,
+              "predicted_n": 128,
+              "predicted_ms": 1638.287,
+              "predicted_per_token_ms": 12.899897637795275,
+              "predicted_per_second": 77.51999497035624
+            },
+            "decode_tok_s": 78.13038863154014,
+            "prefill_tok_s": 1555.3594700273638,
+            "sample_count": 21,
+            "max_temperature_c": 77.0,
+            "max_memory_used_mib_total": 42152.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 21840.0,
+              "2": 20312.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 1282.3359375,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 133521872
+          },
+          {
+            "model": "mistral-xxs",
+            "port": 8082,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 40386.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 67.0,
+                  "memory_used_mib": 22196.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 64.0,
+                  "memory_used_mib": 20538.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 42734.0,
+              "max_temperature_c": 67.0
+            },
+            "startup_process_rss_mib": 1491.5078125,
+            "request_seconds": 206.1346547400026,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 130800,
+              "total_tokens": 130928,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 130800,
+              "prompt_ms": 203389.391,
+              "prompt_per_token_ms": 1.5549647629969419,
+              "prompt_per_second": 643.1013896885113,
+              "predicted_n": 128,
+              "predicted_ms": 2619.371,
+              "predicted_per_token_ms": 20.62496850393701,
+              "predicted_per_second": 48.484922525293285
+            },
+            "decode_tok_s": 48.86669356879953,
+            "prefill_tok_s": 643.1013896885114,
+            "sample_count": 192,
+            "max_temperature_c": 86.0,
+            "max_memory_used_mib_total": 44204.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 22866.0,
+              "2": 21338.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 1745.3671875,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 132943328
+          },
+          {
+            "model": "mistral-xxs",
+            "port": 8082,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 40386.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 72.0,
+                  "memory_used_mib": 22580.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 67.0,
+                  "memory_used_mib": 20924.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 43504.0,
+              "max_temperature_c": 72.0
+            },
+            "startup_process_rss_mib": 1750.80078125,
+            "request_seconds": 432.83462365299056,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 196349,
+              "total_tokens": 196477,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 196349,
+              "prompt_ms": 429355.672,
+              "prompt_per_token_ms": 2.186696504693174,
+              "prompt_per_second": 457.31083296367865,
+              "predicted_n": 128,
+              "predicted_ms": 3303.582,
+              "predicted_per_token_ms": 26.012456692913386,
+              "predicted_per_second": 38.443120225258525
+            },
+            "decode_tok_s": 38.74582195931568,
+            "prefill_tok_s": 457.31083296367865,
+            "sample_count": 404,
+            "max_temperature_c": 88.0,
+            "max_memory_used_mib_total": 45612.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 23634.0,
+              "2": 21978.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 2099.35546875,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 132537280
+          },
+          {
+            "model": "mistral-xxs",
+            "port": 8082,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 40386.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 71.0,
+                  "memory_used_mib": 22964.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 66.0,
+                  "memory_used_mib": 21308.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 44272.0,
+              "max_temperature_c": 71.0
+            },
+            "startup_process_rss_mib": 2010.05078125,
+            "request_seconds": 736.3523588579992,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 261887,
+              "total_tokens": 262015,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 261887,
+              "prompt_ms": 731861.751,
+              "prompt_per_token_ms": 2.794570753798394,
+              "prompt_per_second": 357.83670842500413,
+              "predicted_n": 128,
+              "predicted_ms": 4259.109,
+              "predicted_per_token_ms": 33.53629133858268,
+              "predicted_per_second": 29.81844324716742
+            },
+            "decode_tok_s": 30.0532341388774,
+            "prefill_tok_s": 357.83670842500413,
+            "sample_count": 687,
+            "max_temperature_c": 87.0,
+            "max_memory_used_mib_total": 46744.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 24126.0,
+              "2": 22618.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 2279.734375,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 131665024
+          },
+          {
+            "model": "mistral-s",
+            "port": 8083,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 41922.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 72.0,
+                  "memory_used_mib": 22964.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 68.0,
+                  "memory_used_mib": 21308.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 44272.0,
+              "max_temperature_c": 72.0
+            },
+            "startup_process_rss_mib": 1491.56640625,
+            "request_seconds": 208.49214655999094,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 130809,
+              "total_tokens": 130937,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 130809,
+              "prompt_ms": 205740.818,
+              "prompt_per_token_ms": 1.5728338111292037,
+              "prompt_per_second": 635.795080779741,
+              "predicted_n": 128,
+              "predicted_ms": 2627.932,
+              "predicted_per_token_ms": 20.692377952755905,
+              "predicted_per_second": 48.32697345288996
+            },
+            "decode_tok_s": 48.70750080291271,
+            "prefill_tok_s": 635.795080779741,
+            "sample_count": 194,
+            "max_temperature_c": 87.0,
+            "max_memory_used_mib_total": 45740.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 23762.0,
+              "2": 21978.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 1756.9375,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 132538860
+          },
+          {
+            "model": "mistral-s",
+            "port": 8083,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 41922.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 72.0,
+                  "memory_used_mib": 23348.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 68.0,
+                  "memory_used_mib": 21564.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 44912.0,
+              "max_temperature_c": 72.0
+            },
+            "startup_process_rss_mib": 1750.8203125,
+            "request_seconds": 441.47665894600505,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 196336,
+              "total_tokens": 196464,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 196336,
+              "prompt_ms": 437251.334,
+              "prompt_per_token_ms": 2.2270563421889005,
+              "prompt_per_second": 449.02321555867456,
+              "predicted_n": 128,
+              "predicted_ms": 4052.723,
+              "predicted_per_token_ms": 31.911204724409448,
+              "predicted_per_second": 31.33695542478477
+            },
+            "decode_tok_s": 31.583703105294884,
+            "prefill_tok_s": 449.02321555867456,
+            "sample_count": 412,
+            "max_temperature_c": 87.0,
+            "max_memory_used_mib_total": 46744.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 24126.0,
+              "2": 22618.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 2070.4921875,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 131001392
+          },
+          {
+            "model": "mistral-s",
+            "port": 8083,
+            "status": "passed",
+            "fully_resident": true,
+            "residency": {
+              "fully_resident": true,
+              "offloaded_layers": 37,
+              "total_layers": 37,
+              "cuda_model_mib": 41922.91,
+              "cpu_mapped_mib": 420.0
+            },
+            "startup_snapshot": {
+              "cards": [
+                {
+                  "index": 1,
+                  "power_limit_w": 275.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 71.0,
+                  "memory_used_mib": 23860.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                },
+                {
+                  "index": 2,
+                  "power_limit_w": 300.0,
+                  "utilization_gpu_percent": 0.0,
+                  "temperature_c": 67.0,
+                  "memory_used_mib": 21948.0,
+                  "memory_total_mib": 24576.0,
+                  "pcie_gen_current": 3,
+                  "pcie_width_current": 8
+                }
+              ],
+              "memory_used_mib_total": 45808.0,
+              "max_temperature_c": 71.0
+            },
+            "startup_process_rss_mib": 2009.84765625,
+            "request_seconds": 758.5981675849907,
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 261885,
+              "total_tokens": 262013,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 261885,
+              "prompt_ms": 753066.812,
+              "prompt_per_token_ms": 2.8755629837524106,
+              "prompt_per_second": 347.7579888356572,
+              "predicted_n": 128,
+              "predicted_ms": 5288.42,
+              "predicted_per_token_ms": 41.64110236220473,
+              "predicted_per_second": 24.01473407936586
+            },
+            "decode_tok_s": 24.203826473691574,
+            "prefill_tok_s": 347.7579888356572,
+            "sample_count": 708,
+            "max_temperature_c": 85.0,
+            "max_memory_used_mib_total": 47384.0,
+            "peak_memory_used_mib_per_card": {
+              "1": 24126.0,
+              "2": 23258.0
+            },
+            "pcie_gen_under_load": {
+              "max": 3,
+              "min": 3
+            },
+            "pcie_width_under_load": {
+              "max": 8,
+              "min": 8
+            },
+            "max_process_rss_mib": 2279.859375,
+            "min_swap_free_kb": 8388604,
+            "min_mem_available_kb": 128294848
+          }
+        ]
+      }
+    }
+  ]
+}

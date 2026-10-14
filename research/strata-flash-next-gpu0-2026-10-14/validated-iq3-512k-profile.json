@@ -1,0 +1,27 @@
+{
+  "runtime_tag": "v0.1.44",
+  "runtime_commit": "ed4773eb7c8f1f1531ba2bc70e0e1987de2661af",
+  "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S",
+  "note": "Measured benchmark options. Supply pack, native/PLE GGUF, MTP, expert-profile and tokenizer paths through your local Strata configuration. This is not a directly loadable server config.",
+  "gpu": 0,
+  "host": "127.0.0.1",
+  "port": 18144,
+  "parallel": 1,
+  "reasoning_effort": "none",
+  "args": [
+    "--expert-cache", "auto", "--prefill", "auto",
+    "--spec", "4", "--spec-min-p", "0.5",
+    "--max-context", "524288", "--kv", "int8",
+    "--kv-resident", "32768", "--vram-reserve-mib", "1536",
+    "--rope-scaling", "yarn", "--rope-scale", "2",
+    "--yarn-orig-ctx", "262144"
+  ],
+  "env": {
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "STRATA_ROUTE_TAIL_SKIP": "0",
+    "STRATA_ADAPT_OVERLAP": "0",
+    "STRATA_HC_Q8": "0",
+    "STRATA_MMQ_KQ": "0"
+  }
+}

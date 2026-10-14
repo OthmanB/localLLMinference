@@ -1,0 +1,50 @@
+{
+  "format": "scalar-aggregate-v1",
+  "note": "Filtered historical measurements; omitted raw text, telemetry and machine metadata. Fields retain source units. No new inference.",
+  "records": [
+    {
+      "source_file": "native-context-results.json",
+      "measurements": {
+        "prompt_tokens": 261791,
+        "runs": [
+          {
+            "gpu": 1,
+            "port": 18121,
+            "run": 1,
+            "cleanup_ok": true
+          },
+          {
+            "gpu": 1,
+            "port": 18121,
+            "run": 2,
+            "cleanup_ok": true
+          },
+          {
+            "gpu": 2,
+            "port": 18122,
+            "run": 1,
+            "cleanup_ok": true
+          },
+          {
+            "gpu": 2,
+            "port": 18122,
+            "run": 2,
+            "cleanup_ok": true
+          },
+          {
+            "gpu": 1,
+            "port": 18131,
+            "run": 3,
+            "cleanup_ok": true
+          },
+          {
+            "gpu": 2,
+            "port": 18132,
+            "run": 3,
+            "cleanup_ok": true
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "updated_utc": "2026-10-14T22:06:16Z",
+  "phase": "swe-smoke",
+  "start_epoch": 1792014982.5110164,
+  "deadline_epoch": 1792122982.5110202,
+  "models": {
+    "qwen": "Qwen3.8-27B ATX IQ4_XS-M / llamAmpere MTP3 / GPU1",
+    "flash": "Qwen3.8-Flash-Next IQ3_S / Strata 0.1.44 MTP4 / GPU0"
+  },
+  "swe_phase": "smoke_generation",
+  "swe": {
+    "flash": {
+      "denominator": 40,
+      "attempted": 2,
+      "submitted": 1,
+      "resolved": 0,
+      "officially_evaluated": 0,
+      "states": {
+        "queued": 38,
+        "running": 1,
+        "submitted": 1
+      },
+      "terminal_errors": {
+        "none": 2
+      },
+      "total_attempt_wall_s": 32.14415656100027,
+      "mean_resolved_task_wall_s": null,
+      "total_attempt_seconds_per_resolved": null,
+      "completion_tokens": 938,
+      "model_calls": 9
+    },
+    "qwen": {
+      "denominator": 40,
+      "attempted": 2,
+      "submitted": 2,
+      "resolved": 0,
+      "officially_evaluated": 0,
+      "states": {
+        "queued": 38,
+        "submitted": 2
+      },
+      "terminal_errors": {
+        "none": 2
+      },
+      "total_attempt_wall_s": 194.45005557499826,
+      "mean_resolved_task_wall_s": null,
+      "total_attempt_seconds_per_resolved": null,
+      "completion_tokens": 8822,
+      "model_calls": 40
+    }
+  },
+  "evalplus": {},
+  "speed": {
+    "planned_requests": null,
+    "attempted_requests": null,
+    "groups": null,
+    "paired_delta_distributions": null,
+    "denominator_note": null
+  },
+  "capacity": {
+    "aggregate_rates": null,
+    "note": "2 Qwen GPU replicas versus 1 Flash GPU; includes queue/prefill, not single-GPU speed."
+  }
+}
