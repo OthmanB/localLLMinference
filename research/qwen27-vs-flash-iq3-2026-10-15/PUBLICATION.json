@@ -4,9 +4,9 @@
   "public_base_commit": "1da0562",
   "campaign_start_utc": "2026-10-14T21:56:22Z",
   "directory_label_date": "2026-10-15",
-  "aggregate_snapshot_utc": "2026-10-14T22:06:16Z",
-  "aggregate_campaign_phase": "swe-smoke",
-  "aggregate_swe_phase": "smoke_generation",
+  "aggregate_snapshot_utc": "2026-10-14T23:50:41Z",
+  "aggregate_campaign_phase": "blocked-or-failed",
+  "aggregate_swe_phase": "smoke_complete",
   "publication_status": "Aggregate snapshot; consult phase and official coverage before interpreting scores",
   "previous_archive_manifest": "../publication-manifest-2026-10-14.json",
   "previous_archive_files": 118,
@@ -82,12 +82,12 @@
     },
     {
       "path": "RESULTS.md",
-      "sha256": "fc0939e83569dd332519911c262aabeafa5ebed16b10c7dc039520364759bead",
+      "sha256": "004924548499fcfb5e79f709bd62c2faafd433074342dc29268c24839a6dcc29",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {
       "path": "results-summary.json",
-      "sha256": "b86ec5e17834501618301b39d6347da3c89b33224895ab19faf4abffb3a8e120",
+      "sha256": "6bc284bc8479cedaa1777c44796864801348a5c2960ecae937751aee25f470ca",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {

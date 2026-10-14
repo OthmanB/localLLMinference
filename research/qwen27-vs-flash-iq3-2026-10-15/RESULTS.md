@@ -2,7 +2,7 @@
 
 <!-- generated-by: publish_results.py -->
 
-Updated: 2026-10-14T22:06:16Z. Campaign phase: **swe-smoke**.
+Updated: 2026-10-14T23:50:41Z. Campaign phase: **blocked-or-failed**.
 
 ## Configurations
 
@@ -18,18 +18,18 @@ of serving configurations, not an isolated quantization experiment.
 
 ## SWE-bench Verified (frozen 40-task subset)
 
-Phase: **smoke_generation**. Patch submission is not resolution.
+Phase: **smoke_complete**. Patch submission is not resolution.
 
 | Metric | Qwen | Flash |
 |---|---:|---:|
 | Attempted tasks | 2.0 | 2.0 |
 | Submitted patches | 2.0 | 1.0 |
-| Officially evaluated submissions | 0.0 | 0.0 |
-| Officially resolved / 40 | 0.0 | 0.0 |
-| Total model calls | 40.0 | 9.0 |
-| Total output tokens | 8822.0 | 938.0 |
-| Mean resolved-task wall seconds | pending | pending |
-| All attempt seconds per resolved task | pending | pending |
+| Officially evaluated submissions | 2.0 | 1.0 |
+| Officially resolved / 40 | 2.0 | 1.0 |
+| Total model calls | 40.0 | 159.0 |
+| Total output tokens | 8822.0 | 45270.0 |
+| Mean resolved-task wall seconds | 97.2 | 32.1 |
+| All attempt seconds per resolved task | 97.2 | 847.8 |
 
 Denominator stays 40 for each model. Missing official reports and unattempted
 tasks remain explicit; incomplete coverage is not a completed accuracy score.
@@ -38,17 +38,17 @@ tasks remain explicit; incomplete coverage is not a completed accuracy score.
 
 | Dataset | Qwen base / plus pass@1 | Flash base / plus pass@1 | Coverage/status |
 |---|---:|---:|---|
-| humaneval | pending / pending | pending / pending | qwen: 0/? pending; flash: 0/? pending |
+| humaneval | 96.3% / 92.1% | 97.6% / 95.7% | qwen: 164/164 complete; flash: 164/164 complete |
 | mbpp | pending / pending | pending / pending | qwen: 0/? pending; flash: 0/? pending |
 
 ## Matched natural coding workload: median engine rates and TTFT
 
 | Body target | Qwen prefill / decode tok/s | Flash prefill / decode tok/s | Qwen / Flash TTFT s |
 |---:|---:|---:|---:|
-| 4096 | pending / pending | pending / pending | pending / pending |
-| 32768 | pending / pending | pending / pending | pending / pending |
-| 131072 | pending / pending | pending / pending | pending / pending |
-| 245760 | pending / pending | pending / pending | pending / pending |
+| 4096 | 1161.6 / 98.8 | 1251.4 / 87.5 | 3.9 / 3.3 |
+| 32768 | 1143.8 / 100.5 | 2142.4 / 91.3 | 29.8 / 15.4 |
+| 131072 | 725.9 / 81.2 | 2069.4 / 88.2 | 183.6 / 63.5 |
+| 245760 | 507.0 / 66.7 | 1917.9 / 87.0 | 489.9 / 128.3 |
 
 Three fresh repeats are planned per point. These medians include valid responses;
 the aggregate JSON separately exposes caps, cache reuse/unknowns, failures, actual
