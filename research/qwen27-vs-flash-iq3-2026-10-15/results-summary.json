@@ -1,53 +1,57 @@
 {
-  "updated_utc": "2026-10-15T02:27:27Z",
-  "phase": "verified-runtime-restart",
+  "updated_utc": "2026-10-15T03:19:11Z",
+  "phase": "swe",
   "start_epoch": 1792014982.5110164,
   "deadline_epoch": 1792122982.5110202,
   "models": {
     "qwen": "Qwen3.8-27B ATX IQ4_XS-M / llamAmpere MTP3 / GPU1",
     "flash": "Qwen3.8-Flash-Next IQ3_S / Strata 0.1.44 MTP4 / GPU0"
   },
-  "swe_phase": "smoke_complete",
+  "swe_phase": "generation",
   "swe": {
     "flash": {
       "denominator": 40,
-      "attempted": 2,
-      "submitted": 1,
+      "attempted": 14,
+      "submitted": 11,
       "resolved": 1,
       "officially_evaluated": 1,
       "states": {
-        "queued": 38,
-        "failed": 1,
-        "submitted": 1
+        "queued": 26,
+        "failed": 2,
+        "submitted": 11,
+        "running": 1
       },
       "terminal_errors": {
-        "LimitsExceeded": 1,
-        "none": 1
+        "LimitsExceeded": 2,
+        "none": 12
       },
-      "total_attempt_wall_s": 847.7996170489932,
+      "total_attempt_wall_s": 3270.906325071992,
       "mean_resolved_task_wall_s": 32.14415656100027,
-      "total_attempt_seconds_per_resolved": 847.7996170489932,
-      "completion_tokens": 45270,
-      "model_calls": 159
+      "total_attempt_seconds_per_resolved": 3270.906325071992,
+      "completion_tokens": 135719,
+      "model_calls": 702
     },
     "qwen": {
       "denominator": 40,
-      "attempted": 2,
-      "submitted": 2,
+      "attempted": 15,
+      "submitted": 12,
       "resolved": 2,
       "officially_evaluated": 2,
       "states": {
-        "queued": 38,
-        "submitted": 2
+        "queued": 25,
+        "submitted": 12,
+        "failed": 2,
+        "running": 1
       },
       "terminal_errors": {
-        "none": 2
+        "none": 13,
+        "LimitsExceeded": 2
       },
-      "total_attempt_wall_s": 194.45005557499826,
+      "total_attempt_wall_s": 2856.1489741870028,
       "mean_resolved_task_wall_s": 97.22502778749913,
-      "total_attempt_seconds_per_resolved": 97.22502778749913,
-      "completion_tokens": 8822,
-      "model_calls": 40
+      "total_attempt_seconds_per_resolved": 1428.0744870935014,
+      "completion_tokens": 104939,
+      "model_calls": 788
     }
   },
   "evalplus": {
@@ -82,6 +86,43 @@
           "base_pass_at_1": 0.975609756097561,
           "plus_pass_at_1": 0.9573170731707317,
           "wall_s": 21.68688082699373
+        }
+      }
+    },
+    "mbpp": {
+      "qwen": {
+        "status": "complete",
+        "denominator": 378,
+        "attempted": 378,
+        "outcomes": {
+          "natural_finish": 361,
+          "deadline": 1,
+          "infrastructure": 15,
+          "output_cap": 1
+        },
+        "sanitizer_failures": 0,
+        "official": {
+          "status": "complete",
+          "denominator": 378,
+          "base_pass_at_1": 0.8835978835978836,
+          "plus_pass_at_1": 0.753968253968254,
+          "wall_s": 88.56877141000587
+        }
+      },
+      "flash": {
+        "status": "complete",
+        "denominator": 378,
+        "attempted": 378,
+        "outcomes": {
+          "natural_finish": 378
+        },
+        "sanitizer_failures": 0,
+        "official": {
+          "status": "complete",
+          "denominator": 378,
+          "base_pass_at_1": 0.9417989417989417,
+          "plus_pass_at_1": 0.8042328042328042,
+          "wall_s": 64.9757319920027
         }
       }
     }

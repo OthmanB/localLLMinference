@@ -2,7 +2,7 @@
 
 <!-- generated-by: publish_results.py -->
 
-Updated: 2026-10-15T02:27:27Z. Campaign phase: **verified-runtime-restart**.
+Updated: 2026-10-15T03:19:11Z. Campaign phase: **swe**.
 
 ## Configurations
 
@@ -18,18 +18,18 @@ of serving configurations, not an isolated quantization experiment.
 
 ## SWE-bench Verified (frozen 40-task subset)
 
-Phase: **smoke_complete**. Patch submission is not resolution.
+Phase: **generation**. Patch submission is not resolution.
 
 | Metric | Qwen | Flash |
 |---|---:|---:|
-| Attempted tasks | 2.0 | 2.0 |
-| Submitted patches | 2.0 | 1.0 |
+| Attempted tasks | 15.0 | 14.0 |
+| Submitted patches | 12.0 | 11.0 |
 | Officially evaluated submissions | 2.0 | 1.0 |
 | Officially resolved / 40 | 2.0 | 1.0 |
-| Total model calls | 40.0 | 159.0 |
-| Total output tokens | 8822.0 | 45270.0 |
+| Total model calls | 788.0 | 702.0 |
+| Total output tokens | 104939.0 | 135719.0 |
 | Mean resolved-task wall seconds | 97.2 | 32.1 |
-| All attempt seconds per resolved task | 97.2 | 847.8 |
+| All attempt seconds per resolved task | 1428.1 | 3270.9 |
 
 Denominator stays 40 for each model. Missing official reports and unattempted
 tasks remain explicit; incomplete coverage is not a completed accuracy score.
@@ -39,7 +39,7 @@ tasks remain explicit; incomplete coverage is not a completed accuracy score.
 | Dataset | Qwen base / plus pass@1 | Flash base / plus pass@1 | Coverage/status |
 |---|---:|---:|---|
 | humaneval | 96.3% / 92.1% | 97.6% / 95.7% | qwen: 164/164 complete; flash: 164/164 complete |
-| mbpp | pending / pending | pending / pending | qwen: 0/? pending; flash: 0/? pending |
+| mbpp | 88.4% / 75.4% | 94.2% / 80.4% | qwen: 378/378 complete; flash: 378/378 complete |
 
 ## Matched natural coding workload: median engine rates and TTFT
 
