@@ -1,6 +1,6 @@
 {
-  "updated_utc": "2026-10-14T23:50:41Z",
-  "phase": "blocked-or-failed",
+  "updated_utc": "2026-10-15T02:27:27Z",
+  "phase": "verified-runtime-restart",
   "start_epoch": 1792014982.5110164,
   "deadline_epoch": 1792122982.5110202,
   "models": {
@@ -1757,5 +1757,383 @@
       }
     },
     "note": "2 Qwen GPU replicas versus 1 Flash GPU; includes queue/prefill, not single-GPU speed."
+  },
+  "service_restarts": 2,
+  "document_grade_audit": {
+    "method": "post-hoc semantic audit, applied to every model/point; original grades unchanged",
+    "reason": "Prompt did not specify markers must be an array. Accept exact keyed early/middle/late objects too; citation order is not semantic.",
+    "models": {
+      "qwen": {
+        "denominator": 12,
+        "original_strict_correct": 0,
+        "semantic_correct": 4,
+        "marker_schemas": {
+          "invalid": 8,
+          "keyed_object": 4
+        }
+      },
+      "flash": {
+        "denominator": 12,
+        "original_strict_correct": 0,
+        "semantic_correct": 12,
+        "marker_schemas": {
+          "keyed_object": 12
+        }
+      }
+    },
+    "records": [
+      {
+        "key": "documents-131072-r0-flash",
+        "model": "flash",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-131072-r0-qwen",
+        "model": "qwen",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-131072-r1-flash",
+        "model": "flash",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-131072-r1-qwen",
+        "model": "qwen",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-131072-r2-flash",
+        "model": "flash",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-131072-r2-qwen",
+        "model": "qwen",
+        "target": 131072,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-245760-r0-flash",
+        "model": "flash",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-245760-r0-qwen",
+        "model": "qwen",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-245760-r1-flash",
+        "model": "flash",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-245760-r1-qwen",
+        "model": "qwen",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-245760-r2-flash",
+        "model": "flash",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-245760-r2-qwen",
+        "model": "qwen",
+        "target": 245760,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-32768-r0-flash",
+        "model": "flash",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-32768-r0-qwen",
+        "model": "qwen",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-32768-r1-flash",
+        "model": "flash",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-32768-r1-qwen",
+        "model": "qwen",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-32768-r2-flash",
+        "model": "flash",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-32768-r2-qwen",
+        "model": "qwen",
+        "target": 32768,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": false,
+          "checks": {
+            "valid_json": false
+          }
+        }
+      },
+      {
+        "key": "documents-4096-r0-flash",
+        "model": "flash",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-4096-r0-qwen",
+        "model": "qwen",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-4096-r1-flash",
+        "model": "flash",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-4096-r1-qwen",
+        "model": "qwen",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-4096-r2-flash",
+        "model": "flash",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      },
+      {
+        "key": "documents-4096-r2-qwen",
+        "model": "qwen",
+        "target": 4096,
+        "original_strict_correct": false,
+        "semantic_audit": {
+          "all_correct": true,
+          "checks": {
+            "markers": true,
+            "policy": true,
+            "job": true,
+            "evidence": true
+          },
+          "marker_schema": "keyed_object"
+        }
+      }
+    ]
   }
 }

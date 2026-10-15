@@ -15,6 +15,8 @@ import psutil
 
 HERE = Path(__file__).resolve().parent
 STOP = threading.Event()
+SERVICE_TEXTS = {}
+RUN_FOR_NOTES = None
 QWEN_UNITS = ['llamampere-qwen3.8-atx-iq4xs-m-gpu1.service',
               'llamampere-qwen3.8-atx-iq4xs-m-gpu2.service']
 
@@ -38,9 +40,36 @@ def note(run, phase, **details):
 
 
 def protect(pids):
-    for name, pid in pids.items():
-        if unit(name, 'MainPID') != pid or unit(name, 'ActiveState') != 'active':
+    for name, pid in list(pids.items()):
+        if unit(name, 'MainPID') == pid and unit(name, 'ActiveState') == 'active':
+            continue
+        if name not in SERVICE_TEXTS:
             raise RuntimeError('Deployed Qwen service changed: ' + name)
+        deadline = time.monotonic() + 180
+        while True:
+            current = subprocess.check_output(['systemctl', 'cat', name], text=True)
+            if current != SERVICE_TEXTS[name]:
+                raise RuntimeError('Deployed Qwen configuration changed: ' + name)
+            new_pid = unit(name, 'MainPID')
+            if new_pid != '0' and unit(name, 'ActiveState') == 'active':
+                break
+            if STOP.is_set() or time.monotonic() >= deadline:
+                raise RuntimeError('Qwen restart did not recover: ' + name)
+            time.sleep(5)
+        if RUN_FOR_NOTES is not None:
+            path = RUN_FOR_NOTES / 'service-restarts.json'
+            events = json.loads(path.read_text()) if path.exists() else []
+            if any(e.get('unit') == name and e.get('new_pid') == new_pid for e in events):
+                pids[name] = new_pid
+                continue
+            if len(events) >= 3:
+                raise RuntimeError('Repeated Qwen runtime restarts; inspect deployment before continuing')
+            event = dict(unit=name, old_pid=pid, new_pid=new_pid, configuration_unchanged=True,
+                         utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()))
+            events.append(event)
+            atomic(path, events)
+            note(RUN_FOR_NOTES, 'verified-runtime-restart', restart=event)
+        pids[name] = new_pid
 
 
 def stop_process(process):
@@ -97,6 +126,7 @@ def command(run, phase, cmd, env, deadline, pids, allow_incomplete=False):
 
 
 def main():
+    global RUN_FOR_NOTES
     p = argparse.ArgumentParser()
     p.add_argument('--run-dir', type=Path, default=HERE / 'campaign')
     p.add_argument('--strata-root', type=Path, default=Path(os.getenv('STRATA_ROOT', '~/.local/share/strata-flash-next-20261014')).expanduser())
@@ -106,12 +136,19 @@ def main():
     run = a.run_dir.resolve()
     run.mkdir(parents=True, exist_ok=True)
     os.chmod(run, 0o700)
+    RUN_FOR_NOTES = run
     with (run / 'campaign.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         signal.signal(signal.SIGTERM, lambda *_: STOP.set())
         signal.signal(signal.SIGINT, lambda *_: STOP.set())
         if unit('llama-muse-glimmer-30b-131k.service', 'ActiveState') != 'inactive':
             raise RuntimeError('Muse must remain stopped for Flash GPU0')
+        for index, name in enumerate(QWEN_UNITS, 1):
+            text = subprocess.check_output(['systemctl', 'cat', name], text=True)
+            snapshot = run / f'qwen-gpu{index}.service.txt'
+            if snapshot.exists() and snapshot.read_text() != text:
+                raise RuntimeError('Qwen service differs from original campaign snapshot: ' + name)
+            SERVICE_TEXTS[name] = text
         pids = {name: unit(name, 'MainPID') for name in QWEN_UNITS}
         protect(pids)
         origin = run / 'campaign-origin.json'
@@ -119,6 +156,11 @@ def main():
             atomic(origin, dict(start_epoch=time.time(), generation_deadline_epoch=time.time()+24*3600,
                                 deadline_epoch=time.time()+30*3600, qwen_pids=pids))
         limits = json.loads(origin.read_text())
+        # Reconcile an operator-reviewed resume against original PIDs. Keep the
+        # original start/deadlines and service snapshots; do not restart services.
+        previous = dict(limits.get('qwen_pids', pids))
+        if previous != pids:
+            protect(previous)
         deadline = limits['deadline_epoch']
         cfg = json.loads((a.strata_root / 'strata-iq3_s.json').read_text())
         cfg.update(gpu=0, parallel=1, host='127.0.0.1', port=18144, reasoning_effort='none',

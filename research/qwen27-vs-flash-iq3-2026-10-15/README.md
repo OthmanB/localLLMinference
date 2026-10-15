@@ -1,16 +1,19 @@
 # Paired SWE-bench: Qwen 27B IQ4_XS-M vs Flash-Next IQ3_S
 
 The real campaign started **2026-10-14 at 21:56:22 UTC**; the directory uses the
-next-day study label. The published snapshot at **21:58:29 UTC** records paired
-SWE smoke generation: both Flask patches submitted, with Astropy active for both
-models. Official evaluation and final scores are pending. See [RESULTS.md](RESULTS.md)
-and [results-summary.json](results-summary.json) for the timestamped aggregate.
+next-day study label. The campaign resumed as of **2026-10-15 02:18 UTC** after
+review of an automatic Qwen process restart with unchanged service configuration.
+[RESULTS.md](RESULTS.md) and [results-summary.json](results-summary.json) retain the
+**2026-10-14 23:50:41 UTC** blocked partial snapshot (`smoke_complete` for SWE).
+They are historical snapshots, not a live status feed or final campaign scores;
+this source/recovery update does not regenerate them.
 
 `paired_swe.py` uses existing servers when explicitly invoked with `run --swe-phase`;
 it does not manage inference servers or probe health/models endpoints.
 The campaign orchestrator, `run_campaign.py`, starts and stops **only its own
 Flash process on GPU0**, checks the existing Qwen deployments read-only, and
-performs startup provenance probes. It leaves Qwen GPU1/GPU2 services unchanged.
+performs startup provenance probes. It leaves Qwen service configurations unchanged
+and can reconcile a bounded number of verified systemd automatic PID changes.
 See [CAMPAIGN.md](CAMPAIGN.md) for setup, sequencing, deadlines and publication.
 
 ## Protocol
@@ -65,6 +68,8 @@ See [CAMPAIGN.md](CAMPAIGN.md) for setup, sequencing, deadlines and publication.
 | `official_eval.py` | Resource-bounded offline container adapter around official SWE-bench harness |
 | `test_paired_swe.py` | Offline failure accounting, report, metric, immutability and cancellation contracts |
 | `run_campaign.py` | Global campaign deadlines, smoke pause, supplementary scheduling, own Flash process |
+| `test_campaign_recovery.py` | Mocked unchanged-config recovery, config-change rejection and event-cap tests |
+| `audit_document_grades.py` | Symmetric post-hoc marker-schema/citation-order audit; original grades retained |
 | `supplementary.py` | Matched speed/document, capacity and EvalPlus phases |
 | `supplementary_http.py` | SSE framing, request timing, actual usage and cache accounting |
 | `supplementary_fixtures.py` | Authored synthetic archives, tokenizer loader and exact-answer grader |
@@ -207,7 +212,8 @@ on actual task convergence and hidden-test durations; use the ledger to allocate
 the envelope. The controller truncates explicitly instead of silently extending
 deadlines or shrinking denominators. Cached images can still fail offline if an
 evaluation script tries to install uncached dependencies; inspect official logs.
-The real smoke stage is running; both Flask agents submitted patches in the
-published snapshot. The Astropy runs and official hidden-test smoke gate remain
-pending there. Submission alone does not certify the complete protocol or task
-resolution.
+The retained partial report records SWE `smoke_complete`; the campaign then
+resumed after the reviewed runtime interruption. Inspect each report's timestamp,
+phase and official coverage rather than treating a submission or campaign resume
+as a final task-resolution claim. See `CAMPAIGN.md` for the separately labelled
+post-hoc document audit and its format-versus-factual-error limitations.

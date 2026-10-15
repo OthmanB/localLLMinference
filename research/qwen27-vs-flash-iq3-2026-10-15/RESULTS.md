@@ -2,7 +2,7 @@
 
 <!-- generated-by: publish_results.py -->
 
-Updated: 2026-10-14T23:50:41Z. Campaign phase: **blocked-or-failed**.
+Updated: 2026-10-15T02:27:27Z. Campaign phase: **verified-runtime-restart**.
 
 ## Configurations
 
@@ -67,3 +67,17 @@ held-out evaluation, failure accounting and reproduction. Flash separately passe
 512k YaRN document/code trials; that capability is outside this native matched test.
 Raw agent/model outputs, held-out fixtures, credentials and local telemetry are
 not published. results-summary.json contains filtered aggregate measurements.
+
+## Document-grading audit
+
+The marker schema was ambiguous: keyed early/middle/late objects were valid
+answers but the original grader expected arrays. Original strict scores are
+preserved. A symmetric post-hoc semantic audit accepts both representations
+and ignores citation-array order while still requiring exact IDs and facts.
+
+| Model | Original strict correct | Audited semantic correct |
+|---|---:|---:|
+| qwen | 0/12 | 4/12 |
+| flash | 0/12 | 12/12 |
+
+Verified unchanged-configuration Qwen runtime restarts recorded: 2.

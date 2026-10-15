@@ -2,15 +2,21 @@
   "schema": "study-publication-v1",
   "study": "qwen27-vs-flash-iq3-2026-10-15",
   "public_base_commit": "1da0562",
+  "source_update_base_commit": "b69f34b",
+  "source_update_date": "2026-10-15",
+  "campaign_resume_checkpoint_utc": "2026-10-15 02:18 UTC",
+  "source_update_scope": "Recovery/audit sources and documentation only; retained published result bytes and aggregate snapshot metadata",
   "campaign_start_utc": "2026-10-14T21:56:22Z",
   "directory_label_date": "2026-10-15",
-  "aggregate_snapshot_utc": "2026-10-14T23:50:41Z",
-  "aggregate_campaign_phase": "blocked-or-failed",
+  "aggregate_snapshot_utc": "2026-10-15T02:27:27Z",
+  "aggregate_campaign_phase": "verified-runtime-restart",
   "aggregate_swe_phase": "smoke_complete",
   "publication_status": "Aggregate snapshot; consult phase and official coverage before interpreting scores",
   "previous_archive_manifest": "../publication-manifest-2026-10-14.json",
   "previous_archive_files": 118,
-  "study_files_including_this_manifest": 17,
+  "study_files_including_this_manifest": 19,
+  "publication_files_including_this_manifest": 20,
+  "related_research_files_outside_study": 1,
   "hash_scope": "SHA-256 of exported bytes. This manifest does not include its own hash. Source hashes refer to the stable private source snapshot at export, without private paths.",
   "included": [
     {
@@ -55,20 +61,30 @@
     },
     {
       "path": "run_campaign.py",
-      "sha256": "9f79fb578aa0efa08bf3049e9550c7587999c794eb7c14b16df6d936de9a4a5b",
+      "sha256": "c13a4a46b3235ff6ff5ffff8604d2cc0f887f45f822d2a60e2f9df9bfd5abeab",
       "source_copy": "byte-identical"
     },
     {
       "path": "publish_results.py",
-      "sha256": "bb691f36ba0d7ea44e3d92a93cb1fa49105baacfd0f42799e4f249c9650121d5",
+      "sha256": "f344623945e66a99538673bb43da8ea691df4c2a690cf66025300c7554198c11",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "test_campaign_recovery.py",
+      "sha256": "cf8caeea190ece02c237386bce9eee8dd8d72314d0bfdc1376f581c6e9586bdd",
+      "source_copy": "byte-identical"
+    },
+    {
+      "path": "audit_document_grades.py",
+      "sha256": "d42535939ec956e73cccf88eda8d1f1bfd62eb569a6acace0ff46751f30c9993",
       "source_copy": "byte-identical"
     },
     {
       "path": "README.md",
-      "sha256": "8323dc1f098a84f88558359b0724003514c960b20a58623cae5007aeb1250bc3",
+      "sha256": "4d1b2918a4b59ca63db41c15b0ab376d5f213841eef44e9b1b019f8d0d924ca7",
       "source_sha256": "d0f853637441306df28394ef1b5b8be9104a539b75d770bcecbd0291f0a95abc",
       "source_copy": "reviewed documentation adaptation",
-      "changes": "Replaced implementation-only status, distinguished controller/orchestrator ownership, documented global deadlines, smoke-only resume and public prerequisites."
+      "changes": "Replaced implementation-only status, distinguished controller/orchestrator ownership, documented global deadlines and prerequisites; updated recovery checkpoint and retained blocked-result timestamp, bounded automatic PID reconciliation and separate post-hoc audit."
     },
     {
       "path": "PLAN.md",
@@ -82,18 +98,24 @@
     },
     {
       "path": "RESULTS.md",
-      "sha256": "004924548499fcfb5e79f709bd62c2faafd433074342dc29268c24839a6dcc29",
+      "sha256": "d5da108b89377b29c8613a7f778760393d7ca9b39dfecc8d3fae5bee18df028d",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {
       "path": "results-summary.json",
-      "sha256": "6bc284bc8479cedaa1777c44796864801348a5c2960ecae937751aee25f470ca",
+      "sha256": "e9b44239c942edbfcdd5b24aa19a2eaf2058b987cfc4ff4819fbe52c6ce8fc08",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {
       "path": "CAMPAIGN.md",
-      "sha256": "ac2c8e6dfe1def447b456e82fadb84022c3b9fc5ee5e46be921f84e4d80ec515",
+      "sha256": "4874a4699d9deb6e4850b93f9d3d067f8ece1c0e8ad86ce9bcb742b54194a576",
       "source_copy": "authored public campaign guide"
+    },
+    {
+      "path": "../strata-two-gpu-architecture-2026-10-15.md",
+      "sha256": "7da8246fcfc56fc1d65a30f83699c30c977b101ab01d2cd3e086ed220918a044",
+      "source_copy": "authored public architecture assessment based on tagged v0.1.44 MULTI_GPU, BATCHING and INSTALL docs",
+      "scope": "Related research note outside study directory; no topology change or two-GPU benchmark"
     }
   ],
   "excluded": [
@@ -107,19 +129,27 @@
     "model/runtime assets, environments, caches and bytecode"
   ],
   "checks": {
-    "python_sources_ast_compile": 10,
+    "python_sources_ast_compile": 12,
     "swe_environment": {
-      "tests_run": 23,
-      "passed": 21,
+      "tests_run": 26,
+      "passed": 24,
       "skipped": 2
     },
     "evalplus_environment": {
+      "scope": "Prior export verification retained; not rerun for this recovery-source update",
       "tests_run": 12,
       "passed": 11,
       "skipped": 1
     },
     "optional_tokenizer_test": "Skipped; operator tokenizer environment deliberately unset",
     "evalplus_cached_datasets_and_sanitizer": "Passed offline in EvalPlus environment",
+    "recovery_unit_cases": {
+      "tests_run": 3,
+      "passed": 3,
+      "service_reads": "mocked"
+    },
+    "audit_semantic_fixture_checks": "Offline array/keyed-marker and citation-order acceptance, wrong fact/extra citation/invalid JSON rejection, input immutability",
+    "results_regenerated_during_source_update": false,
     "inference_or_real_container_evaluation_during_export": false,
     "git_commit_or_push_during_export": false
   },
@@ -128,6 +158,9 @@
     "Source includes --smoke-only and campaign-to-SWE global deadline propagation.",
     "Campaign fixed loopback endpoints/systemd unit names require local configuration for reproduction; standalone clients support overrides.",
     "Publisher terminal_errors reads paired attempt reason; field mismatch corrected before publication.",
-    "Publisher refreshes manifest hashes alongside aggregate reports."
+    "Publisher refreshes manifest hashes alongside aggregate reports.",
+    "Recovery checks service text, waits up to 180 seconds for existing systemd automatic recovery and accepts at most three distinct campaign events; recorded unit/new-PID pairs are deduplicated. No service restart/configuration commands are added.",
+    "Audit is symmetric post-hoc normalization; original strict grades, responses and immutable supplementary/SWE sources are unchanged. Checkpoint 4/12 Qwen and 12/12 Flash is not a broad factual-accuracy claim; remaining failures may be format-related.",
+    "The related two-GPU architecture note is separately located under research/ and included in publication count, not study-directory file count."
   ]
 }

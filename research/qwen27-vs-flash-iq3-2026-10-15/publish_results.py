@@ -56,7 +56,9 @@ def aggregate(study):
                 swe_phase=ledger.get('phase','not-started'), swe=swe, evalplus=evalplus,
                 speed={k:speed.get(k) for k in ('planned_requests','attempted_requests','groups','paired_delta_distributions','denominator_note')},
                 capacity=dict(aggregate_rates=capacity.get('aggregate_rates'),
-                              note='2 Qwen GPU replicas versus 1 Flash GPU; includes queue/prefill, not single-GPU speed.'))
+                              note='2 Qwen GPU replicas versus 1 Flash GPU; includes queue/prefill, not single-GPU speed.'),
+                service_restarts=len(load(campaign/'service-restarts.json') or []),
+                document_grade_audit=load(campaign/'document-grade-audit.json'))
 
 
 def fmt(value, percent=False):
@@ -125,6 +127,18 @@ def render(data):
               '512k YaRN document/code trials; that capability is outside this native matched test.',
               'Raw agent/model outputs, held-out fixtures, credentials and local telemetry are',
               'not published. results-summary.json contains filtered aggregate measurements.', '']
+    audit = data.get('document_grade_audit', {}).get('models', {})
+    if audit:
+        lines += ['## Document-grading audit', '',
+                  'The marker schema was ambiguous: keyed early/middle/late objects were valid',
+                  'answers but the original grader expected arrays. Original strict scores are',
+                  'preserved. A symmetric post-hoc semantic audit accepts both representations',
+                  'and ignores citation-array order while still requiring exact IDs and facts.', '',
+                  '| Model | Original strict correct | Audited semantic correct |', '|---|---:|---:|']
+        for model, result in audit.items():
+            n = result['denominator']
+            lines.append(f'| {model} | {result["original_strict_correct"]}/{n} | {result["semantic_correct"]}/{n} |')
+    lines += ['', f'Verified unchanged-configuration Qwen runtime restarts recorded: {data.get("service_restarts", 0)}.', '']
     return '\n'.join(lines)
 
 
