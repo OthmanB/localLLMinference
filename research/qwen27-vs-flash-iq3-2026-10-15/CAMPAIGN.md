@@ -195,6 +195,56 @@ requires a clean public working tree, fast-forwards origin/main, reviews status,
 diff and recent commits, and stages only the two reports and study manifest.
 If another session has public-tree changes, it stops rather than staging them.
 
+## Additional 40-task expansion
+
+The authorized extension freezes **40 disjoint new tasks** from the remaining
+Verified500 pool, giving **80 unique paired tasks** across the original and new
+cohorts. [Metadata and policy](extra-cohort/README.md) publish the seed, quotas,
+input-length-stratified selection, task IDs, dataset provenance, canonical image
+tags and inherited deadlines before additional outcomes. Only five cohort files
+are public: `manifest.json`, `policy.json`, `original-ids.json`, `images.json`,
+and `README.md`. Gold/canonical evaluator rows, seals, live state and run trees
+are not included.
+
+At the reported checkpoint, the independent image-preparation worker was running
+and `run_extra_campaign.py` was **waiting**, not generating additional answers.
+It waits for primary official scoring to finish, the original campaign unit to
+exit (releasing its own Flash process), and all **40 canonical images**. Image
+preparation is serial, requires **25 GiB free on the root filesystem before each
+pull**, and neither substitutes tasks/images nor prunes existing assets.
+
+Only then does the additional runner initialize its separate ledger and launch
+**its own native262k Flash on GPU0** using the primary profile. Existing Qwen
+service configuration must match the original snapshots. `extra_swe.py` imports
+the unchanged paired controller, changes only its process-local smoke IDs, and
+retains the exact instructions, sampling, step/wall/resource limits and official
+scoring policy. Generation still ends **2026-10-15 21:56:22 UTC** and the envelope
+ends **2026-10-16 03:56:22 UTC**; the expansion does not reset either clock.
+Completion of all additional work is not guaranteed by the remaining budget.
+
+The [combined reporter](COMBINED_REPORT_INTEGRATION.md) keeps original40, new40
+and combined80 distinct. Unknown outcomes are not imputed as failures. It uses a
+fixed-seed paired bootstrap within repository/cohort strata, descriptive Wilson
+intervals and exact McNemar statistics, withholding final statistics for scopes
+with unknown outcomes. Its complete-comparison gate additionally requires both
+controllers complete, official booleans for submissions, finished evaluation and
+verified equal frozen protocol/deadlines.
+
+For a reviewed public refresh, invoke `publish_extra_results.py --public-repo
+/path/to/public-checkout` **from the private study copy**, without
+`--commit-and-push`. It only reads reporting inputs and regenerates filtered
+reports/publication labels; it does not launch inference or prepare images. The
+public source copy lacks the private frozen primary manifest, ledgers, evaluator
+and seal, so it is not a self-contained live-report or generation checkout.
+`extra_prepare.py` and `run_extra_campaign.py` are source-only exports here;
+their preparation/launch paths were not executed during publication.
+
+[`EXTRA_PUBLICATION.json`](EXTRA_PUBLICATION.json) inventories the new sources,
+metadata and pending report pair separately. `audit_swe_failures.py` is a private
+diagnostic helper: even without `--include-snippets`, its outputs can contain
+free-text request errors and exit messages. No actual failure audit is exported;
+do not treat its default output as an allowlisted publication artifact.
+
 ### Separate post-hoc document-grade audit
 
 `audit_document_grades.py` reads private document records and fixtures and writes

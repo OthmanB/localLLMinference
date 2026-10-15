@@ -1,0 +1,468 @@
+{
+  "canonical_dataset": {
+    "fingerprint": "a11218685458cbbb",
+    "hub_sha": "c6fe717fd7a4c3ac1daa4055a4fd082c6a1d28a2",
+    "name": "SWE-bench/SWE-bench",
+    "rows": 2294,
+    "split": "test",
+    "version": "0.0.0"
+  },
+  "dataset": {
+    "fingerprint": "1fdfd21ba2621130",
+    "hub_sha": "c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
+    "name": "princeton-nlp/SWE-bench_Verified",
+    "rows": 500,
+    "split": "test",
+    "version": "0.0.0"
+  },
+  "manifest_sha256": "0007c250d4f8b1c2519fc7e55e3b9a7d08f5cefc0d06ad1eee0c87fa529107ab",
+  "original_manifest_sha256": "89b534d44bfcfb63f0d5810261ed7ced70611f4968a493f9f499911a17ccb6a1",
+  "schema_version": 1,
+  "selection": {
+    "eligible_repo_counts": {
+      "astropy/astropy": 19,
+      "django/django": 221,
+      "matplotlib/matplotlib": 30,
+      "mwaskom/seaborn": 1,
+      "psf/requests": 6,
+      "pydata/xarray": 19,
+      "pylint-dev/pylint": 8,
+      "pytest-dev/pytest": 17,
+      "scikit-learn/scikit-learn": 29,
+      "sphinx-doc/sphinx": 40,
+      "sympy/sympy": 70
+    },
+    "eligible_total": 460,
+    "method": "original repo quotas capped by unseen availability; weighted deterministic redistribution; seeded uniform sampling within equal rank input-length strata",
+    "order_seed": 20261015,
+    "original_overlap_count": 0,
+    "original_quotas": {
+      "astropy/astropy": 3,
+      "django/django": 10,
+      "matplotlib/matplotlib": 4,
+      "mwaskom/seaborn": 1,
+      "pallets/flask": 1,
+      "psf/requests": 2,
+      "pydata/xarray": 3,
+      "pylint-dev/pylint": 2,
+      "pytest-dev/pytest": 2,
+      "scikit-learn/scikit-learn": 3,
+      "sphinx-doc/sphinx": 4,
+      "sympy/sympy": 5
+    },
+    "quotas": {
+      "astropy/astropy": 3,
+      "django/django": 11,
+      "matplotlib/matplotlib": 4,
+      "mwaskom/seaborn": 1,
+      "pallets/flask": 0,
+      "psf/requests": 2,
+      "pydata/xarray": 3,
+      "pylint-dev/pylint": 2,
+      "pytest-dev/pytest": 2,
+      "scikit-learn/scikit-learn": 3,
+      "sphinx-doc/sphinx": 4,
+      "sympy/sympy": 5
+    },
+    "seed": 20261016,
+    "smoke_ids": [
+      "psf__requests-1724",
+      "django__django-11790"
+    ],
+    "task_count_per_model": 40,
+    "version_counts": {
+      "astropy/astropy:4.3": 1,
+      "astropy/astropy:5.1": 1,
+      "astropy/astropy:5.2": 1,
+      "django/django:3.0": 4,
+      "django/django:3.1": 1,
+      "django/django:4.0": 2,
+      "django/django:4.1": 1,
+      "django/django:4.2": 2,
+      "django/django:5.0": 1,
+      "matplotlib/matplotlib:3.6": 3,
+      "matplotlib/matplotlib:3.7": 1,
+      "mwaskom/seaborn:0.12": 1,
+      "psf/requests:1.1": 1,
+      "psf/requests:2.0": 1,
+      "pydata/xarray:2022.03": 1,
+      "pydata/xarray:2022.06": 1,
+      "pydata/xarray:2022.09": 1,
+      "pylint-dev/pylint:2.9": 1,
+      "pylint-dev/pylint:3.0": 1,
+      "pytest-dev/pytest:5.2": 2,
+      "scikit-learn/scikit-learn:0.20": 1,
+      "scikit-learn/scikit-learn:0.21": 1,
+      "scikit-learn/scikit-learn:1.3": 1,
+      "sphinx-doc/sphinx:3.0": 1,
+      "sphinx-doc/sphinx:3.2": 1,
+      "sphinx-doc/sphinx:3.4": 1,
+      "sphinx-doc/sphinx:5.2": 1,
+      "sympy/sympy:1.0": 1,
+      "sympy/sympy:1.5": 3,
+      "sympy/sympy:1.7": 1
+    }
+  },
+  "tasks": [
+    {
+      "base_commit": "d16bfe05a744909de4b27f5875fe0d4ed41ce607",
+      "created_at": "2022-03-03T15:14:54Z",
+      "instance_id": "astropy__astropy-12907",
+      "order": 0,
+      "problem_statement_chars": 1246,
+      "repo": "astropy/astropy",
+      "version": "4.3"
+    },
+    {
+      "base_commit": "b16c7d12ccbc7b2d20364b89fb44285bcbfede54",
+      "created_at": "2023-06-27T19:48:18Z",
+      "instance_id": "astropy__astropy-14995",
+      "order": 1,
+      "problem_statement_chars": 2455,
+      "repo": "astropy/astropy",
+      "version": "5.2"
+    },
+    {
+      "base_commit": "cdb66059a2feb44ee49021874605ba90801f9986",
+      "created_at": "2023-01-23T22:34:01Z",
+      "instance_id": "astropy__astropy-14309",
+      "order": 2,
+      "problem_statement_chars": 4910,
+      "repo": "astropy/astropy",
+      "version": "5.1"
+    },
+    {
+      "base_commit": "e28671187903e6aca2428374fdd504fca3032aee",
+      "created_at": "2019-06-14T17:40:45Z",
+      "instance_id": "django__django-11477",
+      "order": 3,
+      "problem_statement_chars": 225,
+      "repo": "django/django",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "770d3e6a4ce8e0a91a9e27156036c1985e74d4a3",
+      "created_at": "2022-02-01T18:29:41Z",
+      "instance_id": "django__django-15382",
+      "order": 4,
+      "problem_statement_chars": 407,
+      "repo": "django/django",
+      "version": "4.1"
+    },
+    {
+      "base_commit": "b1d6b35e146aea83b171c1b921178bbaae2795ed",
+      "created_at": "2019-09-17T14:33:44Z",
+      "instance_id": "django__django-11790",
+      "order": 5,
+      "problem_statement_chars": 465,
+      "repo": "django/django",
+      "version": "3.1"
+    },
+    {
+      "base_commit": "0eb3e9bd754e4c9fac8b616b705178727fc8031e",
+      "created_at": "2023-03-18T18:07:18Z",
+      "instance_id": "django__django-16662",
+      "order": 6,
+      "problem_statement_chars": 740,
+      "repo": "django/django",
+      "version": "5.0"
+    },
+    {
+      "base_commit": "d06c5b358149c02a62da8a5469264d05f29ac659",
+      "created_at": "2021-05-10T20:42:18Z",
+      "instance_id": "django__django-14376",
+      "order": 7,
+      "problem_statement_chars": 782,
+      "repo": "django/django",
+      "version": "4.0"
+    },
+    {
+      "base_commit": "d87bd29c4f8dfcdf3f4a4eb8340e6770a2416fe3",
+      "created_at": "2019-04-16T09:44:54Z",
+      "instance_id": "django__django-11239",
+      "order": 8,
+      "problem_statement_chars": 1056,
+      "repo": "django/django",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "42e8cf47c7ee2db238bf91197ea398126c546741",
+      "created_at": "2021-01-26T03:58:23Z",
+      "instance_id": "django__django-13933",
+      "order": 9,
+      "problem_statement_chars": 1207,
+      "repo": "django/django",
+      "version": "4.0"
+    },
+    {
+      "base_commit": "55b68de643b5c2d5f0a8ea7587ab3b2966021ccc",
+      "created_at": "2019-05-06T21:00:53Z",
+      "instance_id": "django__django-11333",
+      "order": 10,
+      "problem_statement_chars": 1493,
+      "repo": "django/django",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "444b6da7cc229a58a2c476a52e45233001dc7073",
+      "created_at": "2022-11-04T13:49:40Z",
+      "instance_id": "django__django-16255",
+      "order": 11,
+      "problem_statement_chars": 1566,
+      "repo": "django/django",
+      "version": "4.2"
+    },
+    {
+      "base_commit": "5eb6a2b33d70b9889e1cafa12594ad6f80773d3a",
+      "created_at": "2022-07-03T19:10:56Z",
+      "instance_id": "django__django-15814",
+      "order": 12,
+      "problem_statement_chars": 2646,
+      "repo": "django/django",
+      "version": "4.2"
+    },
+    {
+      "base_commit": "7991111af12056ec9a856f35935d273526338c1f",
+      "created_at": "2019-07-09T22:28:45Z",
+      "instance_id": "django__django-11551",
+      "order": 13,
+      "problem_statement_chars": 5413,
+      "repo": "django/django",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "5ec2bd279729ff534719b8bf238dbbca907b93c5",
+      "created_at": "2023-02-01T03:41:00Z",
+      "instance_id": "matplotlib__matplotlib-25122",
+      "order": 14,
+      "problem_statement_chars": 1084,
+      "repo": "matplotlib/matplotlib",
+      "version": "3.6"
+    },
+    {
+      "base_commit": "8f0003ae902952372824c9917975fb372c026a42",
+      "created_at": "2022-11-30T15:50:17Z",
+      "instance_id": "matplotlib__matplotlib-24570",
+      "order": 15,
+      "problem_statement_chars": 1356,
+      "repo": "matplotlib/matplotlib",
+      "version": "3.6"
+    },
+    {
+      "base_commit": "f0f133943d3e4f1e2e665291fe1c8f658a84cc09",
+      "created_at": "2023-06-28T21:31:50Z",
+      "instance_id": "matplotlib__matplotlib-26208",
+      "order": 16,
+      "problem_statement_chars": 2079,
+      "repo": "matplotlib/matplotlib",
+      "version": "3.7"
+    },
+    {
+      "base_commit": "af39f1edffcd828f05cfdd04f2e59506bb4a27bc",
+      "created_at": "2022-10-12T22:00:54Z",
+      "instance_id": "matplotlib__matplotlib-24149",
+      "order": 17,
+      "problem_statement_chars": 3224,
+      "repo": "matplotlib/matplotlib",
+      "version": "3.6"
+    },
+    {
+      "base_commit": "54cab15bdacfaa05a88fbc5502a5b322d99f148e",
+      "created_at": "2022-10-09T23:31:20Z",
+      "instance_id": "mwaskom__seaborn-3069",
+      "order": 18,
+      "problem_statement_chars": 1188,
+      "repo": "mwaskom/seaborn",
+      "version": "0.12"
+    },
+    {
+      "base_commit": "22623bd8c265b78b161542663ee980738441c307",
+      "created_at": "2013-01-25T05:19:16Z",
+      "instance_id": "psf__requests-1142",
+      "order": 19,
+      "problem_statement_chars": 381,
+      "repo": "psf/requests",
+      "version": "1.1"
+    },
+    {
+      "base_commit": "1ba83c47ce7b177efe90d5f51f7760680f72eda0",
+      "created_at": "2013-11-04T09:37:00Z",
+      "instance_id": "psf__requests-1724",
+      "order": 20,
+      "problem_statement_chars": 7476,
+      "repo": "psf/requests",
+      "version": "2.0"
+    },
+    {
+      "base_commit": "851dadeb0338403e5021c3fbe80cbc9127ee672d",
+      "created_at": "2022-04-09T03:02:40Z",
+      "instance_id": "pydata__xarray-6461",
+      "order": 21,
+      "problem_statement_chars": 986,
+      "repo": "pydata/xarray",
+      "version": "2022.03"
+    },
+    {
+      "base_commit": "41fef6f1352be994cd90056d47440fe9aa4c068f",
+      "created_at": "2022-12-20T04:34:24Z",
+      "instance_id": "pydata__xarray-7393",
+      "order": 22,
+      "problem_statement_chars": 2362,
+      "repo": "pydata/xarray",
+      "version": "2022.09"
+    },
+    {
+      "base_commit": "c4e40d991c28be51de9ac560ce895ac7f9b14924",
+      "created_at": "2022-08-20T16:45:22Z",
+      "instance_id": "pydata__xarray-6938",
+      "order": 23,
+      "problem_statement_chars": 2978,
+      "repo": "pydata/xarray",
+      "version": "2022.06"
+    },
+    {
+      "base_commit": "1e55ae64624d28c5fe8b63ad7979880ee2e6ef3f",
+      "created_at": "2021-06-22T10:44:14Z",
+      "instance_id": "pylint-dev__pylint-4604",
+      "order": 24,
+      "problem_statement_chars": 685,
+      "repo": "pylint-dev/pylint",
+      "version": "2.9"
+    },
+    {
+      "base_commit": "1f8c4d9eb185c16a2c1d881c054f015e1c2eb334",
+      "created_at": "2023-07-29T21:53:59Z",
+      "instance_id": "pylint-dev__pylint-8898",
+      "order": 25,
+      "problem_statement_chars": 3455,
+      "repo": "pylint-dev/pylint",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "3a668ea6ff24b0c8f00498c3144c63bac561d925",
+      "created_at": "2019-11-16T07:45:21Z",
+      "instance_id": "pytest-dev__pytest-6202",
+      "order": 26,
+      "problem_statement_chars": 2157,
+      "repo": "pytest-dev/pytest",
+      "version": "5.2"
+    },
+    {
+      "base_commit": "e856638ba086fcf5bebf1bebea32d5cf78de87b4",
+      "created_at": "2019-11-15T16:37:22Z",
+      "instance_id": "pytest-dev__pytest-6197",
+      "order": 27,
+      "problem_statement_chars": 2749,
+      "repo": "pytest-dev/pytest",
+      "version": "5.2"
+    },
+    {
+      "base_commit": "f7eea978097085a6781a0e92fc14ba7712a52d75",
+      "created_at": "2022-12-24T15:32:44Z",
+      "instance_id": "scikit-learn__scikit-learn-25232",
+      "order": 28,
+      "problem_statement_chars": 1448,
+      "repo": "scikit-learn/scikit-learn",
+      "version": "1.3"
+    },
+    {
+      "base_commit": "a7b8b9e9e16d4e15fabda5ae615086c2e1c47d8a",
+      "created_at": "2019-01-13T16:19:52Z",
+      "instance_id": "scikit-learn__scikit-learn-12973",
+      "order": 29,
+      "problem_statement_chars": 1575,
+      "repo": "scikit-learn/scikit-learn",
+      "version": "0.21"
+    },
+    {
+      "base_commit": "dd69361a0d9c6ccde0d2353b00b86e0e7541a3e3",
+      "created_at": "2018-07-16T23:21:56Z",
+      "instance_id": "scikit-learn__scikit-learn-11578",
+      "order": 30,
+      "problem_statement_chars": 7387,
+      "repo": "scikit-learn/scikit-learn",
+      "version": "0.20"
+    },
+    {
+      "base_commit": "5e6da19f0e44a0ae83944fb6ce18f18f781e1a6e",
+      "created_at": "2020-08-01T16:28:05Z",
+      "instance_id": "sphinx-doc__sphinx-8035",
+      "order": 31,
+      "problem_statement_chars": 725,
+      "repo": "sphinx-doc/sphinx",
+      "version": "3.2"
+    },
+    {
+      "base_commit": "f35d2a6cc726f97d0e859ca7a0e1729f7da8a6c8",
+      "created_at": "2022-07-16T19:29:29Z",
+      "instance_id": "sphinx-doc__sphinx-10673",
+      "order": 32,
+      "problem_statement_chars": 1333,
+      "repo": "sphinx-doc/sphinx",
+      "version": "5.2"
+    },
+    {
+      "base_commit": "57ed10c68057c96491acbd3e62254ccfaf9e3861",
+      "created_at": "2020-12-19T09:34:31Z",
+      "instance_id": "sphinx-doc__sphinx-8551",
+      "order": 33,
+      "problem_statement_chars": 1874,
+      "repo": "sphinx-doc/sphinx",
+      "version": "3.4"
+    },
+    {
+      "base_commit": "aca3f825f2e4a8817190f3c885a242a285aa0dba",
+      "created_at": "2020-04-09T17:08:30Z",
+      "instance_id": "sphinx-doc__sphinx-7454",
+      "order": 34,
+      "problem_statement_chars": 2677,
+      "repo": "sphinx-doc/sphinx",
+      "version": "3.0"
+    },
+    {
+      "base_commit": "360290c4c401e386db60723ddb0109ed499c9f6e",
+      "created_at": "2016-09-15T20:01:58Z",
+      "instance_id": "sympy__sympy-11618",
+      "order": 35,
+      "problem_statement_chars": 252,
+      "repo": "sympy/sympy",
+      "version": "1.0"
+    },
+    {
+      "base_commit": "6fd65310fa3167b9626c38a5487e171ca407d988",
+      "created_at": "2019-04-08T12:49:10Z",
+      "instance_id": "sympy__sympy-16597",
+      "order": 36,
+      "problem_statement_chars": 611,
+      "repo": "sympy/sympy",
+      "version": "1.5"
+    },
+    {
+      "base_commit": "cffd4e0f86fefd4802349a9f9b19ed70934ea354",
+      "created_at": "2020-12-12T18:18:38Z",
+      "instance_id": "sympy__sympy-20590",
+      "order": 37,
+      "problem_statement_chars": 758,
+      "repo": "sympy/sympy",
+      "version": "1.7"
+    },
+    {
+      "base_commit": "aefdd023dc4f73c441953ed51f5f05a076f0862f",
+      "created_at": "2019-03-26T18:00:02Z",
+      "instance_id": "sympy__sympy-16450",
+      "order": 38,
+      "problem_statement_chars": 1610,
+      "repo": "sympy/sympy",
+      "version": "1.5"
+    },
+    {
+      "base_commit": "1d3327b8e90a186df6972991963a5ae87053259d",
+      "created_at": "2019-07-01T19:17:18Z",
+      "instance_id": "sympy__sympy-17139",
+      "order": 39,
+      "problem_statement_chars": 1916,
+      "repo": "sympy/sympy",
+      "version": "1.5"
+    }
+  ]
+}

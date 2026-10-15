@@ -16,6 +16,31 @@ performs startup provenance probes. It leaves Qwen service configurations unchan
 and can reconcile a bounded number of verified systemd automatic PID changes.
 See [CAMPAIGN.md](CAMPAIGN.md) for setup, sequencing, deadlines and publication.
 
+## Authorized expansion: original 40 + new 40
+
+An additional **40 new matched tasks** are frozen separately: **zero overlap**,
+**80 unique tasks per model** in the union. The original cohort and its results
+keep their existing labels. Selection metadata is preregistered in
+[`extra-cohort/manifest.json`](extra-cohort/manifest.json), with seed **20261016**
+and canonical-body SHA-256
+`0007c250d4f8b1c2519fc7e55e3b9a7d08f5cefc0d06ad1eee0c87fa529107ab`.
+See the [selection/policy description](extra-cohort/README.md) and
+[`EXTRA_PUBLICATION.json`](EXTRA_PUBLICATION.json) for the exact export inventory.
+
+The additional runner was started **waiting** for primary official scoring and
+all 40 canonical images; additional generation had not started at the reported
+checkpoint. It inherits the original generation/envelope deadlines and imports
+the unchanged paired controller/agent policy. See [campaign expansion](CAMPAIGN.md#additional-40-task-expansion)
+for ownership, prerequisites and publication boundaries.
+
+[`COMBINED_SWE.md`](COMBINED_SWE.md) and [`combined-swe.json`](combined-swe.json)
+report **original40 / additional40 / combined80** separately. They are an
+**incomplete snapshot**, with final comparison statistics withheld while required
+outcomes are unknown. [Integration and statistics](COMBINED_REPORT_INTEGRATION.md)
+documents the fixed-seed paired bootstrap, repository/cohort strata, Wilson
+intervals and exact McNemar test; increasing sample size does not guarantee a
+significant difference or a particular winner.
+
 ## Protocol
 
 - **Primary:** one active agent per model, two total, on Qwen GPU1/8080 and

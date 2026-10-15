@@ -1,0 +1,33 @@
+{
+  "count": 40,
+  "deadline_policy": "inherit exact generation/envelope epochs from original primary ledger; never extend",
+  "enable_thinking": false,
+  "image_policy": "canonical image tags; no substitution; sequential pulls; root free >=25GiB before each; no pruning",
+  "manifest_sha256": "0007c250d4f8b1c2519fc7e55e3b9a7d08f5cefc0d06ad1eee0c87fa529107ab",
+  "max_steps": 150,
+  "max_tokens": 8192,
+  "original_manifest_file_sha256": "fcd5d0eaadf285f61687e54e9bf0cec26182d9e5d19f516b42dd519637628710",
+  "presence_penalty": 1.5,
+  "primary_deadlines": {
+    "envelope_deadline_epoch": 1792122982.5110202,
+    "generation_deadline_epoch": 1792101382.5110183
+  },
+  "reasoning_effort": "none",
+  "schema_version": 1,
+  "seed": 20261016,
+  "smoke_ids": [
+    "psf__requests-1724",
+    "django__django-11790"
+  ],
+  "source_hashes": {
+    "extra_prepare.py": "0d8b4d32b7b8177f5e00c0a38753e8f1206dc92261bbb01aae22d48ed1ad7027",
+    "extra_swe.py": "bcc604b8a462e0c25e98e5b97d36d922449df8b566402f9e398531e8f1a43d4f",
+    "instrumented_model.py": "874b8d0146e7b51f559a90b781c339b23def76e0ad72598900dc6e3648f4f6b8",
+    "official_eval.py": "50bd5ba973b4276625b8844811045e7bc9bedae5f1ee04fff12318b9e91251b2",
+    "paired_swe.py": "19285e66032cbecf2f986d8fb337e73cc6f61a60291abdd8cd21547990fb11fa"
+  },
+  "task_wall_seconds": 1800,
+  "temperature": 0.7,
+  "top_k": 20,
+  "top_p": 0.8
+}

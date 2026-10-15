@@ -81,7 +81,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "4d1b2918a4b59ca63db41c15b0ab376d5f213841eef44e9b1b019f8d0d924ca7",
+      "sha256": "db3382fbe805ecca3b1f2269b6b7d781a47bc8c96281b603377c5a54650feedd",
       "source_sha256": "d0f853637441306df28394ef1b5b8be9104a539b75d770bcecbd0291f0a95abc",
       "source_copy": "reviewed documentation adaptation",
       "changes": "Replaced implementation-only status, distinguished controller/orchestrator ownership, documented global deadlines and prerequisites; updated recovery checkpoint and retained blocked-result timestamp, bounded automatic PID reconciliation and separate post-hoc audit."
@@ -108,7 +108,7 @@
     },
     {
       "path": "CAMPAIGN.md",
-      "sha256": "4874a4699d9deb6e4850b93f9d3d067f8ece1c0e8ad86ce9bcb742b54194a576",
+      "sha256": "81cfa0966a7f53ea7473f3557b12d74d73c3a52d3a60fa317ec9fe3aa8bdfec6",
       "source_copy": "authored public campaign guide"
     },
     {

@@ -1,0 +1,97 @@
+{
+  "schema": "extra-cohort-publication-v1",
+  "study": "qwen27-vs-flash-iq3-2026-10-15",
+  "public_base_commit_at_export": "20c250d",
+  "scope": "Separately preregistered additional40, original40/additional40/combined80 filtered pending report, and expansion guide links",
+  "original_publication_manifest": "PUBLICATION.json",
+  "new_files": 17,
+  "modified_existing_files": ["README.md", "CAMPAIGN.md", "PUBLICATION.json"],
+  "inventory_files_including_this_manifest": 19,
+  "inventory_note": "Included paths are relative to the study directory. SHA-256 covers exported bytes. This manifest excludes its own hash. The existing publication manifest is modified only to refresh the two guide hashes; historical results and cohort labels are preserved.",
+  "selection": {
+    "seed": 20261016,
+    "canonical_body_sha256": "0007c250d4f8b1c2519fc7e55e3b9a7d08f5cefc0d06ad1eee0c87fa529107ab",
+    "tasks_per_model": 40,
+    "original_tasks_per_model": 40,
+    "original_overlap": 0,
+    "combined_unique_tasks_per_model": 80,
+    "repositories": 11,
+    "method": "Original repository quotas capped by unseen availability; weighted deterministic redistribution; seeded sampling within repository input-length rank strata. Selection precedes image availability checks and additional outcomes.",
+    "generation_cutoff_utc": "2026-10-15T21:56:22.511018Z",
+    "envelope_cutoff_utc": "2026-10-16T03:56:22.511020Z",
+    "deadline_policy": "Exact original primary epochs inherited; no extension"
+  },
+  "protected_core_sha256": {
+    "paired_swe.py": "19285e66032cbecf2f986d8fb337e73cc6f61a60291abdd8cd21547990fb11fa",
+    "instrumented_model.py": "874b8d0146e7b51f559a90b781c339b23def76e0ad72598900dc6e3648f4f6b8",
+    "official_eval.py": "50bd5ba973b4276625b8844811045e7bc9bedae5f1ee04fff12318b9e91251b2"
+  },
+  "report_snapshot_utc": "2026-10-15T05:01:58.264783+00:00",
+  "report_kind": "published_incomplete_snapshot",
+  "final_claim": false,
+  "runner_checkpoint": "Additional runner started waiting for primary official scoring, primary Flash release and all 40 canonical images; no additional generation at the reporting checkpoint",
+  "integration_gate": {
+    "ready_for_complete_comparison": false,
+    "blocking_conditions": [
+      "unknown_task_outcomes",
+      "submitted_patches_missing_official_bool",
+      "controller_or_evaluator_incomplete",
+      "resource_instructions_sampling_or_deadlines_unverified_or_mismatched"
+    ],
+    "thresholds": {
+      "unknown_outcomes": 0,
+      "submitted_without_official_bool": 0,
+      "unfinished_evaluations": 0,
+      "protocol_mismatches_or_unverified": 0,
+      "controllers_complete": 2
+    }
+  },
+  "included": [
+    {"path": "extra_prepare.py", "sha256": "0d8b4d32b7b8177f5e00c0a38753e8f1206dc92261bbb01aae22d48ed1ad7027", "source_copy": "byte-identical portable source"},
+    {"path": "extra_swe.py", "sha256": "bcc604b8a462e0c25e98e5b97d36d922449df8b566402f9e398531e8f1a43d4f", "source_copy": "byte-identical portable source"},
+    {"path": "extra_tests.py", "sha256": "f5b319efce99400063020cf35ab310b7c947c15253690a1a6d18d3a0fff6bc54", "source_copy": "byte-identical offline tests"},
+    {"path": "run_extra_campaign.py", "sha256": "9b9c6801a4f82d1e7138ac27afc09b4222bb13418ab2167b3100900ce978c207", "source_copy": "byte-identical portable source"},
+    {"path": "combined_swe_report.py", "sha256": "9a162a6a3deff09bfc144bdbb24249ebee073000954580d216a8ea2c4ded15a3", "source_copy": "byte-identical portable source"},
+    {"path": "test_combined_swe.py", "sha256": "d20975c8815b7acc18a36ac135a2aaf7f9336ba92f673c6f26e87639e4f79582", "source_copy": "byte-identical offline tests"},
+    {"path": "publish_extra_results.py", "sha256": "f69f1ff3f20baa4a56201e55d85cb691b7edfa0e6c6d7739cf5e0e6aba08c159", "source_copy": "byte-identical portable source"},
+    {"path": "COMBINED_REPORT_INTEGRATION.md", "sha256": "f6935bd7eda962cba3ca6db5fab42b7b643fac159eaef4e2f99994dce2deac27", "source_copy": "byte-identical integration protocol"},
+    {"path": "audit_swe_failures.py", "sha256": "676c70e3c524c0ce856ce5907e222a437c1f899f29f05fbf28df92c1ff3328d9", "source_copy": "byte-identical diagnostic source only; actual diagnostic output excluded"},
+    {"path": "extra-cohort/manifest.json", "sha256": "1abcc2046987cb09e618e045a769e9970afd8104d01fc2b843d75de0dc038650", "source_copy": "byte-identical allowlisted preregistration metadata"},
+    {"path": "extra-cohort/policy.json", "sha256": "b1236db375dd59b9b2a31018acba22c1214255ba80a52bd3a7c5ba29c7f6fff9", "source_copy": "byte-identical allowlisted policy metadata"},
+    {"path": "extra-cohort/original-ids.json", "sha256": "067dc8497bd497b79260e074cbac00c17a0ef92fb81895b23115b0169fb3007b", "source_copy": "byte-identical allowlisted original-ID metadata"},
+    {"path": "extra-cohort/images.json", "sha256": "aa9587422a2e4363fa53075feddd23969205364356b70c1a25cb202688aaa8ca", "source_copy": "byte-identical canonical image tags; no host cache status or image IDs"},
+    {"path": "extra-cohort/README.md", "sha256": "ff8107aa40aa184481c82e1e6f94cc0cbc9cadc87a91d75aed1c662920a6e94c", "source_copy": "byte-identical selection and reproduction documentation"},
+    {"path": "COMBINED_SWE.md", "sha256": "d48f729bd59080a825bd22200e2c610635830008d90651c863ba942b5de5bcd1", "source_copy": "Filtered report regenerated by publisher without Git flags; incomplete-snapshot label"},
+    {"path": "combined-swe.json", "sha256": "6a4ff2d0782ed7162f632d03e3cc11d9a7c4eda7e5911d4df5ea202a458709cc", "source_copy": "Filtered report regenerated by publisher without Git flags; no final claim"},
+    {"path": "README.md", "sha256": "db3382fbe805ecca3b1f2269b6b7d781a47bc8c96281b603377c5a54650feedd", "source_copy": "Public guide with brief expansion links; original protocol retained"},
+    {"path": "CAMPAIGN.md", "sha256": "81cfa0966a7f53ea7473f3557b12d74d73c3a52d3a60fa317ec9fe3aa8bdfec6", "source_copy": "Public guide with expansion ownership, deadlines and publication boundaries"}
+  ],
+  "metadata_allowlist": ["manifest.json", "policy.json", "original-ids.json", "images.json", "README.md"],
+  "excluded": [
+    "canonical-evaluator.HOST-ONLY.json and seal.HOST-ONLY.json",
+    "preparation launch/status/lock/log files and host Docker inspection records",
+    "extra-campaign/, campaign/, runs/, frozen/ and private/ generated trees",
+    "Raw datasets, issue text, gold/source/test patches, hidden evaluator scripts and responses",
+    "Agent trajectories, request logs, credentials, machine-local configurations and telemetry",
+    "Actual failure-audit.json and diagnostic stdout; these may contain free-text errors or exit messages"
+  ],
+  "checks": {
+    "new_python_sources_ast_compile": 8,
+    "exact_source_and_metadata_copies": 14,
+    "extra_offline_tests": {"run": 6, "passed": 6},
+    "combined_offline_tests": {"run": 10, "passed": 10},
+    "cohort_body_hash_verified": true,
+    "original_overlap_verified": 0,
+    "protected_core_source_hashes_unchanged": true,
+    "inference_service_or_image_preparation_during_export": false,
+    "git_commit_or_push_during_export": false
+  },
+  "reproduction_gaps": [
+    "The public metadata deliberately lacks the host-only seal and canonical evaluator. Private assets and cached task images are required for wrapper initialization; source export is not a runnable live-run snapshot.",
+    "The report publisher must run from the private study copy with reporting ledgers/frozen original manifest present. Only the two filtered report files are copied publicly.",
+    "Additional frozen protocol/deadline comparisons remain unverified until its run initializes; they are not inferred equal from intent.",
+    "Unknown outcomes suppress final comparison statistics. Original40, additional40 and combined80 labels remain distinct.",
+    "audit_swe_failures.py can expose free-text errors and exit messages even without snippets; its outputs are not public-safe by default.",
+    "The initial pending report is timestamped and will lag active scoring. Later reviewed refreshes must update report hashes and integration status."
+  ]
+}
