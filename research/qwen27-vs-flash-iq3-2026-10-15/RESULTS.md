@@ -2,7 +2,7 @@
 
 <!-- generated-by: publish_results.py -->
 
-Updated: 2026-10-15T03:19:11Z. Campaign phase: **swe**.
+Updated: 2026-10-15T05:11:52Z. Campaign phase: **complete**.
 
 ## Configurations
 
@@ -18,18 +18,18 @@ of serving configurations, not an isolated quantization experiment.
 
 ## SWE-bench Verified (frozen 40-task subset)
 
-Phase: **generation**. Patch submission is not resolution.
+Phase: **complete**. Patch submission is not resolution.
 
 | Metric | Qwen | Flash |
 |---|---:|---:|
-| Attempted tasks | 15.0 | 14.0 |
-| Submitted patches | 12.0 | 11.0 |
-| Officially evaluated submissions | 2.0 | 1.0 |
-| Officially resolved / 40 | 2.0 | 1.0 |
-| Total model calls | 788.0 | 702.0 |
-| Total output tokens | 104939.0 | 135719.0 |
-| Mean resolved-task wall seconds | 97.2 | 32.1 |
-| All attempt seconds per resolved task | 1428.1 | 3270.9 |
+| Attempted tasks | 40.0 | 40.0 |
+| Submitted patches | 34.0 | 35.0 |
+| Officially evaluated submissions | 34.0 | 35.0 |
+| Officially resolved / 40 | 20.0 | 19.0 |
+| Total model calls | 2219.0 | 1968.0 |
+| Total output tokens | 305168.0 | 363348.0 |
+| Mean resolved-task wall seconds | 128.5 | 139.2 |
+| All attempt seconds per resolved task | 428.9 | 471.1 |
 
 Denominator stays 40 for each model. Missing official reports and unattempted
 tasks remain explicit; incomplete coverage is not a completed accuracy score.

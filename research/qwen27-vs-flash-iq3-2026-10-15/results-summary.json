@@ -1,57 +1,53 @@
 {
-  "updated_utc": "2026-10-15T03:19:11Z",
-  "phase": "swe",
+  "updated_utc": "2026-10-15T05:11:52Z",
+  "phase": "complete",
   "start_epoch": 1792014982.5110164,
   "deadline_epoch": 1792122982.5110202,
   "models": {
     "qwen": "Qwen3.8-27B ATX IQ4_XS-M / llamAmpere MTP3 / GPU1",
     "flash": "Qwen3.8-Flash-Next IQ3_S / Strata 0.1.44 MTP4 / GPU0"
   },
-  "swe_phase": "generation",
+  "swe_phase": "complete",
   "swe": {
     "flash": {
       "denominator": 40,
-      "attempted": 14,
-      "submitted": 11,
-      "resolved": 1,
-      "officially_evaluated": 1,
+      "attempted": 40,
+      "submitted": 35,
+      "resolved": 19,
+      "officially_evaluated": 35,
       "states": {
-        "queued": 26,
-        "failed": 2,
-        "submitted": 11,
-        "running": 1
+        "submitted": 35,
+        "failed": 5
       },
       "terminal_errors": {
-        "LimitsExceeded": 2,
-        "none": 12
+        "none": 35,
+        "LimitsExceeded": 5
       },
-      "total_attempt_wall_s": 3270.906325071992,
-      "mean_resolved_task_wall_s": 32.14415656100027,
-      "total_attempt_seconds_per_resolved": 3270.906325071992,
-      "completion_tokens": 135719,
-      "model_calls": 702
+      "total_attempt_wall_s": 8950.197065989953,
+      "mean_resolved_task_wall_s": 139.16297036036772,
+      "total_attempt_seconds_per_resolved": 471.0630034731554,
+      "completion_tokens": 363348,
+      "model_calls": 1968
     },
     "qwen": {
       "denominator": 40,
-      "attempted": 15,
-      "submitted": 12,
-      "resolved": 2,
-      "officially_evaluated": 2,
+      "attempted": 40,
+      "submitted": 34,
+      "resolved": 20,
+      "officially_evaluated": 34,
       "states": {
-        "queued": 25,
-        "submitted": 12,
-        "failed": 2,
-        "running": 1
+        "submitted": 34,
+        "failed": 6
       },
       "terminal_errors": {
-        "none": 13,
-        "LimitsExceeded": 2
+        "none": 34,
+        "LimitsExceeded": 6
       },
-      "total_attempt_wall_s": 2856.1489741870028,
-      "mean_resolved_task_wall_s": 97.22502778749913,
-      "total_attempt_seconds_per_resolved": 1428.0744870935014,
-      "completion_tokens": 104939,
-      "model_calls": 788
+      "total_attempt_wall_s": 8577.685829685026,
+      "mean_resolved_task_wall_s": 128.50578005550125,
+      "total_attempt_seconds_per_resolved": 428.8842914842513,
+      "completion_tokens": 305168,
+      "model_calls": 2219
     }
   },
   "evalplus": {

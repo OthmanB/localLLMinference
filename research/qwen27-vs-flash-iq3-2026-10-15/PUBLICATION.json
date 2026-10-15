@@ -8,9 +8,9 @@
   "source_update_scope": "Recovery/audit sources and documentation only; retained published result bytes and aggregate snapshot metadata",
   "campaign_start_utc": "2026-10-14T21:56:22Z",
   "directory_label_date": "2026-10-15",
-  "aggregate_snapshot_utc": "2026-10-15T03:19:11Z",
-  "aggregate_campaign_phase": "swe",
-  "aggregate_swe_phase": "generation",
+  "aggregate_snapshot_utc": "2026-10-15T05:11:52Z",
+  "aggregate_campaign_phase": "complete",
+  "aggregate_swe_phase": "complete",
   "publication_status": "Aggregate snapshot; consult phase and official coverage before interpreting scores",
   "previous_archive_manifest": "../publication-manifest-2026-10-14.json",
   "previous_archive_files": 118,
@@ -98,12 +98,12 @@
     },
     {
       "path": "RESULTS.md",
-      "sha256": "57f82bdcc3bc6f97234ce3042d9604a06ac2d40f93b10bbb7a2e1a517b3508a9",
+      "sha256": "8fc1b42773f74670e98b9b510590c25497404fe0a7fbdafd795f17d3c2637f8d",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {
       "path": "results-summary.json",
-      "sha256": "38bbd5b2221e9b2cfee8bba1cfc0bafb49ba516451bac8ae3eb38549f3ce9c30",
+      "sha256": "22cfbac314953a6837cc8fc2d1baf0e7a7cccb2dbe256d6db4dfd4e4663d6a8c",
       "source_copy": "byte-identical privacy-filtered running snapshot"
     },
     {
