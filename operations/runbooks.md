@@ -5,9 +5,8 @@
 ```bash
 systemctl status nvidia-power-limit.service
 systemctl status nvidia-fan-control.service
-systemctl status llamampere-qwen3.8-atx-iq4xs-m-gpu1.service
+systemctl status strata-flash-512k.service
 systemctl status llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
-systemctl status llama-muse-glimmer-30b-131k.service
 systemctl status lan-inference-gateway.service
 systemctl status ai-metrics-exporter.service
 systemctl status ai-cpu-power-profiler.service
@@ -15,10 +14,10 @@ cat /etc/ai-server/qwen-serving-profile
 nvidia-smi
 ```
 
-The active Qwen profile is selected by the root-only profile switch. The
-`atx-dual` profile owns GPU1/port 8080 and GPU2/port 8081; Muse continues to own
-GPU0/port 8082. The stock Qwen unit is stopped unless `stock-q4-tensor` is
-selected explicitly.
+The active profile marker must read `flash512-qwen-single`. Flash owns
+GPU0+GPU1/port 8082 and the remaining llamAmpere replica owns GPU2/port 8081.
+The Muse, GPU1 llamAmpere, and stock Qwen units are disabled at boot and stay
+stopped.
 
 The standalone RTX 5090 profile is not selected by this switcher. Its status
 uses distinct units:
@@ -38,30 +37,38 @@ The deployed RTX 5090 vLLM TP2 replacement has its own public gateway on port
 `operations/qwen3.8-vllm-tp2-cookbook.md` for its status, restart, initial
 cutover, and rollback procedures. Do not start it alongside the legacy Q4 unit.
 
-The llamAmpere replicas append to `/var/log/ai-server/llamampere-qwen-gpu1.log`
-and `llamampere-qwen-gpu2.log`; the installer creates that directory and installs
-`/etc/logrotate.d/ai-server` to rotate the files daily. Both `LogsDirectory=` in
-the units and the `append:` targets require the directory to exist before the
-unit starts, so never remove it without recreating it (`systemd-tmpfiles
---create`).
+The active services append to `/var/log/ai-server/llamampere-qwen-gpu2.log`,
+`flash-512k-server.log`, and `flash-512k-engine.log`; the installer creates
+that directory and installs `/etc/logrotate.d/ai-server` to rotate the files
+daily. Both `LogsDirectory=` in the units and the `append:` targets require the
+directory to exist before the unit starts, so never remove it without
+recreating it (`systemd-tmpfiles --create`).
 
 ## Reinstall or Apply Unit Changes
 
 The installer installs the canonical units, preserves an existing gateway token,
-and applies the GPU power and fan settings. It does not choose a Qwen topology.
-After installation, select the profile explicitly:
+and applies the GPU power and fan settings. It does not choose a topology.
+After installation, apply the active profile explicitly:
 
 ```bash
 sudo env \
   AI_SERVER_LAN_SUBNET=192.0.2.0/24 \
   AI_SERVER_PROMETHEUS_IP=192.0.2.10 \
   /path/to/localLLMinference/operations/install.sh
-sudo /usr/local/sbin/ai-qwen-profile-switch atx-dual
+sudo python3 /path/to/localLLMinference/operations/promote_flash_512k.py --check
+sudo python3 /path/to/localLLMinference/operations/promote_flash_512k.py
 ```
 
-Run this command again after changing a canonical unit file. It performs the
-systemd daemon reload; the profile switch starts the services for the selected
-topology.
+The promotion preserves the private gateway credential, replaces the
+gateway/exporter backend lists, disables the retired units, and verifies both
+services through the gateway before recording completion under
+`/var/lib/ai-server/flash-deployment.json`. To re-apply unit-file changes for
+the active profile without a full promotion:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart strata-flash-512k.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
+```
 
 Gateway restart shutdown is bounded to five seconds so an in-flight request
 cannot hold the profile switch or a deliberate restart indefinitely; that
@@ -70,7 +77,6 @@ request may be interrupted during a cutover or restart.
 ## API Check
 
 ```bash
-curl -sS http://127.0.0.1:8080/health
 curl -sS http://127.0.0.1:8081/health
 curl -sS http://127.0.0.1:8082/health
 curl -sS http://127.0.0.1:8088/healthz
@@ -81,49 +87,54 @@ curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
   http://127.0.0.1:8088/v1/models
 ```
 
-`/v1/*` and `/readyz` are authenticated. Gateway `/metrics` is the bounded,
+Gateway `/healthz` must list exactly `flash_iq3s_512k` and `qwen_atx_gpu2`.
+Port 8080 is unused while the retired profiles stay stopped. `/v1/*` and
+`/readyz` are authenticated. Gateway `/metrics` is the bounded,
 unauthenticated diagnostics endpoint; it must not contain raw session IDs.
 
 ## Restart
 
-Restart only the services belonging to the selected profile. For `atx-dual`:
+Restart only the services belonging to the active profile:
 
 ```bash
-sudo systemctl restart llamampere-qwen3.8-atx-iq4xs-m-gpu1.service
+sudo systemctl restart strata-flash-512k.service
 sudo systemctl restart llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
-sudo systemctl restart llama-muse-glimmer-30b-131k.service
 sudo systemctl restart lan-inference-gateway.service
 sudo systemctl restart ai-metrics-exporter.service
 ```
 
-Do not start stock Qwen alongside either llamAmpere replica. Use the profile
-switch for a topology change so ports, GPU ownership, environment backups, and
-readiness checks are performed in order.
+Flash model loading can take minutes; `systemctl status` may stay healthy while
+`/health` on 8082 still reports loading. Do not start retired services while
+Flash runs; the units declare `Conflicts=`, but starting a retired unit first
+would block Flash instead.
 
-## Rollback
+## Restoring A Retired Profile
 
 Rollback is manual, cold, and mutually exclusive. It is not an automatic
-fallback:
+fallback. First stop and disable Flash, then use the legacy profile switcher,
+then restore the gateway/exporter settings that the promotion replaced:
 
 ```bash
-sudo /usr/local/sbin/ai-qwen-profile-switch stock-q4-tensor
+sudo systemctl stop disable strata-flash-512k.service
+sudo /usr/local/sbin/ai-qwen-profile-switch atx-dual   # or stock-q4-tensor
 ```
 
-The switch stops the gateway and both llamAmpere units, verifies ports 8080 and
-8081 and GPUs 1 and 2 are clear, installs the stock gateway/exporter profiles,
-starts `llama-qwen3.8-q4-tensor-262k.service`, and verifies authenticated
-gateway routing. If llamAmpere fails, leave it visible through systemd,
-`/readyz`, and Prometheus until the operator chooses restart or rollback.
+The switch verifies ports and GPU ownership and installs its profile's
+gateway/exporter environment files. Alternatively, restore the pre-promotion
+private files from the root-only backup the promotion created under
+`/var/backups/ai-server/flash512-<UTC timestamp>/`. If a model service fails,
+leave it visible through systemd, `/readyz`, and Prometheus until the operator
+chooses restart or rollback.
 
 ## Reboot Acceptance
 
-After a reboot verify that the selected profile marker is `atx-dual`, both
-llamAmpere units own only their intended GPU and loopback port, Muse reports
-model ID `muse-glimmer-30b-kquant17` on GPU0, the gateway requires a token for
-`/v1` and `/readyz`, `/metrics` is reachable without a token, the exporter is
-reachable by Prometheus, and the stock Qwen service did not start. If the
-operator selected `stock-q4-tensor`, verify that profile and its single Qwen
-model ID instead.
+After a reboot verify that the selected profile marker is
+`flash512-qwen-single`, `strata-flash-512k.service` and
+`llamampere-qwen3.8-atx-iq4xs-m-gpu2.service` are enabled and own only their
+intended GPUs and loopback ports, the gateway requires a token for `/v1` and
+`/readyz`, `/metrics` is reachable without a token, the exporter is reachable
+by Prometheus, and the Muse, GPU1 llamAmpere, and stock Qwen services did not
+start.
 
 The local deployment state, active profile, and acceptance gates are in
 `deployment-record.local.md`.
@@ -182,19 +193,19 @@ sudo rewrites it as `root:root 0600` and the exporter crash-loops with a
 
 ## Context And Reasoning Effort
 
-The llamAmpere profile files request context `262144`, and the native 262144
-acceptance gate passed in isolated runs on both GPUs and concurrently. The
-matching `...-262144` IDs are the validated staged configuration; live endpoint
-and cutover acceptance are still required. Muse remains at 131072.
+The active services publish context `524288` for Flash (one session) and
+`262144` for the remaining Qwen replica (one slot); both were verified at
+promotion time. The retired Muse profile used 131072 and is not served.
 
-Use the model-specific OpenCode variants: Qwen defaults to `medium` and
-supports `none`, `low`, `medium`, `high`, and `xhigh`; Muse Glimmer defaults to
-`high` and supports `low`, `medium`, `high`, and `xhigh`. Muse does not expose a
-reliable non-thinking mode. For an exact Q4 non-thinking benchmark profile,
-use a separate one-off llama.cpp invocation with `--reasoning off`; do not
-change the general-purpose service for that test.
+Use the model-specific OpenCode variants. Flash supports `none`, `low`,
+`medium`, and `xhigh`; Strata also accepts `high` and maps it to `xhigh`, so
+they are not two different levels. The persisted server configuration uses
+`reasoning_effort: high` (Strata 0.1.56 rejects `xhigh` in that field), which
+means thinking at xhigh by default; `set_flash_thinking.py` re-applies that
+default to an installed service. Qwen defaults to `medium` and supports
+`none`, `low`, `medium`, `high`, and `xhigh`.
 
-Sampling parameters are caller-controlled. Use the Qwen-recommended values for
+Sampling parameters are caller-controlled. Use the model-recommended values for
 the selected thinking or non-thinking mode when reproducibility is required.
 
 An OpenCode request also contains its system and tool context, so a fresh

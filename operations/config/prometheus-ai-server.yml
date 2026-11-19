@@ -1,9 +1,10 @@
 # Merge this scrape job into the Prometheus configuration on the monitoring host.
 # Replace the placeholders with the AI server's current LAN address and hostname.
-# The active exporter profile is atx-dual: it scrapes llamAmpere on loopback
-# ports 8080/8081 and unchanged Muse on 8082, then emits model, gpu, and
-# gpu_uuid labels. The model servers themselves remain loopback-only. Do not
-# add separate Prometheus targets for those ports.
+# The active exporter profile is flash512-qwen-single: it scrapes the Strata
+# Flash engine on loopback port 8082 (GPUs 0 and 1) and the remaining llamAmpere
+# replica on 8081 (GPU 2), then emits model, gpu, and gpu_uuid labels. The model
+# servers themselves remain loopback-only. Do not add separate Prometheus
+# targets for those ports.
 scrape_configs:
   - job_name: ai-server
     scrape_interval: 15s

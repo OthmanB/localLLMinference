@@ -4,9 +4,9 @@
 
 - Gateway LAN endpoint: `http://<AI_SERVER_LAN_IP>:8088/v1`.
 - Gateway remote endpoint: `http://<AI_SERVER_TAILSCALE_IP>:8088/v1`.
-- llamAmpere replica GPU1: `http://127.0.0.1:8080`.
+- Flash 512K (Strata, GPUs 0+1): `http://127.0.0.1:8082`.
 - llamAmpere replica GPU2: `http://127.0.0.1:8081`.
-- Muse Glimmer: `http://127.0.0.1:8082`.
+- Port 8080 is unused by the active profile; retired services use it or 8082.
 - Metrics exporter: `http://<AI_SERVER_LAN_IP>:9108/metrics`; permit only the
   monitoring server.
 
@@ -26,18 +26,21 @@ mode 0600. The profile switch preserves it while changing backend topology.
 For the pooled Qwen model, clients should send a stable
 `X-Inference-Session: <conversation-id>` header; the pool also accepts the
 `X-Session-Id` header OpenCode sends automatically. The gateway returns
-`X-Inference-Replica: gpu1|gpu2`. It does not retry after upstream dispatch and
-does not automatically switch to the stock profile.
+`X-Inference-Replica: gpu2` (the pool currently has one member). It does not
+retry after upstream dispatch and does not automatically switch profiles.
 
 ## Profiles And Context
 
-The staged profile is `atx-dual`: independent llamAmpere processes on physical
-GPU1 and GPU2, plus unchanged Muse on GPU0. The stock `stock-q4-tensor` profile
-is a manual rollback option and must not run concurrently with llamAmpere.
+The active profile is `flash512-qwen-single`: the Strata Flash engine on
+physical GPUs 0 and 1 with a 524,288-token context and one session, plus one
+llamAmpere replica on physical GPU 2 with a 262,144-token context. Muse
+Glimmer, the GPU1 llamAmpere replica, and the stock `stock-q4-tensor` profile
+are retired, disabled at boot, and must not run concurrently with Flash.
+See `flash-512k-promotion.md` for the promotion procedure and
+`runbooks.md` for restoring a retired profile.
 
-The llamAmpere native `262144` context gate passed in isolated single-GPU and
-concurrent runs. The matching `...-262144` IDs are valid for the staged profile;
-live endpoint acceptance remains pending.
+Both context sizes were verified live through health checks and gateway
+completion checks at promotion time.
 
 Authenticate the Tailscale device interactively through the browser. Do not
 reuse a GitHub CLI token as an application credential. Use `tailscale ip -4`

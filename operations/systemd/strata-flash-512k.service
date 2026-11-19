@@ -1,0 +1,31 @@
+[Unit]
+Description=Flash-Next IQ3_S 512K single-session on physical GPUs 0 and 1
+Wants=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+After=network-online.target nvidia-power-limit.service nvidia-fan-control.service
+Requires=nvidia-power-limit.service
+RequiresMountsFor=/mnt/model-store/strata-flash-next-20261014
+Conflicts=llama-muse-glimmer-30b-131k.service llamampere-qwen3.8-atx-iq4xs-m-gpu1.service llama-qwen3.8-q4-tensor-262k.service
+
+[Service]
+Type=simple
+User=obenomar
+Group=obenomar
+WorkingDirectory=/opt/ai-server/strata/ffa80d7
+Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID
+Environment=CUDA_VISIBLE_DEVICES=GPU-8c1e5d04-43a0-dba7-ebf6-c623bfa2f325,GPU-bd704e22-5ba1-e0c3-0f66-309a6104b367
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStartPre=/usr/local/sbin/ai-flash-preflight
+ExecStart=/home/obenomar/.local/share/strata-flash-next-20261014/.venv/bin/python -m serve.server --engine strata --config /etc/ai-server/flash-512k.json --port 8082
+LogsDirectory=ai-server
+StandardOutput=append:/var/log/ai-server/flash-512k-server.log
+StandardError=append:/var/log/ai-server/flash-512k-server.log
+Restart=on-failure
+RestartSec=10
+KillMode=control-group
+TimeoutStopSec=90
+LimitNOFILE=1048576
+MemorySwapMax=0
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -21,20 +21,19 @@ from ai_cpu_power_profiler import cpu_utilization_percent, interpolate_power, re
 
 
 DEFAULT_BACKENDS = {
-    "qwen_atx_gpu1": {
-        "url": "http://127.0.0.1:8080/metrics",
-        "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu1",
-        "gpus": ["1"],
+    "flash_iq3s_512k": {
+        "url": "http://127.0.0.1:8082/metrics/prometheus",
+        "model": "qwen3.8-flash-next-iq3_s",
+        "gpus": ["0", "1"],
+        "runtime": "Strata",
+        "cached_input_mode": "observed",
     },
     "qwen_atx_gpu2": {
         "url": "http://127.0.0.1:8081/metrics",
         "model": "qwen3.8-27b-atx-iq4xs-m-262144-gpu2",
         "gpus": ["2"],
-    },
-    "muse_glimmer_30b_131k": {
-        "url": "http://127.0.0.1:8082/metrics",
-        "model": "muse-glimmer-30b-kquant17",
-        "gpus": ["0"],
+        "runtime": "llamAmpere",
+        "cached_input_mode": "unobserved",
     },
 }
 METRIC_LINE = re.compile(r"^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{([^}]*)\})?\s+(.+)$")

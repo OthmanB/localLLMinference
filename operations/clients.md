@@ -36,17 +36,17 @@ printf '\n'
 export AI_SERVER_API_KEY
 ```
 
-The active `atx-dual` profile exposes these staged llamAmpere identifiers:
+The active `flash512-qwen-single` profile exposes these gateway identifiers:
 
 ```text
-qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+qwen3.8-flash-next-iq3_s
 qwen3.8-27b-atx-iq4xs-m-262144-gpu2
 qwen3.8-27b-atx-iq4xs-m-262144
-muse-glimmer-30b-kquant17
 ```
 
-The `gpu1` and `gpu2` IDs select deterministic lanes. The pooled ID distributes
-requests across both replicas. For pooled conversations, send a stable header:
+The `...-gpu2` ID selects the deterministic llamAmpere lane. The pooled ID is
+published for compatibility and currently routes to that single replica. For
+pooled conversations, send a stable header:
 
 ```text
 X-Inference-Session: <stable-conversation-id>
@@ -57,16 +57,14 @@ accepts, so pooled OpenCode sessions get replica affinity without a custom
 header. Requests without any session header use the least-inflight replica with
 round-robin tie-breaking.
 
-The gateway returns `X-Inference-Replica: gpu1|gpu2`. It does not retry a
-request after upstream dispatch, and it does not automatically fall back to the
-stock profile.
+The gateway returns `X-Inference-Replica: gpu2`. It does not retry a
+request after upstream dispatch, and it does not automatically switch profiles.
 
-The native llamAmpere 262144-token gate passed on both GPUs and during
-concurrent isolated execution. The three Qwen IDs above are therefore the
-validated staged contract; live service acceptance remains pending. Muse Glimmer runs
-on GPU 0 with a 131072-token limit, accepts text and
-inline-image input, and supports `low`, `medium`, `high`, or `xhigh` reasoning;
-`high` is the recommended local agent default.
+Flash serves a 524,288-token context with one active session on GPUs 0 and 1
+and supports `none`, `low`, `medium`, and `xhigh` reasoning; the server default
+is xhigh. Strata also accepts `high` and maps it to `xhigh`. Qwen keeps the
+validated 262,144-token single slot on GPU 2. Muse Glimmer and the GPU1
+llamAmpere lane are retired and no longer served.
 
 ## OpenCode
 
@@ -90,20 +88,19 @@ environment reference:
         "apiKey": "{env:AI_SERVER_API_KEY}"
       },
       "models": {
-        "qwen3.8-27b-atx-iq4xs-m-262144-gpu1": {
-          "name": "Qwen3.8-27B ATX llamAmpere GPU1, validated 262k",
+        "qwen3.8-flash-next-iq3_s": {
+          "name": "Qwen3.8-Flash-Next IQ3_S Strata, 512k",
           "limit": {
-            "context": 262144,
+            "context": 524288,
             "output": 8192
           },
           "options": {
-            "reasoningEffort": "medium"
+            "reasoningEffort": "xhigh"
           },
           "variants": {
             "none": {"reasoningEffort": "none"},
             "low": {"reasoningEffort": "low"},
             "medium": {"reasoningEffort": "medium"},
-            "high": {"reasoningEffort": "high"},
             "xhigh": {"reasoningEffort": "xhigh"}
           }
         },
@@ -140,22 +137,6 @@ environment reference:
             "high": {"reasoningEffort": "high"},
             "xhigh": {"reasoningEffort": "xhigh"}
           }
-        },
-        "muse-glimmer-30b-kquant17": {
-          "name": "Muse Glimmer 30B K-Quant, 131k",
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          },
-          "options": {
-            "reasoningEffort": "high"
-          },
-          "variants": {
-            "low": {"reasoningEffort": "low"},
-            "medium": {"reasoningEffort": "medium"},
-            "high": {"reasoningEffort": "high"},
-            "xhigh": {"reasoningEffort": "xhigh"}
-          }
         }
       }
     }
@@ -165,16 +146,17 @@ environment reference:
 
 Use `http://<AI_SERVER_TAILSCALE_IP>:8088/v1` instead of the LAN URL for a client that
 reaches the server through Tailscale. Start OpenCode from a shell where
-`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select a lane, the
-pool, or Muse. If the context gate fails, update the three Qwen IDs and context
-limits together; do not leave a 262144 alias pointing at a 245760 service.
+`AI_SERVER_API_KEY` is set. Use `/models` inside OpenCode to select Flash, the
+Qwen lane, or the pool. If a service context changes, update the model IDs and
+context limits together; do not leave a 262144 alias pointing at a smaller
+service.
 
 OpenCode sends its session ID to non-OpenCode providers as `X-Session-Id`
 (and `x-session-affinity`), and subagents send `x-parent-session-id`. The
-`atx-dual` pool accepts `X-Session-Id`, so each OpenCode session and each
-subagent session is pinned to a replica for prefix-cache locality, while
-different sessions distribute across the two replicas. No custom header or
-plugin is required.
+Qwen pool accepts `X-Session-Id`, so each OpenCode session and each
+subagent session is pinned to a replica for prefix-cache locality. With the
+pool's single current member all pooled requests share that replica. No custom
+header or plugin is required.
 
 The model-level `reasoningEffort` settings provide the model-specific defaults.
 When a task needs a different level, use the OpenCode model/request controls;
@@ -193,11 +175,11 @@ providers:
     api: openai-completions
     apiKey: AI_SERVER_API_KEY
     models:
-      - id: qwen3.8-27b-atx-iq4xs-m-262144-gpu1
-        name: Qwen3.8-27B ATX llamAmpere GPU1, validated 262k
+      - id: qwen3.8-flash-next-iq3_s
+        name: Qwen3.8-Flash-Next IQ3_S Strata, 512k
         reasoning: true
         input: [text]
-        contextWindow: 262144
+        contextWindow: 524288
         maxTokens: 8192
         compat:
           supportsReasoningEffort: true
@@ -217,14 +199,6 @@ providers:
         maxTokens: 8192
         compat:
           supportsReasoningEffort: true
-      - id: muse-glimmer-30b-kquant17
-        name: Muse Glimmer 30B K-Quant, 131k
-        reasoning: true
-        input: [text, image]
-        contextWindow: 131072
-        maxTokens: 8192
-        compat:
-          supportsReasoningEffort: true
 ```
 
 Use the Tailscale URL in `baseUrl` when appropriate:
@@ -237,32 +211,31 @@ Export `AI_SERVER_API_KEY` before launching `omp`. In Oh My Pi, inspect the
 provider and model with:
 
 ```bash
-omp models find qwen3.8-27b-atx-iq4xs-m-262144
+omp models find qwen3.8-flash-next-iq3_s
 ```
 
 Oh My Pi does not send a session header for a custom provider, so its pooled
-requests would be load-balanced across both replicas and lose prompt-cache
-locality. Pin its roles to explicit lanes instead. Put this in
-`~/.omp/agent/config.yml` so the main agent stays on GPU1 and subagents and
-background work use the otherwise idle GPU2:
+requests would bypass cache affinity. Pin its roles to explicit models instead.
+Put this in `~/.omp/agent/config.yml`. Flash serves one active session, so
+keep a single heavy role on it and put the lighter roles on the Qwen lane:
 
 ```yaml
 modelRoles:
-  default: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
-  plan: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
-  slow: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu1
+  default: ai-server/qwen3.8-flash-next-iq3_s
+  plan: ai-server/qwen3.8-flash-next-iq3_s
+  slow: ai-server/qwen3.8-flash-next-iq3_s
   commit: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
   task: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
   smol: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
   tiny: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
   advisor: ai-server/qwen3.8-27b-atx-iq4xs-m-262144-gpu2
-  vision: ai-server/muse-glimmer-30b-kquant17
 ```
 
-The explicit `...-gpu1` and `...-gpu2` IDs are singleton lanes that bypass pool
-routing, so each role keeps its own warm prompt cache. The pooled ID stays
-available for interactive `/model` selection when you want the gateway to pick
-a replica.
+The explicit `...-gpu2` ID is a singleton lane that bypasses pool routing, so
+each role keeps its own warm prompt cache. The pooled ID stays available for
+interactive `/model` selection; it currently routes to the same GPU2 replica.
+No model currently serves inline-image input; the retired Muse profile was the
+vision lane.
 
 ## Reasoning And Sampling
 
@@ -310,7 +283,8 @@ curl -sS -H "Authorization: Bearer $AI_SERVER_API_KEY" \
   "$AI_SERVER_BASE_URL/models"
 ```
 
-The response should list the two explicit llamAmpere IDs, the pooled llamAmpere
-ID, and Muse. A missing or incorrect token should return HTTP 401. The stock
-`qwen3.8-27b-q4-tensor262k` ID is available only after an explicit manual
-rollback to `stock-q4-tensor`.
+The response should list the Flash ID, the explicit `...-gpu2` llamAmpere ID,
+and the pooled llamAmpere ID. A missing or incorrect token should return HTTP
+401. The `qwen3.8-27b-atx-iq4xs-m-262144-gpu1`, `muse-glimmer-30b-kquant17`,
+and `qwen3.8-27b-q4-tensor262k` IDs appear only after an explicit manual
+restore of a retired profile.

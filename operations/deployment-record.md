@@ -18,30 +18,31 @@ Record these values only in the local deployment record:
 
 ## Supported Runtime
 
-- Qwen3.8-27B UD Q4_K_M tensor-split across GPUs 1 and 2
-- 262,144-token context with F16 GPU KV cache
-- Flash Attention, 2,048 batch size, and 1,024 micro-batch size
-- Native NCCL defaults with no UVM or NCCL environment overrides
-- Muse Glimmer 30B K-Quant on GPU 0 with a 131,072-token context
-- llama.cpp services bound to loopback on ports 8080 and 8082
+- Qwen3.8-Flash-Next IQ3_S via the Strata runtime on GPUs 0 and 1
+- 524,288-token context, int8 KV cache, YaRN scale 2, one active session
+- Qwen3.8-27B ATX IQ4_XS single llamAmpere replica on GPU 2
+- 262,144-token context, one slot, Q8_0 K / turbo3 V cache, MTP speculative drafting
+- Model services bound to loopback on ports 8081 and 8082
 - Authenticated OpenAI-compatible gateway on port 8088
 - Prometheus exporter on port 9108
 - Fixed fan speeds at boot when supported by NVML: GPU 0 at 70%, GPU 1 at 80%, GPU 2 at 85%
-- Reasoning default: `auto` with medium effort for Qwen and high for Muse
+- Reasoning default: xhigh for Flash (persisted as `high`), `auto` with medium effort for Qwen
 - Sampling parameters supplied by clients
 
-## Staged Profile
+## Active Profile
 
-The staged target profile is `atx-dual`: two independent llamAmpere replicas,
-GPU 1 on loopback port 8080 and GPU 2 on loopback port 8081, plus the pooled
-gateway model ID `qwen3.8-27b-atx-iq4xs-m-262144` with `X-Inference-Session`
-affinity (OpenCode's `X-Session-Id` is also accepted). Muse Glimmer remains
-unchanged on GPU 0. The `stock-q4-tensor` profile
-remains the manual rollback option; the two must never run concurrently. The
-isolated native-context gate passed on both GPUs and concurrently; live-service
-acceptance remains outstanding.
+The active profile is `flash512-qwen-single`: the Strata Flash engine on
+physical GPUs 0 and 1 at loopback port 8082, plus one llamAmpere replica on
+GPU 2 at port 8081, and the pooled gateway model ID
+`qwen3.8-27b-atx-iq4xs-m-262144` with that single member and
+`X-Inference-Session` affinity (OpenCode's `X-Session-Id` is also accepted).
 
-## Qwen Tensor Validation
+Muse Glimmer on GPU 0, the second llamAmpere replica on GPU 1, and the stock
+`stock-q4-tensor` profile are retired: their units are disabled at boot and
+conflict-guarded against the Flash unit. Restoring them is a deliberate manual
+procedure; the two legacy topologies must never run concurrently with Flash.
+
+## Historical Qwen Tensor Validation
 
 The validated 2026-09-09 Qwen tensor profile uses the existing PCIe Gen3 x16
 links and DDR4-3066 memory configuration. It runs on GPUs 1 and 2 with the
@@ -71,23 +72,23 @@ overwrite enabled and verify the dashboard UID documented in `monitoring.md`.
 
 ## Validation Checklist
 
-After installation, select a Qwen profile and verify:
+After installation, apply the Flash promotion and verify:
 
 ```bash
-cat /etc/ai-server/qwen-serving-profile
+cat /etc/ai-server/qwen-serving-profile                         # flash512-qwen-single
 systemctl is-active nvidia-power-limit.service nvidia-fan-control.service
-systemctl is-active llama-muse-glimmer-30b-131k.service
-systemctl is-active llamampere-qwen3.8-atx-iq4xs-m-gpu1.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service  # atx-dual
-systemctl is-active llama-qwen3.8-q4-tensor-262k.service                 # stock-q4-tensor
+systemctl is-active strata-flash-512k.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
 systemctl is-active lan-inference-gateway.service ai-metrics-exporter.service
+systemctl is-enabled strata-flash-512k.service llamampere-qwen3.8-atx-iq4xs-m-gpu2.service
 nvidia-smi --query-gpu=index,power.limit --format=csv
-curl -sS http://127.0.0.1:8080/health
 curl -sS http://127.0.0.1:8081/health
 curl -sS http://127.0.0.1:8082/health
 curl -sS -H "Authorization: Bearer $LAN_GATEWAY_CLIENT_TOKEN" \
   http://127.0.0.1:8088/readyz
+cat /var/lib/ai-server/flash-deployment.json
 ```
 
-Confirm that the gateway rejects unauthenticated `/v1/*` requests, Prometheus
+The retired Muse, GPU1 llamAmpere, and stock tensor-split services must be
+inactive and disabled. Confirm that the gateway rejects unauthenticated `/v1/*` requests, Prometheus
 reports the exporter target as healthy, and the host-memory metrics appear in
 the monitoring dashboard.

@@ -1,0 +1,63 @@
+{
+  "exe": "/home/obenomar/localLLMinference/research/flash-reliability-2026-11-05/strata-candidate/build-campaign/strata",
+  "args": [
+    "--pack",
+    "/mnt/model-store/strata-flash-next-20261014/packs/iq3_s",
+    "--native",
+    "/home/obenomar/.local/share/strata-flash-next-20261014/comparison-models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf",
+    "--ple-gguf",
+    "/home/obenomar/.local/share/strata-flash-next-20261014/comparison-models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf",
+    "--expert-profile",
+    "/home/obenomar/.local/share/strata-flash-next-20261014/data/expert-profile.bin",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "auto",
+    "--spec",
+    "4",
+    "--spec-min-p",
+    "0.5",
+    "--mtp",
+    "/mnt/model-store/strata-flash-next-20261014/mtp/rt",
+    "--max-context",
+    "524288",
+    "--kv",
+    "int8",
+    "--kv-resident",
+    "32768",
+    "--vram-reserve-mib",
+    "1536",
+    "--rope-scaling",
+    "yarn",
+    "--rope-scale",
+    "2"
+  ],
+  "cwd": "/home/obenomar/localLLMinference/research/flash-reliability-2026-11-05/strata-candidate",
+  "tokenizer": "/mnt/model-store/strata-flash-next-20261014/packs/iq3_s/tokenizer",
+  "model_name": "qwen3.8-flash-next-iq3_s",
+  "log": "/home/obenomar/localLLMinference/research/flash-reliability-2026-11-05/full-matrix/2gpu-512k/mtp-engine.log",
+  "lib_dirs": [
+    "/home/obenomar/localLLMinference/research/flash-reliability-2026-11-05/strata-candidate/build-campaign",
+    "/usr/local/cuda-13.2/lib64"
+  ],
+  "port": 18160,
+  "gpu": [
+    0,
+    1
+  ],
+  "gpus_asked": true,
+  "host": "127.0.0.1",
+  "open_browser": false,
+  "parallel": 1,
+  "reasoning_effort": "none",
+  "env": {
+    "CUDA_VISIBLE_DEVICES": "0,1",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+    "STRATA_ROUTE_TAIL_SKIP": "0",
+    "STRATA_ADAPT_OVERLAP": "0",
+    "STRATA_HC_Q8": "0",
+    "STRATA_MMQ_KQ": "0"
+  },
+  "layer_split": "auto",
+  "tool_call_recovery": true
+}

@@ -4,20 +4,20 @@ Prometheus and Grafana run on the monitoring host. The AI server exporter listen
 on port 9108 and combines llama.cpp, `nvidia-smi`, host-memory, energy,
 electricity-cost, and API-equivalent-cost metrics.
 
-The staged serving profile is `atx-dual`, reported by
-`ai_serving_profile_info{profile="atx-dual"}`. Expected model labels are:
+The active serving profile is `flash512-qwen-single`, reported by
+`ai_serving_profile_info{profile="flash512-qwen-single"}`. Expected model
+labels are:
 
-- `model="muse-glimmer-30b-kquant17"`
-- `gpu="0"`
-- `model="qwen3.8-27b-atx-iq4xs-m-262144-gpu1"`, `gpu="1"`
+- `model="qwen3.8-flash-next-iq3_s"`, on `gpu="0"` and `gpu="1"`
 - `model="qwen3.8-27b-atx-iq4xs-m-262144-gpu2"`, `gpu="2"`
 
 All exporter-owned GPU and accounting series also include immutable `host_id` and
 `gpu_uuid` labels. Do not identify a GPU solely by the global GPU index.
 
-The llamAmpere model IDs above and their `262144` context passed the isolated
-native-context gate on both GPUs and concurrently. A successful exporter scrape
-still does not substitute for live endpoint and cutover acceptance.
+The Flash and Qwen contexts (`524288` and `262144`) and their GPU placement were
+verified live through the gateway at promotion time. Historical `atx-dual`
+series (the GPU1 replica and `muse-glimmer-30b-kquant17`) remain in Prometheus
+retention but stop growing.
 
 The dashboard should show request processing, prefill tokens/s, decode tokens/s,
 cumulative prompt/generated tokens, GPU utilization, measured power draw and limit,
@@ -25,10 +25,11 @@ temperature, VRAM, host memory, energy, electricity cost, API-equivalent costs,
 exporter/service health, active profile, per-replica health, gateway pool
 counters, and cache observation status.
 
-The exporter has two independent llamAmpere backends and one unchanged Muse
-backend. The two Qwen backends are `127.0.0.1:8080` on GPU1 and
-`127.0.0.1:8081` on GPU2. Never configure the stock Qwen backend at the same time:
-the exporter rejects duplicate physical GPU ownership.
+The exporter has two backends: the Strata Flash engine scraped at
+`127.0.0.1:8082/metrics/prometheus` (labeled across GPUs 0 and 1) and the
+llamAmpere replica at `127.0.0.1:8081` on GPU2. Never configure a retired
+backend (Muse, GPU1 llamAmpere, or stock Qwen) at the same time: the exporter
+rejects duplicate physical GPU ownership.
 
 Exporter health metrics include:
 
@@ -36,7 +37,8 @@ Exporter health metrics include:
   server.
 - `ai_backend_cache_observation_info{backend,model,mode}` and
   `ai_model_cached_input_accounting_info{model,gpu,gpu_uuid,mode}` for cache
-  status. `mode="unobserved"` is the expected llamAmpere value.
+  status. `mode="unobserved"` is the expected llamAmpere value; the Strata
+  Flash backend reports `mode="observed"`.
 - `ai_gateway_pool_route_decisions_total{pool,replica,reason}`,
   `ai_gateway_pool_affinity_hits_total`, `ai_gateway_pool_affinity_misses_total`,
   `ai_gateway_pool_saturation_rejections_total`, and
@@ -185,10 +187,12 @@ Key counters:
 - `ai_model_api_workload_cost_{usd,jpy}_total`: token-priced remote API comparison including input, cached input, and output.
 - `ai_model_api_output_only_cost_{usd,jpy}_total`: output-only remote API comparison.
 
-The stock llama.cpp and Muse runtimes report disjoint prompt counters:
+The llama.cpp-family and Strata runtimes report disjoint prompt counters:
 `llamacpp:prompt_tokens_total` counts processed prompt tokens excluding cached
 ones, and `llamacpp:prompt_tokens_cached_total` counts tokens reused from the
-prefix cache. Each class is priced at its own rate (regular input for processed
+prefix cache. The active Strata Flash backend reports the same disjoint split
+with `cached_input_mode=observed`, so its cache-inclusive cost estimates are
+published. Each class is priced at its own rate (regular input for processed
 tokens, cached input for reused tokens) and completion tokens are priced at the
 output rate. The `ai_model_prompt_tokens_total` and
 `ai_model_cached_prompt_tokens_total` HELP texts state this split. Prices not
@@ -232,16 +236,16 @@ Useful PromQL range queries:
 
 ```promql
 # Measured active direct-GPU electricity cost for one model and tariff.
-last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
-- first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+last_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="qwen3.8-flash-next-iq3_s"}[$__range])
+- first_over_time(ai_model_active_gpu_electricity_cost_jpy_total{host_id="ai-server",model="qwen3.8-flash-next-iq3_s"}[$__range])
 
 # Full host electricity cost. Do not attribute this number to one model.
 last_over_time(ai_host_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
 - first_over_time(ai_host_electricity_cost_jpy_total{host_id="ai-server"}[$__range])
 
 # Equivalent remote API workload cost under each configured comparison and FX scenario.
-last_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
-- first_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="muse-glimmer-30b-kquant17"}[$__range])
+last_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="qwen3.8-flash-next-iq3_s"}[$__range])
+- first_over_time(ai_model_api_workload_cost_jpy_total{host_id="ai-server",model="qwen3.8-flash-next-iq3_s"}[$__range])
 
 # Direct-GPU JPY per 1,000 completions with matching energy coverage.
 1000 * sum by (model, tariff_id) (
